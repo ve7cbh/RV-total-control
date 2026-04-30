@@ -1,7 +1,6 @@
 # ============================================================
 # MikroTik CRS109-8G-1S-2HnD  —  RV Router Config
 # Model  : CRS109-8G-1S-2HnD
-# Serial : HD90855YGV8
 # Date   : 2026-04-29
 # Author : VE7CBH
 #
@@ -14,6 +13,9 @@
 #   - RETAINED Internet NAT home mode rule (src-address scoped)
 #   - RETAINED Starlink masquerade (always enabled)
 #   - Rogers masquerade remains DISABLED for home mode
+#   - FIXED: removed invalid bridge port (WAN is a list, not interface)
+#   - FIXED: forward chain rule order — fasttrack now first
+#   - FIXED: removed redundant established/related accept rule
 #
 # OPERATING MODES
 #   HOME     : Rogers NAT disabled — RV subnet (192.168.88.0/24)
@@ -36,6 +38,15 @@
 #   Rogers   : primary  (distance=1, add-default-route=yes)
 #   Starlink : failover (distance=2, add-default-route=yes)
 #   Both use check-gateway via DHCP lease management
+#
+# PINHOLES — to expose a specific RV host to the home LAN:
+#   Add a forward accept rule before the drop rules, e.g.:
+#   /ip firewall filter
+#   add action=accept chain=forward \
+#       comment="Pinhole: home LAN to RV printer" \
+#       src-address=192.168.0.0/21 \
+#       dst-address=192.168.88.50
+#   Then drag it into position above the drop rules in Winbox.
 # ============================================================
 
 # ------------------------------------------------------------
@@ -68,14 +79,6 @@ add comment=defconf name=WAN
 add comment=defconf name=LAN
 
 # ------------------------------------------------------------
-# WIRELESS SECURITY
-# ------------------------------------------------------------
-/interface wireless security-profiles
-set [ find default=yes ] authentication-types=wpa-psk,wpa2-psk \
-    mode=dynamic-keys supplicant-identity=MikroTik \
-    wpa-pre-shared-key=2511670E4400 wpa2-pre-shared-key=2511670E4400
-
-# ------------------------------------------------------------
 # DHCP POOL
 # ------------------------------------------------------------
 /ip pool
@@ -89,6 +92,9 @@ add address-pool=dhcp disabled=no interface=bridge name=defconf
 
 # ------------------------------------------------------------
 # BRIDGE PORTS
+# NOTE: ether8 assigned to passthrough bridge (not main LAN bridge)
+#       WAN interface list is NOT added here — lists cannot be
+#       bridge ports.
 # ------------------------------------------------------------
 /interface bridge port
 add bridge=bridge comment=defconf interface=ether3
@@ -99,7 +105,6 @@ add bridge=bridge comment=defconf interface=ether7
 add bridge=passthrough comment=defconf interface=ether8
 add bridge=bridge comment=defconf interface=sfp1
 add bridge=bridge comment=defconf interface=wlan1
-add bridge=passthrough interface=WAN
 
 # ------------------------------------------------------------
 # NEIGHBOR DISCOVERY
@@ -118,8 +123,8 @@ add interface=ether6 list=LAN
 add interface=ether7 list=LAN
 add interface=ether8 list=LAN
 add interface=sfp1 list=LAN
-add comment=rogers-wan interface=rogers-wan list=WAN
 add interface=bridge list=LAN
+add comment=rogers-wan    interface=rogers-wan   list=WAN
 add comment=Starlink-Failover interface=starlink-wan list=WAN
 
 # ------------------------------------------------------------
@@ -143,6 +148,7 @@ add disabled=no interface=rogers-wan \
     default-route-distance=1 \
     use-peer-dns=yes \
     use-peer-ntp=yes
+
 add disabled=no interface=starlink-wan \
     comment="Starlink Failover WAN DHCP" \
     add-default-route=yes \
@@ -169,41 +175,65 @@ add address=192.168.88.1 comment=defconf name=router.lan
 
 # ------------------------------------------------------------
 # FIREWALL FILTER
+#
+# INPUT CHAIN
+#   1. Accept established/related/untracked
+#   2. Drop invalid
+#   3. Accept ICMP
+#   4. Accept loopback
+#   5. HOME MODE: accept management from home LAN
+#   6. Drop all input not from LAN
+#
+# FORWARD CHAIN
+#   1. Fasttrack established/related (hardware acceleration)
+#   2. Accept established/related/untracked (fasttrack companion)
+#   3. Accept IPsec in/out
+#   4. HOME MODE: bidirectional home LAN <-> RV LAN
+#   5. Pinholes (commented examples — add as needed)
+#   6. Drop invalid
+#   7. Drop unsolicited WAN inbound (not DSTNATed)
 # ------------------------------------------------------------
 /ip firewall filter
 
-# --- Accept established/related/untracked ---
+# ---- INPUT CHAIN ----
+
 add action=accept chain=input \
     comment="defconf: accept established,related,untracked" \
     connection-state=established,related,untracked
 
-# --- Drop invalid ---
 add action=drop chain=input \
     comment="defconf: drop invalid" \
     connection-state=invalid
 
-# --- Accept ICMP ---
 add action=accept chain=input \
     comment="defconf: accept ICMP" \
     protocol=icmp
 
-# --- Accept loopback ---
 add action=accept chain=input \
     comment="defconf: accept to local loopback (for CAPsMAN)" \
     dst-address=127.0.0.1
 
-# --- HOME MODE: accept management from home LAN ---
 add action=accept chain=input \
     comment="HOME MODE: accept input from home LAN 192.168.0.0/21" \
     src-address=192.168.0.0/21 \
     in-interface=rogers-wan
 
-# --- Drop all other input not from LAN ---
 add action=drop chain=input \
     comment="defconf: drop all not coming from LAN" \
     in-interface-list=!LAN
 
-# --- Forward: accept IPsec ---
+# ---- FORWARD CHAIN ----
+
+# Fasttrack must be first — hardware accelerates established sessions
+add action=fasttrack-connection chain=forward \
+    comment="defconf: fasttrack established,related" \
+    connection-state=established,related
+
+# Required companion to fasttrack — accepts what fasttrack passes
+add action=accept chain=forward \
+    comment="defconf: accept established,related,untracked" \
+    connection-state=established,related,untracked
+
 add action=accept chain=forward \
     comment="defconf: accept in ipsec policy" \
     ipsec-policy=in,ipsec
@@ -212,7 +242,7 @@ add action=accept chain=forward \
     comment="defconf: accept out ipsec policy" \
     ipsec-policy=out,ipsec
 
-# --- HOME MODE: home LAN <-> RV LAN forwarding ---
+# HOME MODE: permit bidirectional traffic between home LAN and RV LAN
 add action=accept chain=forward \
     comment="HOME MODE: forward home LAN to RV LAN" \
     src-address=192.168.0.0/21 \
@@ -223,22 +253,28 @@ add action=accept chain=forward \
     dst-address=192.168.0.0/21 \
     out-interface=rogers-wan
 
-# --- Fasttrack established/related ---
-add action=fasttrack-connection chain=forward \
-    comment="defconf: fasttrack" \
-    connection-state=established,related
+# ---- PINHOLES ----
+# To expose a specific RV host to the home LAN, uncomment and
+# edit the example below. Add one block per host. Rules are
+# evaluated top-down — these must appear before the drop rules.
+#
+# add action=accept chain=forward \
+#     comment="Pinhole: home LAN to RV printer" \
+#     src-address=192.168.0.0/21 \
+#     dst-address=192.168.88.50
+#
+# For port-specific access (e.g. web UI only):
+# add action=accept chain=forward \
+#     comment="Pinhole: home LAN to Lathemon web" \
+#     src-address=192.168.0.0/21 \
+#     dst-address=192.168.88.241 \
+#     protocol=tcp \
+#     dst-port=80,443
 
-# --- Accept established/related/untracked forward ---
-add action=accept chain=forward \
-    comment="defconf: accept established,related,untracked" \
-    connection-state=established,related,untracked
-
-# --- Drop invalid forward ---
 add action=drop chain=forward \
-    comment="defconf: drop invalid" \
+    comment="defconf: drop invalid forward" \
     connection-state=invalid
 
-# --- Drop unsolicited WAN inbound ---
 add action=drop chain=forward \
     comment="defconf: drop all from WAN not DSTNATed" \
     connection-nat-state=!dstnat \
