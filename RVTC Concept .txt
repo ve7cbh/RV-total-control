@@ -1,0 +1,19 @@
+RV total Control Project.
+
+Concept:
+	This project will involve the digital control of most of a typical north american designed 5th wheel travel.
+		-Tank level monitoring
+			Monitor fluids into and removed from tanks
+			alarms
+		-Propane usage
+		-Control of varous lights, fans, heat, pumps etc
+		-Monitoring and control of solar electrical including
+			Samlux 2212 Inverter Charger
+			Trace 40 amp MPPT charge controller / 900 watts solar panal
+			Shore power / Generator power enegery use
+		-Data
+			control and monitoring of 
+				Home park broadband
+				Off grid Starlink broadband
+				Misc WIFI broadband of opertunity
+		-Undefined as yet.
