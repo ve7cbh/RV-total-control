@@ -11,7 +11,7 @@
 | Project | RV Total Control (RVTC) |
 | Owner | Steve Bradshaw (ve7cbh) |
 | GitHub | https://github.com/ve7cbh/RV-total-control |
-| Status | Phase 1 Complete — Phase 2 Ready to start |
+| Status | Phase 2 In Progress |
 
 ---
 
@@ -54,15 +54,36 @@ RV-total-control/
 ├── docs/
 │   ├── RVTC_System_Architecture_V0.1.docx
 │   ├── RVTC_Ansible_Role_Structure_V0.1.docx
-│   └── RVTC_Phase1_Build_Log.docx
-├── group_vars/                          # Phase 2 — create all.yml
-├── host_vars/                           # Phase 2 — create rvtc.yml
+│   ├── RVTC_Phase1_Build_Log.docx
+│   └── RVTC_Session_Context_20260527.md
+├── group_vars/
+│   └── all.yml
+├── host_vars/
+│   └── localhost.yml
 ├── inventories/
 │   └── production/
 │       └── hosts.ini                    # localhost ansible_connection=local
-├── roles/                               # Phase 2 — build common role first
-├── site.yml                             # Phase 2 — master playbook stub
-├── phase2.yml                           # Phase 2 — core stack playbook
+├── roles/
+│   ├── common/
+│   │   ├── defaults/main.yml
+│   │   ├── handlers/main.yml
+│   │   ├── meta/main.yml
+│   │   ├── tasks/main.yml
+│   │   └── vars/main.yml
+│   ├── mosquitto/
+│   │   └── tasks/main.yml              # stub
+│   ├── influxdb/
+│   │   └── tasks/main.yml              # stub
+│   ├── grafana/
+│   │   └── tasks/main.yml              # stub
+│   ├── weewx/
+│   │   └── tasks/main.yml              # stub
+│   ├── homeassistant/
+│   │   └── tasks/main.yml              # stub
+│   └── pihole/
+│       └── tasks/main.yml              # stub
+├── site.yml                             # master playbook importing phase playbooks
+├── phase2.yml                           # Phase 2 core stack playbook
 ├── .gitattributes
 └── README.md
 ```
@@ -107,6 +128,18 @@ ansible rvtc -i inventories/production/hosts.ini -m ping
 - TBx-n terminal block wiring convention
 - Navy-standard protocols throughout
 - All documentation version-controlled in GitHub
+
+---
+
+## Network Allocation
+
+| IP | Device | Interface |
+|---|---|---|
+| 192.168.88.1 | MikroTik gateway | — |
+| 192.168.88.2 | Windows workstation | — |
+| 192.168.88.3 | Beelink J45 — ethernet (primary) | enp1s0 |
+| 192.168.88.4 | Open — candidate: J45 WiFi interface | wlp3s0 |
+| 192.168.88.5 | HF5142B Modbus gateway | — |
 
 ---
 
@@ -213,7 +246,7 @@ Fail-safe design: charging is INHIBITED by default. Circuit must be actively ene
 |---|---|---|
 | 0 | Architecture & Design | ✅ Complete |
 | 1 | Beelink J45 Build | ✅ Complete |
-| 2 | Core Stack Deployment | 🔄 Next |
+| 2 | Core Stack Deployment | 🔄 In Progress |
 | 3 | Power Integration | ⏳ Pending |
 | 4 | Tank & Propane Sensing | ⏳ Pending |
 | 5 | Water Monitoring | ⏳ Pending |
@@ -239,16 +272,23 @@ Fail-safe design: charging is INHIBITED by default. Circuit must be actively ene
 
 ---
 
-## Phase 2 — First Tasks
+## Phase 2 — Task Status
 
-1. Create `~/.vault_pass` on J45 — chmod 600
-2. Update `ansible.cfg` — add `vault_password_file = ~/.vault_pass`
-3. Create `group_vars/all.yml` — global variables (rvtc_data_path, rvtc_timezone, docker network: rvtc_net, etc.)
-4. Create `host_vars/rvtc.yml` — J45-specific overrides
-5. Create `site.yml` — master playbook importing phase playbooks
-6. Create `phase2.yml` — Phase 2 playbook stub
-7. Write and test `common` role — OS baseline, Docker idempotency, UFW firewall
-8. Deploy stack roles one at a time — Mosquitto → InfluxDB → Grafana → WeeWX → HA → Pi-hole
+| # | Task | Status |
+|---|---|---|
+| 1 | Create `~/.vault_pass` on J45 — chmod 600 | ✅ Complete |
+| 2 | Update `ansible.cfg` — add vault_password_file | ✅ Complete |
+| 3 | Create `group_vars/all.yml` | ✅ Complete |
+| 4 | Create `host_vars/localhost.yml` | ✅ Complete |
+| 5 | Create `site.yml` — master playbook stub | ✅ Complete |
+| 6 | Create `phase2.yml` — Phase 2 playbook stub | ✅ Complete |
+| 7 | Write and test `common` role | ✅ Complete |
+| 8 | Mosquitto role | 🔄 Next |
+| 9 | InfluxDB role | ⏳ Pending |
+| 10 | Grafana role | ⏳ Pending |
+| 11 | WeeWX role | ⏳ Pending |
+| 12 | Home Assistant role | ⏳ Pending |
+| 13 | Pi-hole role | ⏳ Pending |
 
 ---
 
@@ -259,8 +299,10 @@ Fail-safe design: charging is INHIBITED by default. Circuit must be actively ene
 | `~/RV-total-control` | Ansible project root — all commands run from here |
 | `~/.vault_pass` | Ansible Vault password — chmod 600, never committed |
 | `/data` | 640 GB data drive — Docker volumes go here |
+| `/data/docker/volumes` | Docker volume root |
 | `/home/ve7cbh` | User home on root drive |
 | `/etc/apt/sources.list.d/docker.list` | Docker repo — hardcoded trixie (not gigi) |
+| `/etc/sudoers.d/ve7cbh` | Passwordless sudo for Ansible |
 
 ---
 
@@ -268,6 +310,9 @@ Fail-safe design: charging is INHIBITED by default. Circuit must be actively ene
 
 - **LMDE Docker repo fix:** Docker repo must use `trixie` codename hardcoded — `$VERSION_CODENAME` returns `gigi` on LMDE and causes a 404. See Phase 1 Build Log.
 - **GitHub auth:** PAT stored in `~/.git-credentials` via credential.helper store. No sudo needed for docker commands (ve7cbh in docker group).
+- **host_vars naming:** Must match inventory hostname. Inventory uses `localhost` so file is `host_vars/localhost.yml` — not `rvtc.yml`.
+- **Stub roles:** mosquitto/influxdb/grafana/weewx/homeassistant/pihole exist as empty stubs (tasks/main.yml only) to prevent role-not-found errors during --check runs.
+- **Passwordless sudo:** Configured via `/etc/sudoers.d/ve7cbh` — required for Ansible `become: true` on local connection.
 - **Reference repo:** geerlingguy/internet-pi kept as clean upstream reference only — not a dependency.
 - **Solsante V1.5 PDD:** Water monitoring subset used for club demo. Full PDD covers 6 hilltop water systems at Solsante Club.
 - **SAMLUX register map:** Full Modbus register map held locally under NDA. Never paste into chat. Physical interface and framing details confirmed from non-confidential pages. Integration role will be written with register address placeholders — Steve inserts actual addresses locally before deployment.
@@ -275,12 +320,18 @@ Fail-safe design: charging is INHIBITED by default. Circuit must be actively ene
 - **J45 power management:** Modified to never sleep.
 - **X11 background:** Suitable background image created for X11 session.
 
-## Network Allocation
+---
 
-| IP | Device |
-|---|---|
-| 192.168.88.1 | MikroTik gateway |
-| 192.168.88.2 | Windows workstation |
-| 192.168.88.3 | Beelink J45 — eth0 (primary) |
-| 192.168.88.4 | Open — candidate: J45 WiFi interface (wlan0) |
-| 192.168.88.5 | HF5142B Modbus gateway |
+## Session Log
+
+### 2026-05-27
+
+**Tasks completed:** 1–7 (full Phase 2 scaffolding + common role live)
+
+**Issues resolved:**
+- `host_vars/rvtc.yml` renamed to `localhost.yml` — Ansible matches host_vars by inventory hostname
+- Stub roles created for all Phase 2 containers to prevent role-not-found errors
+- Passwordless sudo configured via `/etc/sudoers.d/ve7cbh`
+- Variable interpolation issue: `rvtc_docker_volumes` must be a literal path in `host_vars/localhost.yml`, not a nested variable reference from `group_vars/all.yml`
+
+**Next session:** Task 8 — Mosquitto role
