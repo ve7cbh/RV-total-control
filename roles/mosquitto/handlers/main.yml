@@ -2,7 +2,6 @@
 # roles/mosquitto/handlers/main.yml
 
 - name: restart mosquitto
-  community.docker.docker_container:
-    name: mosquitto
-    state: started
-    restart: true
+  ansible.builtin.command:
+    cmd: docker restart mosquitto
+  changed_when: true
