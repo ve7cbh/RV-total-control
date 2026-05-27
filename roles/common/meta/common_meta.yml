@@ -1,0 +1,9 @@
+---
+# roles/common/meta/main.yml
+
+galaxy_info:
+  author: ve7cbh
+  description: RVTC common role — OS baseline, Docker, UFW
+  min_ansible_version: "2.15"
+
+dependencies: []

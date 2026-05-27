@@ -1,0 +1,26 @@
+---
+# roles/common/defaults/main.yml
+# Lowest-precedence defaults — override in group_vars or host_vars
+
+common_packages:
+  - curl
+  - wget
+  - git
+  - vim
+  - htop
+  - net-tools
+  - ca-certificates
+  - gnupg
+  - lsb-release
+  - python3-pip
+  - python3-docker
+
+ufw_allow_ports:
+  - { port: 22,   proto: tcp, comment: SSH }
+  - { port: 1883, proto: tcp, comment: MQTT }
+  - { port: 8086, proto: tcp, comment: InfluxDB }
+  - { port: 3000, proto: tcp, comment: Grafana }
+  - { port: 8123, proto: tcp, comment: Home Assistant }
+  - { port: 53,   proto: tcp, comment: Pi-hole DNS TCP }
+  - { port: 53,   proto: udp, comment: Pi-hole DNS UDP }
+  - { port: 80,   proto: tcp, comment: Pi-hole web }

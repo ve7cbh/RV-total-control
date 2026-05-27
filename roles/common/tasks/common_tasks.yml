@@ -1,0 +1,69 @@
+---
+# roles/common/tasks/main.yml
+
+- name: Update APT cache
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Upgrade all packages
+  ansible.builtin.apt:
+    upgrade: dist
+  notify: reboot if required
+
+- name: Install common packages
+  ansible.builtin.apt:
+    name: "{{ common_packages }}"
+    state: present
+
+- name: Ensure Docker service is enabled and running
+  ansible.builtin.systemd:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Ensure user is in docker group
+  ansible.builtin.user:
+    name: "{{ rvtc_user }}"
+    groups: docker
+    append: true
+
+- name: Create Docker volumes root directory
+  ansible.builtin.file:
+    path: "{{ rvtc_docker_volumes }}"
+    state: directory
+    owner: "{{ rvtc_user }}"
+    group: "{{ rvtc_user }}"
+    mode: '0755'
+
+- name: Create rvtc_net Docker network
+  community.docker.docker_network:
+    name: "{{ docker_network }}"
+    state: present
+
+- name: Install UFW
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+
+- name: Set UFW default incoming policy to deny
+  community.general.ufw:
+    default: deny
+    direction: incoming
+
+- name: Set UFW default outgoing policy to allow
+  community.general.ufw:
+    default: allow
+    direction: outgoing
+
+- name: Allow required ports through UFW
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+    comment: "{{ item.comment }}"
+  loop: "{{ ufw_allow_ports }}"
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
