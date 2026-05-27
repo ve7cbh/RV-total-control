@@ -1,0 +1,30 @@
+---
+# site.yml
+# RVTC master playbook — imports phase playbooks in order
+# Version: 0.1  2026-05-27
+#
+# Usage:
+#   ansible-playbook site.yml                          # full run
+#   ansible-playbook site.yml --tags phase2            # single phase
+#   ansible-playbook site.yml --tags common            # single role
+
+- name: RVTC Phase 2 — Core Stack
+  import_playbook: phase2.yml
+  tags: phase2
+
+# Future phases uncommented as they are written:
+# - name: RVTC Phase 3 — Power Integration
+#   import_playbook: phase3.yml
+#   tags: phase3
+
+# - name: RVTC Phase 4 — Tank & Propane Sensing
+#   import_playbook: phase4.yml
+#   tags: phase4
+
+# - name: RVTC Phase 5 — Water Monitoring
+#   import_playbook: phase5.yml
+#   tags: phase5
+
+# - name: RVTC Phase 6 — Baseline & Handover
+#   import_playbook: phase6.yml
+#   tags: phase6

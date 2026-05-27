@@ -1,0 +1,44 @@
+---
+# group_vars/all.yml
+# RVTC global variables — applies to all hosts
+# Version: 0.1  2026-05-27
+
+# --- Paths ---
+rvtc_data_path: /data
+
+# --- Identity ---
+rvtc_user: ve7cbh
+rvtc_hostname: ve7cbh-control
+rvtc_timezone: America/Vancouver
+
+# --- Docker ---
+docker_network: rvtc_net
+docker_volumes_path: "{{ rvtc_data_path }}/docker/volumes"
+
+# --- MQTT ---
+mqtt_broker_host: mosquitto
+mqtt_broker_port: 1883
+
+# --- InfluxDB ---
+influxdb_host: influxdb
+influxdb_port: 8086
+influxdb_org: rvtc
+influxdb_bucket: rvtc_data
+influxdb_token: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  # placeholder — encrypt and insert before first deploy
+
+# --- Grafana ---
+grafana_host: grafana
+grafana_port: 3000
+grafana_admin_user: admin
+grafana_admin_password: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  # placeholder — encrypt and insert before first deploy
+
+# --- Modbus Gateway ---
+hf5142b_host: 192.168.88.5
+hf5142b_port_solar: 4001
+hf5142b_port_inverter: 4002
+hf5142b_port_water: 4003
+hf5142b_port_spare: 4004

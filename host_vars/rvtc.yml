@@ -1,0 +1,30 @@
+---
+# host_vars/rvtc.yml
+# J45 Beelink host-specific variables — overrides and extensions to group_vars/all.yml
+# Version: 0.1  2026-05-27
+
+# --- Connection ---
+ansible_connection: local
+ansible_python_interpreter: /usr/bin/python3.13
+
+# --- Hardware ---
+rvtc_hw_model: Beelink J45
+rvtc_cpu: Intel Pentium J4205
+rvtc_ram_gb: 8
+
+# --- Network interfaces ---
+rvtc_iface_eth: enp1s0
+rvtc_iface_wifi: wlp3s0
+rvtc_ip_eth: 192.168.88.3
+rvtc_ip_wifi: 192.168.88.4
+
+# --- Storage ---
+rvtc_root_dev: /dev/sda
+rvtc_root_mount: /
+rvtc_root_size_gb: 256
+rvtc_data_dev: /dev/sdb
+rvtc_data_mount: /data
+rvtc_data_size_gb: 640
+
+# --- Docker volume root (host path) ---
+rvtc_docker_volumes: /data/docker/volumes

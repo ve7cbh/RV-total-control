@@ -274,3 +274,13 @@ Fail-safe design: charging is INHIBITED by default. Circuit must be actively ene
 - **XRDP / D-Bus fix:** `export $(dbus-launch)` added as first line of `/etc/xrdp/startwm.sh`. Isolates D-Bus between local (:0) and remote (:10+) X11 sessions so they don't conflict.
 - **J45 power management:** Modified to never sleep.
 - **X11 background:** Suitable background image created for X11 session.
+
+## Network Allocation
+
+| IP | Device |
+|---|---|
+| 192.168.88.1 | MikroTik gateway |
+| 192.168.88.2 | Windows workstation |
+| 192.168.88.3 | Beelink J45 — eth0 (primary) |
+| 192.168.88.4 | Open — candidate: J45 WiFi interface (wlan0) |
+| 192.168.88.5 | HF5142B Modbus gateway |
