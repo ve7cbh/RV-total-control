@@ -337,4 +337,5 @@ Fail-safe design: charging is INHIBITED by default. Circuit must be actively ene
 Modified /ve7cbh/RV-total-control common packages main.yml to include rtl-433 and nano
 Installed rtl-433
 
-**Next session:** Task 8 — Mosquitto role
+**Next session:** Task 8 — Mosquitto role - completed
+**Next session:** Task 9
