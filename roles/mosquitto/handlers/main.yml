@@ -1,0 +1,8 @@
+---
+# roles/mosquitto/handlers/main.yml
+
+- name: restart mosquitto
+  community.docker.docker_container:
+    name: mosquitto
+    state: started
+    restart: true

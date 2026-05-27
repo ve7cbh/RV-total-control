@@ -1,0 +1,38 @@
+---
+# roles/mosquitto/tasks/main.yml
+
+- name: Create Mosquitto directory structure
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ rvtc_user }}"
+    group: "{{ rvtc_user }}"
+    mode: '0755'
+  loop:
+    - "{{ mosquitto_volume_base }}/config"
+    - "{{ mosquitto_volume_base }}/data"
+    - "{{ mosquitto_volume_base }}/log"
+
+- name: Deploy Mosquitto config
+  ansible.builtin.template:
+    src: mosquitto.conf.j2
+    dest: "{{ mosquitto_volume_base }}/config/mosquitto.conf"
+    owner: "{{ rvtc_user }}"
+    group: "{{ rvtc_user }}"
+    mode: '0644'
+  notify: restart mosquitto
+
+- name: Deploy Mosquitto container
+  community.docker.docker_container:
+    name: mosquitto
+    image: "eclipse-mosquitto:{{ mosquitto_version }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: "{{ docker_network }}"
+    ports:
+      - "{{ mosquitto_port }}:{{ mosquitto_port }}"
+    volumes:
+      - "{{ mosquitto_volume_base }}/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
+      - "{{ mosquitto_volume_base }}/data:/mosquitto/data"
+      - "{{ mosquitto_volume_base }}/log:/mosquitto/log"

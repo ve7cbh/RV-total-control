@@ -1,0 +1,8 @@
+---
+# roles/mosquitto/defaults/main.yml
+
+mosquitto_version: latest
+mosquitto_port: 1883
+mosquitto_persistence: true
+mosquitto_log_dest: file /mosquitto/log/mosquitto.log
+mosquitto_volume_base: "{{ rvtc_docker_volumes }}/mosquitto"

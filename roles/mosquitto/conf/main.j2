@@ -1,0 +1,14 @@
+# mosquitto.conf
+# Managed by Ansible — do not edit manually
+
+listener {{ mosquitto_port }}
+allow_anonymous true
+
+persistence {{ mosquitto_persistence | lower }}
+persistence_location /mosquitto/data/
+
+log_dest {{ mosquitto_log_dest }}
+log_type error
+log_type warning
+log_type notice
+log_type information
