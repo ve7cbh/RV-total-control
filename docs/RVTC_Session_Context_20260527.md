@@ -339,3 +339,19 @@ Installed rtl-433
 
 **Next session:** Task 8 — Mosquitto role - completed
 **Next session:** Task 9
+
+## Future Considerations (or Scope creep by another name)
+
+### Garden Raised Bed Soil Moisture
+
+| Item | Detail |
+|---|---|
+| Goal | Monitor soil moisture in raised garden bed |
+| Preferred path | ESPHome node on home WiFi → home HA instance |
+| Rationale | Works year-round independent of RV location |
+| Home HA | Instance exists — integration path available |
+| RVTC link | VPN tunnel or Nabu Casa to link home HA ↔ RVTC HA for unified dashboard |
+| Stopgap option | 433 MHz capacitive sensor — drops into rtl_433 → WeeWX pipeline, RV-home only |
+| Phase | Post Phase 6 — after RVTC baseline complete |
+| Status | Parked — not a blocker |
+| VPN | RV↔home VPN already designed — see config/rv-mikrotik-config.rsc |
