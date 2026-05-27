@@ -334,4 +334,7 @@ Fail-safe design: charging is INHIBITED by default. Circuit must be actively ene
 - Passwordless sudo configured via `/etc/sudoers.d/ve7cbh`
 - Variable interpolation issue: `rvtc_docker_volumes` must be a literal path in `host_vars/localhost.yml`, not a nested variable reference from `group_vars/all.yml`
 
+Modified /ve7cbh/RV-total-control common packages main.yml to include rtl-433 and nano
+Installed rtl-433
+
 **Next session:** Task 8 — Mosquitto role
