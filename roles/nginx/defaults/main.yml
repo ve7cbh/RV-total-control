@@ -1,0 +1,4 @@
+---
+nginx_image_tag: alpine
+nginx_port: 80
+nginx_weewx_volume: /data/docker/volumes/weewx/public_html

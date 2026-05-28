@@ -1,0 +1,13 @@
+---
+- name: Deploy nginx container
+  community.docker.docker_container:
+    name: nginx
+    image: "nginx:{{ nginx_image_tag }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: "{{ docker_network }}"
+    ports:
+      - "{{ nginx_port }}:80"
+    volumes:
+      - "{{ nginx_weewx_volume }}:/usr/share/nginx/html:ro"
