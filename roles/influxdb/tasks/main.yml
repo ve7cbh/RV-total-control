@@ -1,0 +1,29 @@
+---
+- name: Create InfluxDB data directory
+  ansible.builtin.file:
+    path: "{{ influxdb_volume }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Deploy InfluxDB container
+  community.docker.docker_container:
+    name: influxdb
+    image: "influxdb:{{ influxdb_image_tag }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: "{{ docker_network }}"
+    ports:
+      - "{{ influxdb_port }}:8086"
+    volumes:
+      - "{{ influxdb_volume }}:/var/lib/influxdb2"
+    env:
+      DOCKER_INFLUXDB_INIT_MODE: "setup"
+      DOCKER_INFLUXDB_INIT_USERNAME: "{{ influxdb_user }}"
+      DOCKER_INFLUXDB_INIT_PASSWORD: "{{ influxdb_password }}"
+      DOCKER_INFLUXDB_INIT_ORG: "{{ influxdb_org }}"
+      DOCKER_INFLUXDB_INIT_BUCKET: "{{ influxdb_bucket }}"
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: "{{ influxdb_token }}"

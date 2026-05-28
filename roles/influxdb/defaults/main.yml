@@ -1,0 +1,3 @@
+---
+influxdb_user: "{{ vault_influxdb_user }}"
+influxdb_password: "{{ vault_influxdb_password }}"
