@@ -3,35 +3,29 @@
 # RVTC Phase 2 — Core Stack Deployment
 # Version: 0.1  2026-05-27
 #
-# Deploy order: common → mosquitto → influxdb → grafana → weewx → homeassistant → pihole
+# Deploy order: common → mosquitto → influxdb → grafana → rtl433 → weewx → homeassistant → pihole
 #
 # Usage:
 #   ansible-playbook phase2.yml                        # full phase 2 run
 #   ansible-playbook phase2.yml --tags common          # single role
 #   ansible-playbook phase2.yml --check                # dry run
-
 - name: Phase 2 — Core Stack
   hosts: rvtc
   become: true
-
   roles:
     - role: common
       tags: common
-
     - role: mosquitto
       tags: mosquitto
-
     - role: influxdb
       tags: influxdb
-
     - role: grafana
       tags: grafana
-
+    - role: rtl433
+      tags: rtl433
     - role: weewx
       tags: weewx
-
     - role: homeassistant
       tags: homeassistant
-
     - role: pihole
       tags: pihole
