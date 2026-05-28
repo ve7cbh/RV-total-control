@@ -59,3 +59,8 @@ weewx_mqtt_topic: "rtl_433/Acurite-5n1/1111"
 homeassistant_image_tag: stable
 homeassistant_port: 8123
 homeassistant_volume: /data/docker/volumes/homeassistant
+
+# --- Pi-hole ---
+pihole_image_tag: latest
+pihole_web_port: 8880
+pihole_volume: /data/docker/volumes/pihole

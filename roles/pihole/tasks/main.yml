@@ -1,0 +1,33 @@
+---
+- name: Create Pi-hole data directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+  loop:
+    - "{{ pihole_volume }}"
+    - "{{ pihole_volume }}/etc-pihole"
+    - "{{ pihole_volume }}/etc-dnsmasq"
+
+- name: Deploy Pi-hole container
+  community.docker.docker_container:
+    name: pihole
+    image: "pihole/pihole:{{ pihole_image_tag }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: "{{ docker_network }}"
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "{{ pihole_web_port }}:80"
+    volumes:
+      - "{{ pihole_volume }}/etc-pihole:/etc/pihole"
+      - "{{ pihole_volume }}/etc-dnsmasq:/etc/dnsmasq.d"
+    env:
+      TZ: "{{ rvtc_timezone }}"
+      WEBPASSWORD: "{{ pihole_password }}"
+      FTLCONF_dns_listeningMode: "all"

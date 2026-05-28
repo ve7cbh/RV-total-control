@@ -1,0 +1,6 @@
+---
+pihole_image_tag: latest
+pihole_web_port: 8880
+pihole_volume: /data/docker/volumes/pihole
+pihole_user: "{{ vault_pihole_user }}"
+pihole_password: "{{ vault_pihole_password }}"
