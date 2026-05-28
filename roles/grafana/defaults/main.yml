@@ -1,0 +1,3 @@
+---
+grafana_user: "{{ vault_grafana_user }}"
+grafana_password: "{{ vault_grafana_password }}"

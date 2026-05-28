@@ -1,0 +1,25 @@
+---
+- name: Create Grafana data directory
+  ansible.builtin.file:
+    path: "{{ grafana_volume }}"
+    state: directory
+    owner: "472"
+    group: "472"
+    mode: '0755'
+  become: true
+
+- name: Deploy Grafana container
+  community.docker.docker_container:
+    name: grafana
+    image: "grafana/grafana:{{ grafana_image_tag }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: "{{ docker_network }}"
+    ports:
+      - "{{ grafana_port }}:3000"
+    volumes:
+      - "{{ grafana_volume }}:/var/lib/grafana"
+    env:
+      GF_SECURITY_ADMIN_USER: "{{ grafana_user }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_password }}"

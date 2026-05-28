@@ -39,3 +39,7 @@ hf5142b_port_solar: 4001
 hf5142b_port_inverter: 4002
 hf5142b_port_water: 4003
 hf5142b_port_spare: 4004
+
+# --- Grafana ---
+grafana_image_tag: latest
+grafana_volume: /data/docker/volumes/grafana
