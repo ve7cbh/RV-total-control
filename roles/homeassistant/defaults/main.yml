@@ -1,0 +1,4 @@
+---
+homeassistant_image_tag: stable
+homeassistant_port: 8123
+homeassistant_volume: /data/docker/volumes/homeassistant

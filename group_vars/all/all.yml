@@ -54,3 +54,8 @@ weewx_altitude: 46
 weewx_mqtt_host: mosquitto
 weewx_mqtt_port: 1883
 weewx_mqtt_topic: "rtl_433/Acurite-5n1/1111"
+
+# --- Home Assistant ---
+homeassistant_image_tag: stable
+homeassistant_port: 8123
+homeassistant_volume: /data/docker/volumes/homeassistant

@@ -1,0 +1,24 @@
+---
+- name: Create Home Assistant data directory
+  ansible.builtin.file:
+    path: "{{ homeassistant_volume }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Deploy Home Assistant container
+  community.docker.docker_container:
+    name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:{{ homeassistant_image_tag }}"
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: "{{ docker_network }}"
+    ports:
+      - "{{ homeassistant_port }}:8123"
+    volumes:
+      - "{{ homeassistant_volume }}:/config"
+    env:
+      TZ: "{{ rvtc_timezone }}"
