@@ -62,6 +62,7 @@ Phase 2 wrap-up:
 2. WeeWX → InfluxDB integration
 3. Home Assistant onboarding and MQTT integration
 4. Update session context document
+5. Fix time issue to PST
 
 Then Phase 3 planning — Power integration (EPEVER MPPT60 + SAMLUX EVO-2212 via HF5142B Modbus).
 
