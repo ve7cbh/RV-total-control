@@ -1,0 +1,10 @@
+---
+weewx_image_tag: latest
+weewx_volume: /data/docker/volumes/weewx
+weewx_station_name: ve7cbh
+weewx_latitude: 48.6686
+weewx_longitude: -123.6002
+weewx_altitude: 46
+weewx_mqtt_host: mosquitto
+weewx_mqtt_port: 1883
+weewx_mqtt_topic: "rtl_433/Acurite-5n1/1111"
