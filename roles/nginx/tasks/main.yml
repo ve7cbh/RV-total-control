@@ -1,4 +1,23 @@
 ---
+- name: Create nginx config directory
+  ansible.builtin.file:
+    path: /data/docker/volumes/nginx
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+  become: true
+
+- name: Deploy nginx config
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /data/docker/volumes/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: Restart nginx
+
 - name: Deploy nginx container
   community.docker.docker_container:
     name: nginx
@@ -11,3 +30,4 @@
       - "{{ nginx_port }}:80"
     volumes:
       - "{{ nginx_weewx_volume }}:/usr/share/nginx/html:ro"
+      - "/data/docker/volumes/nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
