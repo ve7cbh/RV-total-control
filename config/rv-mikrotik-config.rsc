@@ -1,21 +1,18 @@
 # ============================================================
 # MikroTik CRS109-8G-1S-2HnD  —  RV Router Config
 # Model  : CRS109-8G-1S-2HnD
-# Date   : 2026-04-29
+# Date   : 2026-05-29
 # Author : VE7CBH
 #
-# CHANGES FROM PREVIOUS VERSION (2026-04-28)
-#   - REMOVED bad static route "gateway=rogers-wan" (no next-hop IP)
-#     was overriding DHCP-learned route and blocking internet
-#   - DHCP client add-default-route=yes now manages default route
-#     automatically — no static default route needed
-#   - REMOVED duplicate/redundant NAT rules (old rules 0,2,3,4)
-#   - RETAINED Internet NAT home mode rule (src-address scoped)
-#   - RETAINED Starlink masquerade (always enabled)
-#   - Rogers masquerade remains DISABLED for home mode
-#   - FIXED: removed invalid bridge port (WAN is a list, not interface)
-#   - FIXED: forward chain rule order — fasttrack now first
-#   - FIXED: removed redundant established/related accept rule
+# CHANGES FROM PREVIOUS VERSION (2026-04-29)
+#   - DNS servers changed: primary 192.168.88.3 (Pi-hole),
+#     secondary 8.8.8.8 (fallback)
+#   - DHCP server network dns-server changed to 192.168.88.3
+#     so all DHCP clients use Pi-hole for DNS
+#   - Added pinhole filter rule: club LAN to RVTC WeeWX port 80
+#   - Added dst-nat rule: rogers-wan port 80 -> 192.168.88.3:80
+#     (WeeWX accessible from club LAN via wifi.solsante.com:8080,
+#      forwarded by club router to MikroTik rogers-wan IP:80)
 #
 # OPERATING MODES
 #   HOME     : Rogers NAT disabled — RV subnet (192.168.88.0/24)
@@ -47,6 +44,11 @@
 #       src-address=192.168.0.0/21 \
 #       dst-address=192.168.88.50
 #   Then drag it into position above the drop rules in Winbox.
+#
+# WEEWX EXTERNAL ACCESS
+#   Club LAN : http://wifi.solsante.com:8080
+#   Path     : club router port 8080 -> MikroTik rogers-wan:80
+#              -> dst-nat -> 192.168.88.3:80 -> nginx -> WeeWX
 # ============================================================
 
 # ------------------------------------------------------------
@@ -158,17 +160,21 @@ add disabled=no interface=starlink-wan \
 
 # ------------------------------------------------------------
 # DHCP SERVER NETWORKS
+# NOTE: dns-server changed to Pi-hole (192.168.88.3)
+#       8.8.8.8 set as fallback in Pi-hole, not here
 # ------------------------------------------------------------
 /ip dhcp-server network
 add address=192.168.88.0/24 comment=defconf \
-    dns-server=192.168.88.1 \
+    dns-server=192.168.88.3 \
     gateway=192.168.88.1
 
 # ------------------------------------------------------------
 # DNS
+# NOTE: Primary DNS changed to Pi-hole (192.168.88.3)
+#       8.8.8.8 retained as secondary fallback
 # ------------------------------------------------------------
 /ip dns
-set allow-remote-requests=yes servers=1.1.1.1,8.8.8.8
+set allow-remote-requests=yes servers=192.168.88.3,8.8.8.8
 
 /ip dns static
 add address=192.168.88.1 comment=defconf name=router.lan
@@ -189,7 +195,7 @@ add address=192.168.88.1 comment=defconf name=router.lan
 #   2. Accept established/related/untracked (fasttrack companion)
 #   3. Accept IPsec in/out
 #   4. HOME MODE: bidirectional home LAN <-> RV LAN
-#   5. Pinholes (commented examples — add as needed)
+#   5. Pinholes
 #   6. Drop invalid
 #   7. Drop unsolicited WAN inbound (not DSTNATed)
 # ------------------------------------------------------------
@@ -254,22 +260,13 @@ add action=accept chain=forward \
     out-interface=rogers-wan
 
 # ---- PINHOLES ----
-# To expose a specific RV host to the home LAN, uncomment and
-# edit the example below. Add one block per host. Rules are
-# evaluated top-down — these must appear before the drop rules.
-#
-# add action=accept chain=forward \
-#     comment="Pinhole: home LAN to RV printer" \
-#     src-address=192.168.0.0/21 \
-#     dst-address=192.168.88.50
-#
-# For port-specific access (e.g. web UI only):
-# add action=accept chain=forward \
-#     comment="Pinhole: home LAN to Lathemon web" \
-#     src-address=192.168.0.0/21 \
-#     dst-address=192.168.88.241 \
-#     protocol=tcp \
-#     dst-port=80,443
+
+add action=accept chain=forward \
+    comment="Pinhole: club LAN to RVTC WeeWX port 80" \
+    src-address=192.168.0.0/21 \
+    dst-address=192.168.88.3 \
+    protocol=tcp \
+    dst-port=80
 
 add action=drop chain=forward \
     comment="defconf: drop invalid forward" \
@@ -289,6 +286,8 @@ add action=drop chain=forward \
 # Rule 1: Starlink masquerade — always enabled
 # Rule 2: Internet NAT home mode — masquerades RV subnet internet
 #         traffic only; excludes home LAN (192.168.0.0/21)
+# Rule 3: WeeWX pinhole — dst-nat port 80 on rogers-wan to J45
+#         Club router forwards wifi.solsante.com:8080 -> rogers-wan:80
 # ------------------------------------------------------------
 /ip firewall nat
 
@@ -307,6 +306,14 @@ add action=masquerade chain=srcnat \
     src-address=192.168.88.0/24 \
     dst-address=!192.168.0.0/21 \
     out-interface=rogers-wan
+
+add action=dst-nat chain=dstnat \
+    comment="Pinhole: WeeWX port 80" \
+    in-interface=rogers-wan \
+    protocol=tcp \
+    dst-port=80 \
+    to-addresses=192.168.88.3 \
+    to-ports=80
 
 # ------------------------------------------------------------
 # ROUTING
