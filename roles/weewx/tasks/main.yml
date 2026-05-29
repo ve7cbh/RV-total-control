@@ -24,21 +24,4 @@
       WEEWX_LONGITUDE: "{{ weewx_longitude | string }}"
       WEEWX_ALTITUDE: "{{ weewx_altitude | string }}, meter"
       WEEWX_LOCATION: "{{ weewx_station_name }}"
-      
-      - name: Deploy weewx.conf
-  ansible.builtin.template:
-    src: weewx.conf.j2
-    dest: "{{ weewx_volume }}/weewx.conf"
-    owner: "1000"
-    group: "1000"
-    mode: '0644'
-  become: true
-  notify: Restart WeeWX
-
-- name: Install weewx-influxdb3 extension
-  community.docker.docker_container_exec:
-    container: weewx
-    command: >
-      python3 -m weectl extension install
-      https://github.com/jonkolar/weewx-influxdb3/archive/refs/heads/main.zip
-  notify: Restart WeeWX
+      TZ: "{{ rvtc_timezone }}"

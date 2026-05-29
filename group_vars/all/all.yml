@@ -24,7 +24,7 @@ influxdb_host: influxdb
 influxdb_port: 8086
 influxdb_org: rvtc
 influxdb_bucket: rvtc
-influxdb_token: rvtc-token-local
+influxdb_token: "{{ vault_influxdb_token }}"
 influxdb_image_tag: "2"
 influxdb_volume: /data/docker/volumes/influxdb
 
@@ -32,15 +32,6 @@ influxdb_volume: /data/docker/volumes/influxdb
 grafana_host: grafana
 grafana_port: 3000
 grafana_admin_user: admin
-
-# --- Modbus Gateway ---
-hf5142b_host: 192.168.88.5
-hf5142b_port_solar: 4001
-hf5142b_port_inverter: 4002
-hf5142b_port_water: 4003
-hf5142b_port_spare: 4004
-
-# --- Grafana ---
 grafana_image_tag: latest
 grafana_volume: /data/docker/volumes/grafana
 
@@ -65,10 +56,9 @@ pihole_image_tag: latest
 pihole_web_port: 8880
 pihole_volume: /data/docker/volumes/pihole
 
-
-# --- InfluxDB ---
-influxdb_host: "192.168.88.3"
-influxdb_port: "8086"
-influxdb_org: "rvtc"
-influxdb_bucket: "rvcc"
-influxdb_token: "{{ vault_influxdb_token }}"
+# --- Modbus Gateway ---
+hf5142b_host: 192.168.88.5
+hf5142b_port_solar: 4001
+hf5142b_port_inverter: 4002
+hf5142b_port_water: 4003
+hf5142b_port_spare: 4004
