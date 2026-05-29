@@ -63,6 +63,9 @@ Phase 2 wrap-up:
 3. Home Assistant onboarding and MQTT integration
 4. Update session context document
 5. Fix time issue to PST
+6. Pinhole to weewx
+7. Local DNS names for the services
+8. Register ve7cbh.ca (out of scope) DDNS for home site and rv cname to the host site
 
 Then Phase 3 planning — Power integration (EPEVER MPPT60 + SAMLUX EVO-2212 via HF5142B Modbus).
 
