@@ -15,25 +15,19 @@
     host = {{ weewx_mqtt_host }}
     port = {{ weewx_mqtt_port }}
     keepalive = 60
-
     [[topic]]
         [[[{{ weewx_mqtt_topic }}]]]
             unit_system = US
-
             [[[[wind_avg_km_h]]]]
                 name = windSpeed
                 units = km_per_hour
-
             [[[[wind_dir_deg]]]]
                 name = windDir
-
             [[[[temperature_F]]]]
                 name = outTemp
                 units = degree_F
-
             [[[[humidity]]]]
                 name = outHumidity
-
             [[[[rain_in]]]]
                 name = rain
                 units = inch
@@ -49,22 +43,14 @@
         skin = Seasons
         enable = true
 
-[Databases]
-    [[influxdb_binding]]
-        database_type = InfluxDB
+[InfluxDB2]
+    host = {{ influxdb_host }}
+    port = {{ influxdb_port }}
+    org = {{ influxdb_org }}
+    bucket = {{ influxdb_bucket }}
+    token = {{ influxdb_token }}
+    measurement = weewx
 
-[DatabaseTypes]
-    [[InfluxDB]]
-        driver = user.influxdb3
-        host = {{ influxdb_host }}
-        port = {{ influxdb_port }}
-        org = {{ influxdb_org }}
-        bucket = {{ influxdb_bucket }}
-        token = {{ influxdb_token }}
-
-[DataBindings]
-    [[wx_binding]]
-        database = influxdb_binding
-        table_name = archive
-        manager = weewx.manager.Manager
-        schema = schemas.wview_extended.schema
+[Engine]
+    [[Services]]
+        archive_services = weewx.engine.StdArchive, user.influxdb3.InfluxDB2Writer
