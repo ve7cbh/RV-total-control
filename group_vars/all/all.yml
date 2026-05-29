@@ -64,3 +64,11 @@ homeassistant_volume: /data/docker/volumes/homeassistant
 pihole_image_tag: latest
 pihole_web_port: 8880
 pihole_volume: /data/docker/volumes/pihole
+
+
+# --- InfluxDB ---
+influxdb_host: "192.168.88.3"
+influxdb_port: "8086"
+influxdb_org: "rvtc"
+influxdb_bucket: "rvcc"
+influxdb_token: "{{ vault_influxdb_token }}"

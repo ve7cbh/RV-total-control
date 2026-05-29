@@ -1,0 +1,6 @@
+---
+- name: Restart WeeWX
+  community.docker.docker_container:
+    name: weewx
+    state: started
+    restart: true
