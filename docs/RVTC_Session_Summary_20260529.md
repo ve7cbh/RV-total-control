@@ -44,6 +44,7 @@ Phase 2 wrap-up:
   - `[InfluxDB2]` section with host/port/org/bucket/token
   - `[Engine]` with `user.influxdb2.InfluxDB2Writer` in archive_services
 - Removed duplicate `[Engine]` and `[Logging]` sections (lines 495-510 from backup)
+- Template approach abandoned for weewx.conf — live file managed manually on host volume
 
 ### weewx.conf current state
 - Station type: MQTTSubscribeDriver
@@ -52,14 +53,41 @@ Phase 2 wrap-up:
 - Archive services: weewx.engine.StdArchive, user.influxdb2.InfluxDB2Writer
 - InfluxDB: host=influxdb, org=rvtc, bucket=rvtc
 
+### nginx CSS fix
+- Added `include mime.types` and `default_type application/octet-stream` to nginx.conf.j2
+- Fixes CSS being served as `text/plain` instead of `text/css`
+- Removed dead `proxy_set_header` directives from WeeWX static file block
+- Added WebSocket upgrade headers to Grafana block
+
+### ESPHome nginx block
+- Added `esphome.local` server block proxying to `esphome:6052`
+- Used Docker resolver (`127.0.0.11`) with `set $upstream` pattern to defer DNS
+  resolution until request time — prevents nginx startup failure when ESPHome
+  container is not yet running
+
+### WeeWX timezone fix
+- Added `TZ: America/Vancouver` env var to WeeWX container in Ansible role
+
+### InfluxDB data flow verified
+- WeeWX archive records confirmed flowing into InfluxDB bucket `rvtc`
+
+### Local DNS records
+- Pi-hole local DNS records added for all services:
+  - weewx.local, grafana.local, influxdb.local, homeassistant.local, pihole.local, esphome.local → 192.168.88.3
+
+### MikroTik RSC update
+- RSC file updated to reflect DNS changes previously made in Winbox
+
 ---
 
 ## Issues Resolved
 
-- **Ansible template deployment corrupts live weewx.conf** — template approach abandoned for weewx.conf; live file managed manually on host volume
+- **Ansible template deployment corrupts live weewx.conf** — template approach abandoned; live file managed manually on host volume
 - **Duplicate [Engine] and [Logging] sections** — caused configobj parse error at line 560; fixed by removing first set
 - **vault_influxdb_token not in vault** — added during this session
 - **weectl extension install fails from Ansible** — weectl needs `--config /data/weewx.conf`; extension install done manually
+- **CSS served as text/plain** — fixed with `include mime.types` in nginx config
+- **nginx crash on ESPHome upstream** — nginx resolves upstreams at startup; fixed with Docker resolver + `set $upstream` deferred resolution pattern
 
 ---
 
@@ -67,14 +95,9 @@ Phase 2 wrap-up:
 
 | Item | Notes |
 |---|---|
-| Verify WeeWX → InfluxDB data flow | Wait for first archive record (5 min interval), check InfluxDB |
-| WeeWX time zone | Container needs `TZ: America/Vancouver` env var in Ansible role |
-| Ansible weewx role cleanup | Template approach broken — role needs rethink; for now weewx.conf managed manually |
+| Grafana dashboard | Build weather dashboard from InfluxDB rvtc bucket |
 | Home Assistant onboarding | Setup wizard, MQTT integration |
-| Local DNS names | Pi-hole local DNS records for services |
-| MikroTik dst-nat port 80 | Forward club LAN → 192.168.88.3:80 for WeeWX |
-| Update session context document | Reflect Phase 2 complete + all changes |
-| MikroTik RSC update | DNS changes made in Winbox not yet in rsc file |
+| ESPHome container deployment | Ansible role to be created; nginx block already in place |
 
 ---
 
@@ -85,6 +108,7 @@ Phase 2 wrap-up:
 | weewx.conf (live) | /data/docker/volumes/weewx/weewx.conf |
 | weewx.conf backup | /data/docker/volumes/weewx/weewx.conf.20260528170858 |
 | Custom InfluxDB writer | /data/docker/volumes/weewx/bin/user/influxdb2.py |
+| nginx config | /data/docker/volumes/nginx/nginx.conf |
 | Ansible vault | ~/RV-total-control/group_vars/all/vault.yml |
 | group_vars | ~/RV-total-control/group_vars/all/all.yml |
 
@@ -92,9 +116,6 @@ Phase 2 wrap-up:
 
 ## Next Session
 
-1. Verify InfluxDB data flowing from WeeWX
-2. Build Grafana dashboard for weather data
-3. WeeWX time zone fix
-4. Home Assistant onboarding
-5. Local DNS names via Pi-hole
-6. Update session context document
+1. Grafana dashboard for weather data
+2. Home Assistant onboarding (setup wizard + MQTT integration)
+3. ESPHome container deployment (Ansible role)
