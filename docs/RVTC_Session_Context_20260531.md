@@ -1,5 +1,5 @@
 # RVTC Session Context Document
-**Last Updated:** May 31, 2026  
+**Last Updated:** May 31, 2026 (evening)
 **Purpose:** Feed this to Claude at the start of each session to restore project context instantly.
 
 ---
@@ -42,6 +42,7 @@
 | Python | 3.13.5 |
 | Git | 2.47.3 |
 | rtl-433 | Latest (also in Docker container) |
+| mosquitto-clients | Latest (mosquitto_sub / mosquitto_pub CLI tools) |
 
 ---
 
@@ -203,7 +204,7 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.1
 | 192.168.88.1 | MikroTik gateway | — |
 | 192.168.88.2 | Windows workstation | — |
 | 192.168.88.3 | Beelink J45 — ethernet (primary) | enp1s0 |
-| 192.168.88.4 | Open — candidate: J45 WiFi interface | wlp3s0 |
+| 192.168.88.4 | J45 WiFi interface — disabled autoconnect | wlp3s0 |
 | 192.168.88.5 | HF5142B Modbus gateway | — |
 
 ---
@@ -330,6 +331,7 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.1
 - **Pi-hole listeningMode:** Must be `all` — set via `FTLCONF_dns_listeningMode: "all"` env var in Ansible role. Default `local` rejects queries from outside Docker bridge subnet.
 - **SAMLUX register map:** Full Modbus register map held locally under NDA. Never paste into chat.
 - **InfluxDB token:** Stored in vault as `vault_influxdb_token`. Also in weewx.conf in plaintext (private network, acceptable).
+- **WiFi autoconnect disabled:** wlp3s0 (Auto VE7CBH_Mikrotik + solsante profiles) set to autoconnect=no. Was causing IP conflict with enp1s0 (.3) on startup. WiFi disabled via `nmcli radio wifi off`. Ansible role needed to make this permanent — TODO next session.
 
 ---
 
@@ -367,5 +369,9 @@ Phase 2 wrap-up complete:
 - Port allocation expanded: ports 3 & 4 assigned to KWS-303L AC power meters (grid and generator)
 - HW-08 and HW-09 added to hardware backlog for KWS-303L meters
 - Network allocation note: IP 192.168.88.5 carried forward for new gateway
+- mosquitto-clients installed (mosquitto_sub / mosquitto_pub)
+- dvb_usb_rtl28xxu kernel module conflict diagnosed — blacklist pending Ansible role update
+- WiFi IP conflict diagnosed: wlp3s0 was grabbing 192.168.88.3 on startup — autoconnect disabled on both WiFi profiles; `nmcli radio wifi off` applied. Ansible role needed to make permanent.
+- Steve taking RV to Port Renfrew — project resumes over Starlink from campsite
 
-**Next session:** Home Assistant onboarding (OI-15), ESPHome Ansible role (OI-18), Grafana dashboard cleanup, Phase 3 planning.
+**Next session:** WiFi autoconnect fix in Ansible (common role), dvb_usb_rtl28xxu blacklist in Ansible, Home Assistant onboarding (OI-15), ESPHome Ansible role (OI-18), Grafana dashboard cleanup, Phase 3 planning.
