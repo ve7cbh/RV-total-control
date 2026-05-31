@@ -277,7 +277,7 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.1
 
 | ID | Item | Phase | Status | Notes |
 |---|---|---|---|---|
-| OI-14 | WeeWX Seasons skin CSS | 2 | 🟡 Open | Not loading via nginx reverse proxy — cosmetic only |
+| OI-14 | WeeWX Seasons skin CSS | 2 | ✅ Complete | Not loading via nginx reverse proxy — cosmetic only | Fixed 29/5
 | OI-15 | Home Assistant onboarding | 2/3 | 🟡 Open | Setup wizard + MQTT integration — pending hardware mount |
 | OI-16 | Grafana weather dashboard | 2 | ✅ Complete | Built 2026-05-30 — cleanup items remain (legends, °F, auto-refresh) |
 | OI-17 | Ansible weewx role cleanup | 2 | 🟡 Open | Template approach abandoned — role needs rethink for idempotency |
@@ -298,6 +298,8 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.1
 | HW-07 | Design tank monitoring sensors | 4/5 | 🟡 Open | Sensor types and mounting TBD |
 | HW-08 | Source/install KWS-303L — grid | 3 | 🟡 Open | AC power meter, grid input; RS-485 Modbus to gateway port 3 |
 | HW-09 | Source/install KWS-303L — generator | 3 | 🟡 Open | AC power meter, generator input; RS-485 Modbus to gateway port 4 |
+| HW-10 | Install GNSS BDS/GPS/GLONASS RS485 Multimode Satellite Rx | 3 | 🟡 | 
+| HW-11 | Configure and install CC1101 Wireless Module | 3 | 🟡 | to replace RTL-433 dongle prone to vibration failures in mobile appliations
 
 ### Design / Documentation
 
