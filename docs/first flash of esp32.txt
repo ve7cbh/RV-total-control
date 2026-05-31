@@ -1,0 +1,26 @@
+Before first flash:
+
+secrets.yaml — create this alongside your device YAML in ESPHome with these keys:
+
+yamlwifi_ssid: "YourNetworkName"
+wifi_password: "YourWifiPassword"
+api_encryption_key: "generate-a-32-byte-base64-key"
+ota_password: "something-strong"
+fallback_ap_password: "something-strong"
+You can generate an API key in the ESPHome dashboard — it does it automatically when you create a new device there.
+Static IP — assign 192.168.88.XX in the YAML and reserve it in MikroTik DHCP so it's stable for HA discovery.
+
+
+First boot procedure:
+
+Temporarily set scan: false → scan: true on dallas_temp (not i2c — leave that false)
+Flash and open the ESPHome log
+It will print all 5 DS18B20 addresses — copy them into the address fields
+Set scan back to false and reflash
+
+BME280 address — 0x76 is correct for most modules. If HA shows no pressure data after first boot, change it to 0x77.
+TODO items in the file:
+
+Static IP (192.168.88.XX)
+The 5 DS18B20 addresses (filled after first boot scan)
+Rvtc ambientYAML DownloadSonnet 4.6 Low

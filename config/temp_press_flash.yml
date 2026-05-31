@@ -1,0 +1,5 @@
+wifi_ssid: "YourNetworkName"
+wifi_password: "YourWifiPassword"
+api_encryption_key: "generate-a-32-byte-base64-key"
+ota_password: "something-strong"
+fallback_ap_password: "something-strong"

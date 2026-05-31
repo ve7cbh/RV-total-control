@@ -117,5 +117,12 @@ Phase 2 wrap-up:
 ## Next Session
 
 1. Grafana dashboard for weather data
-2. Home Assistant onboarding (setup wizard + MQTT integration)
+2. Home Assistant onboarding (setup wizard, ESPhome + MQTT integration.  Install MQTT explorer of some sort either in HA or ????)
+      Make Homelan HA and RV HA available to each other
 3. ESPHome container deployment (Ansible role)
+
+Install Hi-Flying HF5142B — 4-port RS-485 to Ethernet, Modbus RTU/TCP, J45.  Build cables Samlux, EPEVER MPPT controller.  Draw a system drawing - wire lists hardware lists.  
+Source a barometric sensor, Build exp32 for pulse water meter, turbitty, preasure (2), flow, etc (how far do you go? )
+Install 4x100watt PVpanels, wire 9 PV panels 3x3 (36 volt and complete solar system so we get some data, Design the tank monitoring sensors.
+
+Claude please put the above into a trackable list that will live with these updates.  
