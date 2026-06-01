@@ -284,7 +284,8 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.1
 | OI-18 | ESPHome Ansible role | 3 | 🟡 Open | nginx block already in place; role to be created |
 | OI-19 | MQTT Explorer | 2/3 | 🟡 Open | Install in HA or standalone; TBD which tool |
 | OI-20 | HA multi-site linking | 3 | 🟡 Open | Make Homelan HA and RV HA visible to each other |
-
+| OI-21 | LADP phonebook for VOIP phones.  Or install freepbx?  Link to Home PBX?  SIP or IAX2 trunk over a site-to-site VPN to link?  Am I just getting silly?
+| OI-24 | Automatic 120VAC disconnect of water heater and fridge when on solar unless solar is keeping up over a 24 hour period day to day
 ### Hardware / Physical Install
 
 | ID | Item | Phase | Status | Notes |
