@@ -36,8 +36,8 @@ services:
     container_name: rtl433
     restart: unless-stopped
     devices:
-      - /dev/bus/usb/001/006:/dev/bus/usb/001/006
-    command: ["-F", "mqtt://mosquitto:1883,retain=1,events=rtl_433/+/events"]
+      - /dev/bus/usb:/dev/bus/usb
+    command: ["-M", "si", "-F", "mqtt://mosquitto:1883,retain=1,events=rtl_433/rtl433/events"]
     depends_on:
       - mosquitto
 
