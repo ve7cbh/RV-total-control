@@ -103,3 +103,17 @@ docker restart weewx
 5. WiFi autoconnect fix (OI-22)
 6. dvb_usb_rtl28xxu blacklist (OI-23)
 7. File WeeWX upstream bug report
+
+
+For next time:  
+
+After every reload
+sudo chown -R 472:472 /data/docker/volumes/grafana
+
+sed -i 's|proxy_pass http://homeassistant:8123|proxy_pass http://192.168.88.3:8123|' /data/docker/volumes/nginx/nginx.conf
+
+Permanent fixes to do next session:
+
+Add user: "472:472" to grafana service in docker-compose.yml
+Update nginx.conf in the backup with the correct homeassistant IP
+Commit both to GitHub
