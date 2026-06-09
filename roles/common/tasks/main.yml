@@ -67,3 +67,23 @@
 - name: Enable UFW
   community.general.ufw:
     state: enabled
+
+- name: Blacklist dvb_usb_rtl28xxu kernel module
+  ansible.builtin.copy:
+    dest: /etc/modprobe.d/rtlsdr.conf
+    content: "blacklist dvb_usb_rtl28xxu\n"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: update initramfs
+
+- name: Disable WiFi radio
+  ansible.builtin.command:
+    cmd: nmcli radio wifi off
+  changed_when: false
+
+- name: Set WiFi connections to autoconnect=no
+  ansible.builtin.command:
+    cmd: nmcli connection modify "{{ item }}" connection.autoconnect no
+  loop: "{{ wifi_connections }}"
+  changed_when: false

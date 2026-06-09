@@ -1,8 +1,12 @@
 ---
 # roles/common/handlers/main.yml
-
 - name: reboot if required
   ansible.builtin.reboot:
     msg: "Reboot triggered by package upgrade"
     reboot_timeout: 300
   when: ansible_connection != 'local'
+
+- name: update initramfs
+  ansible.builtin.command:
+    cmd: update-initramfs -u
+  changed_when: false
