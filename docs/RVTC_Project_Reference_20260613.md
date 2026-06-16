@@ -1,5 +1,5 @@
 # RV Total Control — Project Reference
-**Last Updated:** June 12, 2026
+**Last Updated:** June 13, 2026
 **Owner:** Steve Bradshaw (ve7cbh) — Nanaimo, BC
 **GitHub:** https://github.com/ve7cbh/RV-total-control
 **Status:** Phase 2 Complete — Phase 3 Active
@@ -97,6 +97,8 @@ The architecture uses Ansible-managed Docker containers feeding data via MQTT in
 - EPEVER MPPT60 solar charge controller — Modbus RS-485
 - SAMLUX EVO-2212 inverter-charger — Modbus RS-485
 - KWS-303L × 2 — AC power meters (grid input, generator input) — RS-485
+- Waveshare Modbus RTU 8-ch Relay / RS485 — shore power load management (HW-13)
+- HSR1-25 25A NC relay × 2 — water heater and fridge AC disconnection (HW-18)
 
 **Tanks:**
 - Fresh, Grey1, Grey2, Black — exterior sensors on plastic tanks
@@ -158,6 +160,45 @@ The RV has an aluminium trailer frame on a steel chassis. With the sensor mounte
 - The barometric sensor sometimes bundled with this module is superseded by WN90LP (HW-16) — ignore if present
 - ESPHome does not include a built-in LSM303D calibration wizard; run a short Python script against raw I²C readings to derive hard-iron offsets, then set as static calibration constants in YAML
 
+### 2.8  - Waveshare Modbus RTU 8-ch Relay — Shore Power Load Management
+
+**Device:** - Waveshare Modbus RTU 8-ch Relay
+**Interface:** Ethernet — Modbus TCP. 
+**IP:** 192.168.88.6 (reserved in MikroTik DHCP)
+**Status: On order — commissioning Phase 3 (HW-13)**
+
+**RVTC use case — shore power load management:**
+Three independent shed conditions:
+
+1. **Shore power absent** (KWS-303L grid meter reads zero) → open both relay channels immediately → water heater and fridge revert to LPG
+2. **Shore power present, grid current >25A** (KWS-303L grid meter) → open water heater relay → restore when current drops below ~20A. Fridge relay unaffected.
+3. **Generator running, generator current >22A** (KWS-303L generator meter) → open water heater relay → restore when current drops below ~18A. Fridge relay unaffected.
+
+```
+KWS-303L grid meter (HW-08) + KWS-303L generator meter (HW-09)
+  → HA automation (three conditions)
+    → - Waveshare Modbus RTU 8-ch Relay (2 relay channels)
+      → HSR1-25 relay × 2 (water heater AC, fridge AC)
+```
+
+**Channel assignment (to be confirmed at commissioning):**
+
+| Channel | Load | Relay | Normal state |
+|---|---|---|---|
+| TBD | Water heater AC | HSR1-25 | NC — closed on shore power |
+| TBD | Fridge AC | HSR1-25 | NC — closed on shore power |
+| 3–16 | Spare | — | Reserved for future use |
+
+**Integration:**
+- HA Modbus TCP integration — same pattern as EPEVER/SAMLUX
+- Map only the two active coils — leave unused channels unmapped to avoid unnecessary InfluxDB writes
+- Modbus register addresses to be recorded at commissioning
+
+**Notes:**
+- WiFi must not be configured — Ethernet only per RVTC wired-first policy
+- 14 spare relay channels available for future expansion
+- Wiegand input register address to be documented at commissioning for future reference
+
 ---
 
 ## 3  Network
@@ -171,6 +212,7 @@ The RV has an aluminium trailer frame on a steel chassis. With the sensor mounte
 | 192.168.88.3 | Beelink J45 (enp1s0) | All services — primary IP |
 | 192.168.88.4 | J45 WiFi (wlp3s0) | Disabled — autoconnect=no, radio off |
 | 192.168.88.5 | Waveshare RS-485 gateway | Pending commissioning |
+| 192.168.88.6 | - Waveshare Modbus RTU 8-ch Relay | Ethernet Modbus TCP — load management |
 
 ### 3.2  Pi-hole DNS (.lan records)
 
@@ -469,7 +511,7 @@ RV-total-control/
 | OI-19 | 2-3 | MQTT Explorer | 🟡 Open | May be superseded by Phase 7 fusion UI |
 | OI-20 | 3 | HA multi-site linking | 🟡 Open | VPN prerequisite |
 | OI-21 | 3+ | VOIP / PBX inter-site | 🟡 Open | Prerequisite: OI-20 |
-| OI-24 | 3 | 120VAC load shedding on solar | 🟡 Open | Smart relay + EPEVER MPPT data required |
+| OI-24 | 3 | Shore power load management — water heater + fridge AC shed | 🟡 Open | Three conditions: (1) shore power absent → shed both immediately; (2) shore power present, grid current >25A → shed water heater, restore <20A; (3) generator running, generator current >22A → shed water heater, restore <18A. Current feedback from KWS-303L grid (HW-08) and generator (HW-09). Prerequisites: HW-08, HW-09, HW-13, HW-18 |
 | OI-25 | 7 | Phase 7 Sensor Fusion | 🟡 Open | Python fusion service, normalised MQTT schema |
 | OI-29 | 3 | GNSS-driven WeeWX position | 🟡 Open | Prerequisite: HW-10 |
 | OI-30 | 3 | RV position display page | 🟡 Open | Prerequisite: HW-10, Phase 7 |
@@ -494,12 +536,12 @@ RV-total-control/
 | HW-09 | 3 | Source/install KWS-303L — generator | 🟡 Open | AC power meter, generator input; RS-485 port 4 |
 | HW-10 | 3 | Install GNSS E108-GN03G-485 | 🟡 Open | RS485, IP67; Waveshare port 6 (TCP 4006) |
 | HW-12 | — | Replace spare Acurite 5n1 | 🟡 Open | Spare confirmed DOA 2026-06-02 |
-| HW-13 | 3 | Smart relay for 120VAC load shedding | 🟡 Open | Required for OI-24 |
+| HW-13 | 3 | DT-R016 Ethernet Modbus TCP relay controller — shore power load management | 🟡 Open | **IN HAND** — 16-ch, Ethernet Modbus TCP (WiFi disabled), Wiegand D0/D1 input; 2 channels drive HSR1-25 relays (HW-18); prerequisite for OI-24 |
 | HW-14 | — | Rain gauge inspection/repair | 🟡 Open | Physical inspection at club required |
 | HW-15 | 3 | Install POE-SW802-DIN PoE switch | 🟡 Open | Powers Waveshare gateway and bay devices |
 | HW-16 | 3 | Ecowitt WN90LP RS-485 Modbus weather station | 🟡 Open | **Ordered 2026-06-10, ships after June 15** — ultrasonic wind, temp, humidity, rain, UV, light, barometric pressure — Waveshare RS-485/7 (TCP 4007) — closes HW-05 |
 | HW-17 | 3/7 | diymore 10-axis IMU (L3GD20 + LSM303D) | 🟡 Open | **Ordered 2026-06-12** — magnetometer heading reference for true-north wind direction correction and map orientation; I²C to ESP32-S3 ESPHome node; one-time hard-iron calibration required; Phase 7 fusion layer consumer |
-| HW-18 | 3 | Install two HSR1-25 25A, NC load shead relays:  Hot water and Fridge.  Activated when 1. no shore power 2. when AC load > 28 amps. | 🟡 Open | Ordered 20260613
+| HW-18 | 3 | Install HSR1-25 25A NC relay × 2 — water heater AC and fridge AC | 🟡 Open | **Ordered 2026-06-13** — normally closed; activated on: (1) shore power absent, (2) grid current >25A, or (3) generator current >22A; driven by DT-R016 (HW-13); current feedback from KWS-303L grid (HW-08) and generator (HW-09) |
 
 ### 7.3  Design / Documentation
 
@@ -574,6 +616,18 @@ sqlite3 installed on host. archive_day_rain corruption diagnosed and fixed (rebu
 - OI-36 added: WN90LP wind direction true-north correction pipeline (prerequisite: HW-17 + Phase 7 fusion)
 - Section 2.7 added to project reference documenting IMU hardware and integration rationale
 
+### 2026-06-13  (Home base — Rogers)
+- DT-R016 16-channel Ethernet Modbus TCP relay controller reviewed and scoped for RVTC
+- Confirmed: Ethernet Modbus TCP interface — WiFi present but will not be configured (wired-first policy)
+- Confirmed: Wiegand D0/D1 input terminals present; card UID readable via Modbus holding register — reserved for future use
+- Confirmed: previously tested on home HA instance — Modbus register map known
+- Load shedding scope defined: shore power presence/absence (KWS-303L) drives two relay channels via binary HA automation — water heater and fridge revert to LPG when shore power absent
+- HSR1-25 25A NC relay × 2 ordered (HW-18) — one per load
+- HW-13 updated: scope is now DT-R016 commission + 2-channel load shed integration
+- OI-24 updated: simplified to binary shore-power-loss automation; no threshold management
+- Section 2.8 added: DT-R016 hardware and integration documentation
+- Section 2.5 updated: DT-R016 and HSR1-25 added to monitored/controlled systems list
+
 ### Next Session — Phase 3 Priorities
 1. Waveshare RS-485 gateway commissioning (HW-01 — device in hand)
 2. EPEVER MPPT60 Modbus integration (RS-485/1, TCP 4001)
@@ -583,6 +637,7 @@ sqlite3 installed on host. archive_day_rain corruption diagnosed and fixed (rebu
 6. Rebuild Grafana dashboard (OI-16)
 7. WeeWX upstream bug report (OI-32)
 8. WN90LP commissioning when received (HW-16 — ships after June 15)
+9. - Waveshare Modbus RTU 8-ch Relay — record Modbus coil addresses for load relay channels(HW-13)
 
 ---
 
