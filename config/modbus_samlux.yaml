@@ -1,0 +1,379 @@
+# RVTC — Home Assistant Modbus config for SAMLUX EVO-2212
+# Confirmed working 2026-06-17: TCP reachable, slave 1 answers (mbpoll test, register 1 = 2094)
+#
+# Connection details (confirmed):
+#   Gateway:      Waveshare 8-port RS-485/TCP, channel RS-485/2
+#   Host:         192.168.88.6
+#   Port:         4001          (every gateway channel uses 4001 — IP differentiates, not port)
+#   Slave/unit:   1             (EVO-2212 default, 01H per manual)
+#   Serial:       9600 8N1      (already matched on gateway — not relevant to this file)
+#
+# Address convention — CORRECTED 2026-06-17 based on live testing:
+#   The manual's hex address (converted straight to decimal) does NOT match the actual
+#   wire register on this device/gateway. A block scan of registers 259-268 confirmed
+#   a consistent +1 offset is needed:
+#     real wire address = (hex address converted to decimal) + 1
+#   Verified via: Frequency of Grid Input landed at 261 (60.06 Hz), Voltage of Grid
+#   Input at 262 (118.71 V, matches known 119 VAC), Input Current at 263 (4.36 A,
+#   matches known 4 A load) — plus internal consistency checks (VA ≈ V×A, W/VA = sane
+#   power factor) and two "Reserved" registers correctly landing on 0 one slot below
+#   each value register.
+#   RULE FOR ALL FUTURE ADDRESSES: take the hex address from the manual, convert to
+#   decimal, then ADD 1. Example: manual says 105H -> 261 (direct) -> 262 (real).
+#   Function 03H = "holding" registers in HA's input_type field.
+#   Max 50 registers per single read on EVO-series — keep grouped reads under that.
+#
+# Scale values below are taken from the manual's Units column (e.g. "0.01 Hz" means
+# multiply the raw register by 0.01 to get Hz) — these are generic engineering units,
+# not the proprietary address map, so they're safe to keep here.
+#
+# IMPORTANT: do not paste real SAMLUX register ADDRESSES into chat with Claude —
+# the address map is held locally under NDA. Fill in the address: fields below
+# directly in this file, not in conversation.
+#
+# Usage: either paste this block into configuration.yaml under modbus:, or save as-is
+# and add `modbus: !include modbus_samlux.yaml` to configuration.yaml.
+
+modbus:
+  - name: samlux_evo2212
+    type: tcp
+    host: 192.168.88.6
+    port: 4001
+    timeout: 5
+    delay: 0
+    message_wait_milliseconds: 30   # small gap between requests; raise if you see sporadic errors
+
+    sensors:
+      # --- WORKING EXAMPLE — confirmed live via mbpoll, register 1, value 2094 ---
+      # Meaning of register 1 is unknown until checked against your local register map.
+      # Replace name/unit/scale once you know what it actually represents.
+      - name: "SAMLUX Test Register 1"
+        unique_id: samlux_test_register_1
+        slave: 1
+        address: 1
+        input_type: holding
+        data_type: uint16
+        scale: 1
+        unit_of_measurement: ""
+        scan_interval: 30
+
+      # =========================================================================
+      # Below: named placeholders for read-only data registers, per manual table.
+      # address: left blank — fill in directly from your local manual (not in chat).
+      # scale: filled in from the manual's Units column where shown.
+      # =========================================================================
+
+      - name: "SAMLUX Status of GEN Input"
+        unique_id: samlux_status_gen_input
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scan_interval: 30
+
+      - name: "SAMLUX Frequency of GEN Input"
+        unique_id: samlux_freq_gen_input
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 0.01
+        unit_of_measurement: "Hz"
+        device_class: frequency
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Voltage of GEN Input"
+        unique_id: samlux_voltage_gen_input
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 0.01
+        unit_of_measurement: "V"
+        device_class: voltage
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Status of Grid Input"
+        unique_id: samlux_status_grid_input
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scan_interval: 30
+
+      - name: "SAMLUX Frequency of Grid Input"
+        unique_id: samlux_freq_grid_input
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 0.01
+        unit_of_measurement: "Hz"
+        device_class: frequency
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Voltage of Grid Input"
+        unique_id: samlux_voltage_grid_input
+        slave: 1
+        address: 262        # 105H+1 — CONFIRMED via block scan: 118.71V, matches 119VAC
+        input_type: holding
+        data_type: uint16
+        scale: 0.01
+        unit_of_measurement: "V"
+        device_class: voltage
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Input Current"
+        unique_id: samlux_input_current
+        slave: 1
+        address: 263        # 106H+1 — CONFIRMED via block scan: 4.36A, matches stated 4A load
+        input_type: holding
+        data_type: uint16
+        scale: 0.01
+        unit_of_measurement: "A"
+        device_class: current
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Input VA"
+        unique_id: samlux_input_va
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 1
+        unit_of_measurement: "VA"
+        device_class: apparent_power
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Input Watt"
+        unique_id: samlux_input_watt
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 1
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Output Frequency"
+        unique_id: samlux_output_frequency
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 0.01
+        unit_of_measurement: "Hz"
+        device_class: frequency
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Output Voltage"
+        unique_id: samlux_output_voltage
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 0.01
+        unit_of_measurement: "V"
+        device_class: voltage
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Invert/Charge Current"
+        unique_id: samlux_invert_charge_current
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: int16      # may go negative (charge vs invert direction) — confirm in manual
+        scale: 0.01
+        unit_of_measurement: "A"
+        device_class: current
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Invert/Charge VA"
+        unique_id: samlux_invert_charge_va
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 1
+        unit_of_measurement: "VA"
+        device_class: apparent_power
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Invert/Charge Watt"
+        unique_id: samlux_invert_charge_watt
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: int16      # may go negative (charge vs invert direction) — confirm in manual
+        scale: 1
+        unit_of_measurement: "W"
+        device_class: power
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Battery Voltage"
+        unique_id: samlux_battery_voltage
+        slave: 1
+        address: 277        # 114H+1 — CONFIRMED via poll: 13026 raw -> 13.026V, plausible 12V bank
+        input_type: holding
+        data_type: uint16
+        scale: 0.001
+        unit_of_measurement: "V"
+        device_class: voltage
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Battery Current"
+        unique_id: samlux_battery_current
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: int16      # may go negative (charge vs discharge) — confirm in manual
+        scale: 0.1
+        unit_of_measurement: "A"
+        device_class: current
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX External Current"
+        unique_id: samlux_external_current
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: int16
+        scale: 0.1
+        unit_of_measurement: "A"
+        device_class: current
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Battery Temperature"
+        unique_id: samlux_battery_temperature
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: int16
+        scale: 0.1
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Transformer Temperature"
+        unique_id: samlux_transformer_temperature
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: int16
+        scale: 0.1
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Bus Bar Temperature"
+        unique_id: samlux_busbar_temperature
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: int16
+        scale: 0.1
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Heat Sink Temperature"
+        unique_id: samlux_heatsink_temperature
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: int16
+        scale: 0.1
+        unit_of_measurement: "°C"
+        device_class: temperature
+        state_class: measurement
+        scan_interval: 30
+
+      - name: "SAMLUX Fan Speed"
+        unique_id: samlux_fan_speed
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scan_interval: 30
+
+      - name: "SAMLUX Operating Mode"
+        unique_id: samlux_operating_mode
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scan_interval: 30
+
+      - name: "SAMLUX Error Code"
+        unique_id: samlux_error_code
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scan_interval: 30
+
+      - name: "SAMLUX Charge Stage"
+        unique_id: samlux_charge_stage
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scan_interval: 30
+
+      - name: "SAMLUX Firmware Version"
+        unique_id: samlux_version
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 0.01
+        scan_interval: 300    # rarely changes — poll infrequently
+
+      - name: "SAMLUX Compensating Voltage"
+        unique_id: samlux_compensating_voltage
+        slave: 1
+        address:             # <-- FILL IN
+        input_type: holding
+        data_type: uint16
+        scale: 0.001
+        unit_of_measurement: "V"
+        device_class: voltage
+        state_class: measurement
+        scan_interval: 30
+
+    # If a register turns out signed where it's currently uint16 (or vice versa),
+    # adjust data_type accordingly — int16 for anything that can go negative
+    # (charge/discharge current, temperature below 0°C, etc.)
+    #
+    # If a value spans two registers (32-bit), use data_type: uint32 or int32 —
+    # HA derives the register count from data_type automatically.
+    #
+    # =========================================================================
+    # NOT INCLUDED HERE: the large block of Read/Write configuration parameters
+    # (absorb voltage, equalization voltage, low/high voltage cutoffs, GEN ON/OFF
+    # timing, charge mode, relay function, comm ID, etc.). Those are settings you
+    # write TO the device, not sensor readings — in HA they belong under a
+    # `number:` or `switch:` platform block (via modbus), not `sensors:`.
+    # Worth building as a separate config once read-side polling is confirmed
+    # working, since writing to the wrong register on a live inverter-charger
+    # carries more risk than reading one.
+    # =========================================================================
