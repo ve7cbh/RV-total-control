@@ -8,20 +8,24 @@
 #   Slave/unit:   1             (EVO-2212 default, 01H per manual)
 #   Serial:       9600 8N1      (already matched on gateway — not relevant to this file)
 #
-# Address convention — CORRECTED 2026-06-17 based on live testing:
-#   The manual's hex address (converted straight to decimal) does NOT match the actual
-#   wire register on this device/gateway. A block scan of registers 259-268 confirmed
-#   a consistent +1 offset is needed:
-#     real wire address = (hex address converted to decimal) + 1
-#   Verified via: Frequency of Grid Input landed at 261 (60.06 Hz), Voltage of Grid
-#   Input at 262 (118.71 V, matches known 119 VAC), Input Current at 263 (4.36 A,
-#   matches known 4 A load) — plus internal consistency checks (VA ≈ V×A, W/VA = sane
-#   power factor) and two "Reserved" registers correctly landing on 0 one slot below
-#   each value register.
-#   RULE FOR ALL FUTURE ADDRESSES: take the hex address from the manual, convert to
-#   decimal, then ADD 1. Example: manual says 105H -> 261 (direct) -> 262 (real).
+# Address convention — CORRECTED, same session, this time for real:
+#   The "+1 offset" documented here yesterday was WRONG. Root cause: mbpoll defaults to
+#   classic Modicon-style 1-based reference numbering and silently subtracts 1 from
+#   whatever you pass to -r before putting it on the wire. The -0 flag disables that
+#   and addresses the literal PDU register directly. We weren't using -0, which is why
+#   everything we read looked shifted by one register from where it should have been.
+#   Confirmed by re-polling register 261 WITH -0 and getting the same value (119.03V)
+#   we'd previously gotten from register 262 WITHOUT -0 — i.e. mbpoll's default mode
+#   was quietly sending 261 when we typed 262.
+#   CORRECT RULE: the manual's hex address, converted straight to decimal, IS the real
+#   wire/PDU address. No adjustment needed. This also matches the manual's own 03H
+#   worked example, which uses literal unshifted addressing — the thing that didn't
+#   add up yesterday, now explained.
 #   Function 03H = "holding" registers in HA's input_type field.
 #   Max 50 registers per single read on EVO-series — keep grouped reads under that.
+#   NOTE FOR FUTURE mbpoll USE: always pass -0 to address registers literally, matching
+#   what HA/pymodbus and the manual both expect. Without -0, subtract 1 from whatever
+#   mbpoll reports the address as, or just always use -0 and skip the math.
 #
 # Scale values below are taken from the manual's Units column (e.g. "0.01 Hz" means
 # multiply the raw register by 0.01 to get Hz) — these are generic engineering units,
@@ -118,7 +122,7 @@ modbus:
       - name: "SAMLUX Voltage of Grid Input"
         unique_id: samlux_voltage_grid_input
         slave: 1
-        address: 262        # 105H+1 — CONFIRMED via block scan: 118.71V, matches 119VAC
+        address: 261        # 105H direct, NO offset — CONFIRMED via mbpoll -0: 119.03V, matches grid voltage
         input_type: holding
         data_type: uint16
         scale: 0.01
@@ -130,7 +134,7 @@ modbus:
       - name: "SAMLUX Input Current"
         unique_id: samlux_input_current
         slave: 1
-        address: 263        # 106H+1 — CONFIRMED via block scan: 4.36A, matches stated 4A load
+        address: 262        # 106H direct, NO offset — CONFIRMED via mbpoll -0: 4.41A, matches ~4A load
         input_type: holding
         data_type: uint16
         scale: 0.01
@@ -226,7 +230,7 @@ modbus:
       - name: "SAMLUX Battery Voltage"
         unique_id: samlux_battery_voltage
         slave: 1
-        address: 277        # 114H+1 — CONFIRMED via poll: 13026 raw -> 13.026V, plausible 12V bank
+        address: 276        # 114H direct, NO offset — CONFIRMED via mbpoll -0: 13.005V, consistent with prior 13.03V reading
         input_type: holding
         data_type: uint16
         scale: 0.001

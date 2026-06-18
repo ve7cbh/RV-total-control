@@ -68,6 +68,7 @@ The architecture uses Ansible-managed Docker containers feeding data via MQTT in
 | rtl-433 | Latest (host + Docker container) |
 | rtl-sdr | Latest (provides rtl_eeprom, udev rules) |
 | mosquitto-clients | Latest (mosquitto_sub / mosquitto_pub CLI) |
+| mbpoll | Latest (Modbus TCP/RTU CLI diagnostic tool) |
 | sqlite3 | Latest (host — WeeWX archive queries) |
 
 ### 2.3  RTL-SDR Dongles
@@ -203,6 +204,36 @@ KWS-303L grid meter (HW-08) + KWS-303L generator meter (HW-09)
 - RS-485 interface means no dedicated IP is consumed — previously-reserved 192.168.88.6 (for DT-R016) is now free
 - 6 spare relay channels available for future expansion
 - No Wiegand/card-reader capability on this board — not required for current scope
+
+### 2.9  SAMLUX EVO-2212 — Communications Confirmed
+
+**Status:** Commissioned and addressing fully resolved 2026-06-17 — Modbus TCP/RTU communications validated end-to-end via gateway RS-485/2.
+
+**Connection:**
+- Gateway channel: RS-485/2, IP 192.168.88.6, TCP 4001 (Section 2.6)
+- Modbus slave/unit address: 1 (01H, manufacturer default — confirmed correct as-is)
+- Serial settings on gateway: 9600 8N1 (matches EVO-series manual spec)
+
+**Address convention — corrected later the same session (post mortem on a false lead):**
+An initial block scan appeared to show every register shifted by +1 from the manual's literal hex address, and that "+1 rule" was briefly documented and applied to the YAML. It was wrong. Root cause: `mbpoll` defaults to classic Modicon-style 1-based reference numbering and silently subtracts 1 from whatever is passed to `-r` before putting it on the wire — the `-0` flag disables that and addresses the literal PDU register directly. The initial polls omitted `-0`, so every address typed was actually being sent on the wire one lower than intended, which looked exactly like a device-side +1 offset. Re-polling the same three registers with `-0` returned the same real-world values one register address lower, confirming there is **no real offset** — the manual's hex address, converted straight to decimal, is the correct wire/PDU address, exactly as the manual's own 03H worked example showed all along.
+
+> **Takeaway for future Modbus work in this project:** when using `mbpoll`, always pass `-0` so its addressing matches both the manual and Home Assistant's `pymodbus`-based Modbus integration (which addresses literally by default). Skipping `-0` will look like a consistent off-by-one device quirk and is a known, common pitfall in the Modbus ecosystem (sometimes called the "Modbus Shuffle") — not specific to SAMLUX.
+
+**Registers confirmed working (read-only, addresses are literal/direct, no offset):**
+
+| Field | Address | Scale | Confirmed value | Cross-check |
+|---|---|---|---|---|
+| Voltage of Grid Input | 261 | ×0.01 V | 119.03 V | Matches known ~119 VAC |
+| Input Current | 262 | ×0.01 A | 4.41 A | Matches known ~4 A load |
+| Battery Voltage | 276 | ×0.001 V | 13.005 V | Consistent across two separate readings (13.03V, 13.005V) |
+
+**Tooling:** `mbpoll` added to required packages and to the `common` Ansible role's package list (Section 2.2, Section 6.3) — installed manually on the J45 for now, pending next `common` role run.
+
+**Home Assistant integration:** Drafted as `modbus_samlux.yaml`, managed manually for now (same pattern as `weewx.conf`) rather than templated via Ansible — held outside this repo's tracked config until the register list stabilizes.
+
+**Scope decision:** Read-only telemetry registers only. The EVO-series also exposes a large block of Read/Write configuration parameters (absorb voltage, equalization voltage, voltage cutoffs, GEN timing, relay function, comm ID, etc.) — intentionally deferred. Programming/write registers will not be touched until read-side polling is fully validated and trusted; this will be a separate, later phase of work.
+
+**Ansible role status:** The `samlux` role (RVTC Ansible Role Structure Document V0.1, Section 5i) was blocked on OI-03 pending protocol confirmation. **OI-03 is now resolved** (see Section 7.1) — protocol confirmed as Modbus RTU over RS-485 via the Waveshare gateway, slave address 1, literal/direct addressing (no offset). Role design can proceed in principle but is intentionally deferred until the read-only register set stabilizes and the write-register scope is defined separately.
 
 ---
 
@@ -435,7 +466,7 @@ localhost ansible_connection=local ansible_python_interpreter=/usr/bin/python3.1
 
 | Role | Purpose / Notes |
 |---|---|
-| common | OS baseline, Docker idempotency, UFW firewall, WiFi disable, dvb_usb blacklist, rtl-sdr + sqlite3 |
+| common | OS baseline, Docker idempotency, UFW firewall, WiFi disable, dvb_usb blacklist, rtl-sdr + sqlite3 + mbpoll |
 | mosquitto | Eclipse Mosquitto MQTT broker |
 | influxdb | InfluxDB 2.x time-series database |
 | grafana | Grafana dashboards — user 472:472 baked in |
@@ -516,6 +547,7 @@ RV-total-control/
 
 | ID | Phase | Item | Status | Notes |
 |---|---|---|---|---|
+| OI-03 | 3 | SAMLUX 2212 protocol confirmation | ✅ Closed | Originally tracked in RVTC Ansible Role Structure Document V0.1 (Section 8) as blocking the `samlux` role. Resolved 2026-06-17 — confirmed Modbus RTU over RS-485 via Waveshare gateway RS-485/2, slave address 1; +1 register address offset discovered and documented (Section 2.9). `samlux` role design now unblocked, deferred pending stable register list and separate scoping of write/programming registers |
 | OI-15 | 2-3 | Home Assistant onboarding | 🟡 Open | Container up — setup wizard + MQTT integration not done |
 | OI-16 | 2 | Grafana weather dashboard | 🟡 Open | Lost after reboot 2026-06-09 — needs rebuilding |
 | OI-18 | 3 | ESPHome Ansible role | 🟡 Open | nginx block in place; role to be created |
@@ -537,7 +569,7 @@ RV-total-control/
 
 | ID | Phase | Item | Status | Notes |
 |---|---|---|---|---|
-| HW-01 | 3 | Install Waveshare RS485 gateway | 🟡 Open | **IN HAND** — commissioning next session |
+| HW-01 | 3 | Install Waveshare RS485 gateway | 🟡 Open | **IN HAND** — network up, RS-485/2 (SAMLUX) confirmed live 2026-06-17 (Section 2.9); remaining channels pending cabling/commissioning |
 | HW-02 | 3 | Build RS-485 cables | 🟡 Open | For SAMLUX EVO-2212 + EPEVER MPPT |
 | HW-03 | 3 | Install 4×100W PV panels | 🟡 Open | Get solar data flowing before full array |
 | HW-04 | 3 | Wire 9 PV panels (3S×3P ~36V) | 🟡 Open | Complete solar system |
@@ -653,17 +685,25 @@ sqlite3 installed on host. archive_day_rain corruption diagnosed and fixed (rebu
 
 ### 2026-06-17  (Home base — Rogers)
 - **Correction:** Waveshare 8-port RS-485 gateway addressing scheme fixed throughout document. The gateway is effectively two separate Modbus TCP devices in one enclosure — every channel answers on **TCP 4001**, channels are distinguished by **IP only** (192.168.88.5–12). Earlier drafts had incorrectly assigned per-port TCP numbers (4002 for SAMLUX, 4006 for GNSS, 4007 for WN90LP, 4008 for the load-shed relay board) — all corrected to 4001. Section 2.6 port table column headers also fixed (IP and TCP were mislabeled/swapped). Section 2.8 relay board entry corrected: it does receive a dedicated IP via gateway port 8 (192.168.88.12) — "no dedicated IP" language removed.
+- SAMLUX EVO-2212 commissioning started: TCP reachability confirmed (`nc -zv 192.168.88.6 4001` succeeded). Gateway config verified against device — TCP Server mode, 9600/8/N/1 serial settings match EVO-series spec sheet, Protocol = Modbus TCP to RTU. EVO-2212 default Modbus slave/unit address confirmed as 1 (01H, per manual). Noted minor housekeeping item: gateway's Destination IP/DNS field is set to 192.168.1.3 — stale value on a different subnet, inert in TCP Server mode but should be cleared/corrected to avoid confusion if Work Mode ever changes.
+- `mbpoll` added to required packages (not yet installed on J45) — needed for direct Modbus-level probing ahead of HA integration. **Added to `common` role package list** so it's provisioned by Ansible rather than manual `apt install`; until the role is re-run, install manually with `sudo apt install mbpoll`.
+- mbpoll installed manually (`sudo apt install mbpoll`) and used to probe the EVO-2212 directly — slave 1, register 1 answered (raw 2094), confirming the bus, wiring, and gateway bridging all work end to end.
+- **SAMLUX EVO-2212 communications fully confirmed.** A 10-register block scan (259–268) initially appeared to show a consistent +1 offset between the manual's hex addresses and the actual wire register. Further testing traced this to an `mbpoll` tooling artifact, not a real device offset (see below) — once corrected, three registers confirmed working with literal/direct addressing: Voltage of Grid Input (261, 119.03 V), Input Current (262, 4.41 A), Battery Voltage (276, 13.005 V). Full detail in new Section 2.9.
+- Drafted `modbus_samlux.yaml` for Home Assistant — read-only telemetry sensors only. Write/programming registers (charge profile, voltage cutoffs, etc.) explicitly deferred to a later, separate pass once read-side polling is fully trusted.
+- **OI-03 closed** (see Section 7.1) — SAMLUX protocol confirmed, `samlux` Ansible role design unblocked (deferred until register list stabilizes).
+- **Correction (same session):** the initial "+1 register offset" finding above was wrong. Root cause: `mbpoll` defaults to 1-based Modicon-style reference numbering and subtracts 1 from the typed `-r` value before sending it on the wire; the `-0` flag disables this and addresses the register literally. The block-scan polls omitted `-0`, making every register look shifted by exactly one — a known, common Modbus tooling pitfall (the "Modbus Shuffle"), not a SAMLUX-specific quirk. Re-confirmed all three working registers with `mbpoll -0`, getting the values shown above (literal/direct addresses, no offset).
+- Lesson for future Modbus work: always pass `-0` with `mbpoll` so its addressing matches both the manual and Home Assistant's `pymodbus`-based Modbus integration.
 
 ### Next Session — Phase 3 Priorities
-1. Waveshare RS-485 gateway commissioning (HW-01 — device in hand)
-2. EPEVER MPPT60 Modbus integration (RS-485/1, IP 192.168.88.5, TCP 4001)
-3. SAMLUX EVO-2212 Modbus integration (RS-485/2, IP 192.168.88.6, TCP 4001)
-4. Solar panel wiring (HW-03 / HW-04)
-5. Home Assistant onboarding — MQTT integration (OI-15)
-6. Rebuild Grafana dashboard (OI-16)
-7. WeeWX upstream bug report (OI-32)
-8. WN90LP commissioning when received (HW-16 — ships after June 15)
-9. Waveshare 8-ch RS-485 relay board — commission via Waveshare gateway port RS-485/8, IP 192.168.88.12, TCP 4001; record Modbus coil addresses for load relay channels (HW-13)
+1. GNSS E108-GN03G-485 — install and integrate (HW-10), Waveshare RS-485/6
+2. Waveshare 8-ch RS-485 relay board — commission via Waveshare gateway port RS-485/8, IP 192.168.88.12, TCP 4001; record Modbus coil addresses for load relay channels (HW-13)
+3. KWS-303L grid + generator power meters — install and integrate (HW-08, HW-09), Waveshare RS-485/3 and RS-485/4
+4. EPEVER MPPT60 Modbus integration (RS-485/1, IP 192.168.88.5, TCP 4001)
+5. Solar panel wiring (HW-03 / HW-04)
+6. Home Assistant onboarding — MQTT integration (OI-15)
+7. Rebuild Grafana dashboard (OI-16)
+8. WeeWX upstream bug report (OI-32)
+9. WN90LP commissioning when received (HW-16 — ships after June 15)
 10. Consider Portainer deployment for container management (OI-37)
 
 ---
