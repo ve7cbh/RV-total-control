@@ -1,8 +1,10 @@
 # RV Total Control — Project Reference
-**Last Updated:** June 17, 2026
+**Last Updated:** June 18, 2026
 **Owner:** Steve Bradshaw (ve7cbh) — Nanaimo, BC
 **GitHub:** https://github.com/ve7cbh/RV-total-control
 **Status:** Phase 2 Complete — Phase 3 Active
+
+> **Resuming a Claude session:** Share this document at the start of each session. It is the project memory — no other context is needed.
 
 ---
 
@@ -90,7 +92,7 @@ The architecture uses Ansible-managed Docker containers feeding data via MQTT in
 |---|---|---|---|
 | 1111 | A | Home base — pole-mounted | Active — primary |
 | 291 | C | Mobile — travels with RV | At home — filtered out in weewx.conf |
-| Spare | — | — | DOA (HW-12) — replacement pending |
+| Spare | — | — | ✅ HW-12 closed — replacement sourced |
 
 ### 2.5  Monitored & Controlled Systems
 
@@ -98,7 +100,7 @@ The architecture uses Ansible-managed Docker containers feeding data via MQTT in
 - EPEVER MPPT60 solar charge controller — Modbus RS-485
 - SAMLUX EVO-2212 inverter-charger — Modbus RS-485
 - KWS-303L × 2 — AC power meters (grid input, generator input) — RS-485
-- Waveshare Modbus RTU 8-ch Relay / RS485 — shore power load management (HW-13)
+- Waveshare Modbus RTU 8-ch Relay / RS-485 — shore power load management (HW-13)
 - HSR1-25 25A NC relay × 2 — water heater and fridge AC disconnection (HW-18)
 
 **Tanks:**
@@ -112,36 +114,31 @@ The architecture uses Ansible-managed Docker containers feeding data via MQTT in
 - Turbidity (Seeed S-DTS210-01 RS-485 Modbus)
 - Enclosure temperature (DS18B20)
 
-**Weather:** 433 MHz sensor network via WeeWX + RTL-SDR (dual dongle). WN90LP RS-485 Modbus station (HW-16) ordered — will replace Acurite 5n1 long term.
+**Weather:** 433 MHz sensor network via WeeWX + RTL-SDR (dual dongles). WN90LP RS-485 Modbus station (HW-16) ordered — will replace Acurite 5n1 long term.
 
 ### 2.6  Waveshare 8-Ch RS485 Gateway
 
 ASIN B0F5WXX4ZQ — 8-port RS-485 to Ethernet, Modbus RTU/TCP, MQTT gateway, industrial isolation, PoE.
-**Status: In hand — commissioning next session (HW-01)**
+**Status: ✅ In service — HW-01 closed**
 
-NOTE:  Where ever possible every device mounted in the RV will be accessed by a wired connection.  Wireless esp32Home will be used for controlling minor 
-things such as remote lighting and the sdr dongles for use as required. If this requires more than one device per 485 channel 
-then so be it.  RS-485 is the interface of choice for this project, IP networks notwithstanding.  
+NOTE: Where ever possible every device mounted in the RV will be accessed by a wired connection. Wireless ESPHome will be used for controlling minor things such as remote lighting and the SDR dongles for use as required. If this requires more than one device per RS-485 channel then so be it. RS-485 is the interface of choice for this project, IP networks notwithstanding.
 
-| Port | IP | TCP | Purpose | Device(s) | Phase |
-|---|---|---|---|---|---|
-| RS-485/1 | 192.168.88.5 | 4001 | Power — Solar | EPEVER MPPT60 (RJ45 D+ 4, D- 6) | 3 | Baud = 115200, CONNECTED - TEST OK
-| RS-485/2 | 192.168.88.6 | 4001 | Power — Inverter | SAMLUX EVO-2212 (RJ45 D+ 4, D- 5) | 3 | CONNECTED - TEST OK
-| RS-485/3 | 192.168.88.7 | 4001 | Power — Grid meter | KWS-303L (grid) | 3 | CONNECTED - TEST OK
-| RS-485/4 | 192.168.88.8 | 4001 | Power — Generator | KWS-303L (generator) | 3 | INSTALLED - Generator wiring not installed.
-| RS-485/5 | 192.168.88.9 | 4001 | Water sensors | Pressure + Filter ΔP + Turbidity | 5 |
-| RS-485/6 | 192.168.88.10 | 4001 | GNSS | E108-GN03G-485 position/time receiver | 3 | Device in hand, awaiting install
-| RS-485/7 | 192.168.88.11 | 4001 | Weather station | WN90LP (HW-16) | 3 | Shipped
-| RS-485/8 | 192.168.88.12 | 4001 | Power — Load shed | Waveshare 8-ch relay board (HW-13) | 3 | CONNECTED - TEST OK
+| Port | IP | TCP | Purpose | Device(s) | Phase | Status |
+|---|---|---|---|---|---|---|
+| RS-485/1 | 192.168.88.5 | 4001 | Power — Solar | EPEVER MPPT60 (RJ45 D+ 4, D- 6) | 3 | ✅ CONNECTED - TEST OK (baud 115200) |
+| RS-485/2 | 192.168.88.6 | 4001 | Power — Inverter | SAMLUX EVO-2212 (RJ45 D+ 4, D- 5) | 3 | ✅ CONNECTED - TEST OK |
+| RS-485/3 | 192.168.88.7 | 4001 | Power — Grid meter | KWS-303L (grid) | 3 | ✅ CONNECTED - TEST OK |
+| RS-485/4 | 192.168.88.8 | 4001 | Power — Generator | KWS-303L (generator) | 3 | INSTALLED - generator AC wiring not yet complete |
+| RS-485/5 | 192.168.88.9 | 4001 | Water sensors | Pressure + Filter ΔP + Turbidity | 5 | Pending Phase 5 |
+| RS-485/6 | 192.168.88.10 | 4001 | GNSS | E108-GN03G-485 position/time receiver | 3 | Device in hand, awaiting install |
+| RS-485/7 | 192.168.88.11 | 4001 | Weather station | WN90LP (HW-16) | 3 | Shipped |
+| RS-485/8 | 192.168.88.12 | 4001 | Power — Load shed | Waveshare 8-ch relay board (HW-13) | 3 | ✅ CONNECTED - TEST OK |
 
-> **NOTE — gateway addressing scheme:** every channel on this gateway answers Modbus TCP on **port 4001**; 
-  channels are distinguished by **IP only** (192.168.88.5–12), not by port. The unit is effectively two separate 
-  Modbus TCP gateways in one enclosure, so per-port TCP numbering (4002/4006/4007/4008, as appeared in earlier drafts) 
-  does not work — corrected throughout this document 2026-06-17.
-  **NOTE - EPEVER baud rate:** Set at 115200 as this is also the same 485 network that talks to its OEM remote control.
-  **NOTE - WAVESHARE 8 channel relay board:** +5VDC supplied by EPEVER MPPT controller.  Unit complains if too many relays
-   are turned on at once - possible not enough power or a back emf issue - Confirmed that the solar controller does not have 
-   the current reserve to power the relay board - need to install a DC-DC converter (in hand)
+> **NOTE — gateway addressing scheme:** every channel on this gateway answers Modbus TCP on **port 4001**; channels are distinguished by **IP only** (192.168.88.5–12), not by port. The unit is effectively two separate Modbus TCP gateways in one enclosure, so per-port TCP numbering (4002/4006/4007/4008, as appeared in earlier drafts) does not work — corrected throughout this document 2026-06-17.
+>
+> **NOTE - EPEVER baud rate:** Set at 115200 as this is also the same RS-485 network that talks to its OEM remote control.
+>
+> **NOTE - Waveshare 8-channel relay board:** +5VDC originally supplied by EPEVER MPPT controller. Unit complains if too many relays are turned on at once — confirmed the solar controller does not have the current reserve to power the relay board. DC-DC converter (HW-19, in hand) to be installed.
 
 ### 2.7  IMU / Compass Module
 
@@ -173,44 +170,49 @@ The RV has an aluminium trailer frame on a steel chassis. With the sensor mounte
 ### 2.8  Waveshare 8-Channel RS-485 Relay Board — Shore Power Load Management
 
 **Device:** Waveshare Modbus RTU 8-ch Relay Module (RS-485 interface) — replaces DT-R016
-**Interface:** RS-485 Modbus RTU — wired into the Waveshare 8-Ch RS485 Gateway (Section 2.6), port RS-485/8 (TCP 4001). No standalone Ethernet/IP interface of its own.
-**IP:** 192.168.88.12 (gateway port RS-485/8), TCP 4001
-**Status: Ordered 2026-06-16 — commissioning Phase 3 (HW-13)**
+**Interface:** RS-485 Modbus RTU — wired into the Waveshare 8-Ch RS485 Gateway (Section 2.6), port RS-485/8, IP 192.168.88.12, TCP 4001
+**Status: ✅ Connected and tested — commissioning Phase 3 (HW-13)**
 
 **Background — DT-R016 retired:**
 The previously-scoped DT-R016 16-channel Ethernet Modbus TCP relay controller (see 2026-06-13 session) was found inoperative on bench test. Rather than troubleshoot or source a replacement DT-R016, the role is now filled by an 8-channel Waveshare relay board with a native RS-485 Modbus RTU interface, keeping the device consistent with RVTC's RS-485-first wiring policy (Section 2.6) and removing the need for a dedicated Ethernet port/IP. The DT-R016's Wiegand card-reader capability is not carried forward — it was a side feature of that board, not a requirement for this use case.
 
-**RVTC use case — shore power load management:**
-Three independent shed conditions (thresholds provisional — original values carried forward, expect tuning once the system is live):
+**RVTC use case — load protection:**
+Load shedding is a **protection function**, not a software automation. It must operate independently of Home Assistant, Mosquitto availability, and the J45 software stack. HA has no control authority over the relay board for this function — it is a visibility consumer only.
 
-1. **Shore power absent** (KWS-303L grid meter reads zero) → open both relay channels immediately → water heater and fridge revert to LPG
-2. **Shore power present, grid current >25A** (KWS-303L grid meter) → open water heater relay → restore when current drops below ~20A. Fridge relay unaffected.
-3. **Generator running, generator current >22A** (KWS-303L generator meter) → open water heater relay → restore when current drops below ~18A. Fridge relay unaffected.
+The data source is the **SAMLUX EVO-2212** (Section 2.9), not the KWS-303L grid meters. The EVO-2212 is the correct source because it has full visibility of system state across all operating modes — shore power, generator, and battery-only. The RV is not always connected to shore power; the KWS-303L grid meter is only relevant when shore power is present.
 
+**Data and control flow:**
 ```
-KWS-303L grid meter (HW-08) + KWS-303L generator meter (HW-09)
-  → HA automation (three conditions)
-    → Waveshare 8-ch relay board, RS-485/8 (192.168.88.12, TCP 4001) — 2 relay channels
-      → HSR1-25 relay × 2 (water heater AC, fridge AC)
+SAMLUX EVO-2212
+  <==> RS-485 adaptor <==> Mosquitto
+                               <==> Protection controller (subscribes to EVO-2212 topics)
+                                        — applies shed thresholds in dedicated logic
+                                        — drives Waveshare relay board directly via Modbus
+                               <==> HA (subscribes for visibility and dashboard only)
+                               <==> InfluxDB (historical record)
 ```
+
+**Shed conditions (thresholds provisional — expect tuning once live):**
+
+1. **Shore power absent** — EVO-2212 reports no AC input → open both relay channels immediately → water heater and fridge revert to LPG
+2. **AC input current >25A** — EVO-2212 AC input current reading → open water heater relay → restore when current drops below ~20A. Fridge relay unaffected.
+3. **Generator running, current >22A** — EVO-2212 generator/AC input reading → open water heater relay → restore when current drops below ~18A. Fridge relay unaffected.
+
+**Protection controller design:** See DD-04. The controller subscribes to EVO-2212 MQTT topics, evaluates thresholds, and commands the relay board via direct Modbus TCP (192.168.88.12, TCP 4001). It publishes its own state to Mosquitto for HA visibility. Implementation TBD — options include a dedicated ESPHome node, a systemd service on the J45, or a standalone microcontroller. Must not depend on HA or any other consumer being alive.
 
 **Channel assignment (to be confirmed at commissioning):**
 
 | Channel | Load | Relay | Normal state |
 |---|---|---|---|
-| TBD | Water heater AC | HSR1-25 | NC — closed on shore power |
-| TBD | Fridge AC | HSR1-25 | NC — closed on shore power |
+| TBD | Water heater AC | HSR1-25 | NC — energised on AC power |
+| TBD | Fridge AC | HSR1-25 | NC — energised on AC power |
 | 3–8 | Spare | — | Reserved for future use |
 
-**Integration:**
-- HA Modbus integration via the Waveshare RS-485 gateway — same pattern as EPEVER/SAMLUX/KWS-303L
-- Map only the two active coils — leave unused channels unmapped to avoid unnecessary InfluxDB writes
-- Modbus register addresses to be recorded at commissioning
-
 **Notes:**
-- RS-485 interface means no dedicated IP is consumed — previously-reserved 192.168.88.6 (for DT-R016) is now free
 - 6 spare relay channels available for future expansion
 - No Wiegand/card-reader capability on this board — not required for current scope
+- Power supply issue: EPEVER MPPT controller insufficient to drive board under multi-relay load — DC-DC converter (HW-19) to be installed (Section 2.6 note)
+- Modbus coil addresses to be recorded at commissioning
 
 ### 2.9  SAMLUX EVO-2212 — Communications Confirmed
 
@@ -221,10 +223,10 @@ KWS-303L grid meter (HW-08) + KWS-303L generator meter (HW-09)
 - Modbus slave/unit address: 1 (01H, manufacturer default — confirmed correct as-is)
 - Serial settings on gateway: 9600 8N1 (matches EVO-series manual spec)
 
-**Address convention — corrected later the same session (post mortem on a false lead):**
-An initial block scan appeared to show every register shifted by +1 from the manual's literal hex address, and that "+1 rule" was briefly documented and applied to the YAML. It was wrong. Root cause: `mbpoll` defaults to classic Modicon-style 1-based reference numbering and silently subtracts 1 from whatever is passed to `-r` before putting it on the wire — the `-0` flag disables that and addresses the literal PDU register directly. The initial polls omitted `-0`, so every address typed was actually being sent on the wire one lower than intended, which looked exactly like a device-side +1 offset. Re-polling the same three registers with `-0` returned the same real-world values one register address lower, confirming there is **no real offset** — the manual's hex address, converted straight to decimal, is the correct wire/PDU address, exactly as the manual's own 03H worked example showed all along.
+**Address convention:**
+The manual's hex address, converted straight to decimal, is the correct wire/PDU address — no offset. Early testing appeared to show a consistent +1 offset but this was a tooling artifact: `mbpoll` defaults to 1-based Modicon-style reference numbering and silently subtracts 1 from the typed `-r` value before putting it on the wire. The `-0` flag disables this and addresses the literal PDU register directly. Always use `-0` with mbpoll for this project (see takeaway box below).
 
-> **Takeaway for future Modbus work in this project:** when using `mbpoll`, always pass `-0` so its addressing matches both the manual and Home Assistant's `pymodbus`-based Modbus integration (which addresses literally by default). Skipping `-0` will look like a consistent off-by-one device quirk and is a known, common pitfall in the Modbus ecosystem (sometimes called the "Modbus Shuffle") — not specific to SAMLUX.
+> **Takeaway for future Modbus work in this project:** when using `mbpoll`, always pass `-0` so its addressing matches both the manual and Home Assistant's `pymodbus`-based Modbus integration (which addresses literally by default). Skipping `-0` will look like a consistent off-by-one device quirk — a known, common pitfall in the Modbus ecosystem (sometimes called the "Modbus Shuffle") — not specific to SAMLUX.
 
 **Registers confirmed working (read-only, addresses are literal/direct, no offset):**
 
@@ -248,20 +250,20 @@ An initial block scan appeared to show every register shifted by +1 from the man
 
 ### 3.1  IP Allocation
 
-| IP           | Device           | Notes |
+| IP | Device | Notes |
 |---|---|---|
 | 192.168.88.1 | MikroTik gateway | Primary router |
 | 192.168.88.2 | Windows workstation | SSH client |
 | 192.168.88.3 | Beelink J45 (enp1s0) | All services — primary IP |
 | 192.168.88.4 | J45 WiFi (wlp3s0) | Disabled — autoconnect=no, radio off |
-| 192.168.88.5 | Waveshare RS-485 gateway Ch-1 | AN series EPEVER MPPT-60 COMM 2 - Pending commissioning |
-| 192.168.88.6 | Waveshare RS-485 gateway Ch-2 | EVO-2212 COMM 1
-| 192.168.88.7 | Waveshare RS-485 gateway Ch-3
-| 192.168.88.8 | Waveshare RS-485 gateway Ch-4
-| 192.168.88.9 | Waveshare RS-485 gateway Ch-5
-| 192.168.88.10| Waveshare RS-485 gateway Ch-6
-| 192.168.88.11| Waveshare RS-485 gateway Ch-7
-| 192.168.88.12| Waveshare RS-485 gateway Ch-8
+| 192.168.88.5 | Waveshare RS-485 gateway Ch-1 | EPEVER MPPT60 — Power/Solar |
+| 192.168.88.6 | Waveshare RS-485 gateway Ch-2 | SAMLUX EVO-2212 — Power/Inverter |
+| 192.168.88.7 | Waveshare RS-485 gateway Ch-3 | KWS-303L — Grid power meter |
+| 192.168.88.8 | Waveshare RS-485 gateway Ch-4 | KWS-303L — Generator power meter |
+| 192.168.88.9 | Waveshare RS-485 gateway Ch-5 | Water sensors (Phase 5) |
+| 192.168.88.10 | Waveshare RS-485 gateway Ch-6 | GNSS E108-GN03G-485 |
+| 192.168.88.11 | Waveshare RS-485 gateway Ch-7 | WN90LP weather station (HW-16) |
+| 192.168.88.12 | Waveshare RS-485 gateway Ch-8 | Waveshare 8-ch relay board — load shed (HW-13) |
 
 ### 3.2  Pi-hole DNS (.lan records)
 
@@ -434,7 +436,6 @@ docker exec weewx weectl database rebuild-daily --config=/data/weewx.conf --date
 ### 5.4  Known WeeWX Issues
 
 - **OI-32:** Upstream bug — `contains_total=true` + hardware fault → corrupted archive_day_rain → silent stats failure. Bug report pending.
-- **HW-14:** Rain gauge physical inspection at club still required.
 - ID filter (`filter_out_message_when = 291`) not yet tested under live rain conditions.
 
 ---
@@ -554,46 +555,47 @@ RV-total-control/
 
 | ID | Phase | Item | Status | Notes |
 |---|---|---|---|---|
-| OI-03 | 3 | SAMLUX 2212 protocol confirmation | ✅ Closed | Originally tracked in RVTC Ansible Role Structure Document V0.1 (Section 8) as blocking the `samlux` role. Resolved 2026-06-17 — confirmed Modbus RTU over RS-485 via Waveshare gateway RS-485/2, slave address 1; +1 register address offset discovered and documented (Section 2.9). `samlux` role design now unblocked, deferred pending stable register list and separate scoping of write/programming registers |
+| OI-03 | 3 | SAMLUX 2212 protocol confirmation | ✅ Closed | Originally tracked in RVTC Ansible Role Structure Document V0.1 (Section 8) as blocking the `samlux` role. Resolved 2026-06-17 — confirmed Modbus RTU over RS-485 via Waveshare gateway RS-485/2, slave address 1, literal/direct addressing (no offset). `samlux` role design now unblocked, deferred pending stable register list and separate scoping of write/programming registers. |
 | OI-15 | 2-3 | Home Assistant onboarding | 🟡 Open | Container up — setup wizard + MQTT integration not done |
 | OI-16 | 2 | Grafana weather dashboard | 🟡 Open | Lost after reboot 2026-06-09 — needs rebuilding |
 | OI-18 | 3 | ESPHome Ansible role | 🟡 Open | nginx block in place; role to be created |
 | OI-19 | 2-3 | MQTT Explorer | 🟡 Open | May be superseded by Phase 7 fusion UI |
 | OI-20 | 3 | HA multi-site linking | 🟡 Open | VPN prerequisite |
 | OI-21 | 3+ | VOIP / PBX inter-site | 🟡 Open | Prerequisite: OI-20 |
-| OI-24 | 3 | Shore power load management — water heater + fridge AC shed | 🟡 Open | Three conditions: (1) shore power absent → shed both immediately; (2) shore power present, grid current >25A → shed water heater, restore <20A; (3) generator running, generator current >22A → shed water heater, restore <18A. Thresholds provisional — expect tuning once live. Via Waveshare 8-ch RS-485 relay board. Current feedback from KWS-303L grid (HW-08) and generator (HW-09). Prerequisites: HW-08, HW-09, HW-13, HW-18 |
+| OI-24 | 3 | Load protection controller — water heater + fridge AC shed | 🟡 Open | Protection function — must operate independently of HA, Mosquitto, and J45 software stack. Data source: SAMLUX EVO-2212 via Mosquitto (not KWS-303L — RV is not always on shore power). Three conditions: (1) no AC input → shed both immediately; (2) AC input current >25A → shed water heater, restore <20A; (3) generator current >22A → shed water heater, restore <18A. Thresholds provisional. Controller subscribes to EVO-2212 MQTT topics, drives Waveshare relay board via direct Modbus TCP. HA subscribes for visibility only — no control authority. Implementation TBD (see DD-04). Prerequisites: HW-13, HW-18, HW-19, EVO-2212 adaptor on Mosquitto (OI-38) |
 | OI-25 | 7 | Phase 7 Sensor Fusion | 🟡 Open | Python fusion service, normalised MQTT schema |
 | OI-29 | 3 | GNSS-driven WeeWX position | 🟡 Open | Prerequisite: HW-10 |
 | OI-30 | 3 | RV position display page | 🟡 Open | Prerequisite: HW-10, Phase 7 |
 | OI-32 | — | WeeWX upstream bug report | 🟡 Open | contains_total=true + hardware fault → silent rain stats failure |
 | OI-33 | 3 | Club bridge Pi | 🟡 Open | rtl_433 + WireGuard at club → home J45 hub; prereq: OI-20 |
 | OI-34 | 7 | GNSS geofence source inhibit | 🟡 Open | Suppress RV 5n1 when at club; prereq: HW-10, OI-33, Phase 7 |
-| OI-35 | 7 | Make weewx webpage dynamicly update.  Requires mqtt websockets enabled in mosquitto broker |🟡 Open |
+| OI-35 | 7 | Make WeeWX webpage dynamically update | 🟡 Open | Requires MQTT websockets enabled in Mosquitto broker |
 | OI-36 | 7 | WN90LP wind direction true-north correction pipeline | 🟡 Open | IMU (HW-17) heading → Phase 7 fusion layer → rotation offset applied to WN90LP raw windDir → publish corrected `rvtc/sensors/weather/windDir_true`; prerequisite: HW-17 commissioned, Phase 7 fusion layer |
 | OI-37 | 2/3 | Portainer container management UI | 🟡 Open | Single-pane Docker visibility across containers; consider portainer.lan via nginx; agent mode could later span home J45 + club bridge Pi (OI-33) |
+| OI-38 | 3 | Modbus→MQTT adaptor — confirm gateway native MQTT capability | 🟡 Open | Architecture decision: all sensors must publish to Mosquitto via a thin adaptor; HA must be a consumer only, never in the collection path (Section 9.2a). Waveshare gateway lists native MQTT as a supported protocol — confirm whether it can poll Modbus registers on a schedule and publish to Mosquitto directly. If yes, no additional container needed. If no, deploy modbus2mqtt container as the adaptor. Must be resolved before EPEVER, SAMLUX, KWS-303L, and relay board data flows into the broker. |
 
 ### 7.2  Hardware / Physical Install
 
 | ID | Phase | Item | Status | Notes |
 |---|---|---|---|---|
-| HW-01 | 3 | Install Waveshare RS485 gateway | ✅ Closed | **IN HAND** — network up, RS-485/2 (SAMLUX) confirmed live 2026-06-17 (Section 2.9); remaining channels pending cabling/commissioning |
-| HW-02 | 3 | Build RS-485 cables | ✅ Closed | For SAMLUX EVO-2212 + EPEVER MPPT |
+| HW-01 | 3 | Install Waveshare RS485 gateway | ✅ Closed | In service — network up, multiple RS-485 channels confirmed live |
+| HW-02 | 3 | Build RS-485 cables | ✅ Closed | For SAMLUX EVO-2212 + EPEVER MPPT60 |
 | HW-03 | 3 | Install 4×100W PV panels | 🟡 Open | Get solar data flowing before full array |
 | HW-04 | 3 | Wire 9 PV panels (3S×3P ~36V) | 🟡 Open | Complete solar system |
 | HW-05 | 3/5 | Source barometric pressure sensor | ✅ Closed | Covered by WN90LP (HW-16) |
 | HW-06 | 5 | Build ESP32 sensor node | 🟡 Open | Pulse water meter, turbidity, pressure ×2, flow |
 | HW-07 | 4/5 | Design tank monitoring sensors | 🟡 Open | Sensor types and mounting TBD |
-| HW-08 | 3 | Source/install KWS-303L — grid | ✅ Closed | AC power meter, grid input; RS-485 port 3 |
-| HW-09 | 3 | Source/install KWS-303L — generator | ✅ Closed | Generator I/P AC wireing need to be installed.
-| HW-10 | 3 | Install GNSS E108-GN03G-485 | 🟡 Open | RS485, IP67; Waveshare port 6, IP 192.168.88.10, TCP 4001 |
-| HW-12 | — | Replace spare Acurite 5n1 | ✅ Closed | 
-| HW-13 | 3 | Waveshare 8-ch RS-485 Modbus relay board — shore power load management | ✅ Closed | 
-| HW-14 | — | Rain gauge inspection/repair | ✅ Closed | 
+| HW-08 | 3 | Source/install KWS-303L — grid | ✅ Closed | AC power meter, grid input; RS-485/3, IP 192.168.88.7, TCP 4001 |
+| HW-09 | 3 | Source/install KWS-303L — generator | ✅ Closed | AC power meter, generator input; RS-485/4, IP 192.168.88.8, TCP 4001 — generator AC wiring not yet complete |
+| HW-10 | 3 | Install GNSS E108-GN03G-485 | 🟡 Open | RS-485, IP67; Waveshare RS-485/6, IP 192.168.88.10, TCP 4001 — device in hand |
+| HW-12 | — | Replace spare Acurite 5n1 | ✅ Closed | Replacement sourced |
+| HW-13 | 3 | Waveshare 8-ch RS-485 Modbus relay board — shore power load management | ✅ Closed | Connected and tested; Modbus coil addresses for load channels to be recorded at commissioning |
+| HW-14 | — | Rain gauge inspection/repair | ✅ Closed | |
 | HW-15 | 3 | Install POE-SW802-DIN PoE switch | ✅ Closed | Powers Waveshare gateway and bay devices |
-| HW-16 | 3 | Ecowitt WN90LP RS-485 Modbus weather station | 🟡 Open | Shipped inc wind, temp, humidity, rain, UV, light, barometric pressure — Waveshare RS-485/7, IP 192.168.88.11, TCP 4001 — closes HW-05 |
+| HW-16 | 3 | Ecowitt WN90LP RS-485 Modbus weather station | 🟡 Open | Shipped — wind, temp, humidity, rain, UV, light, barometric pressure; Waveshare RS-485/7, IP 192.168.88.11, TCP 4001 — closes HW-05 |
 | HW-17 | 3/7 | diymore 10-axis IMU (L3GD20 + LSM303D) | 🟡 Open | **Ordered 2026-06-12** — magnetometer heading reference for true-north wind direction correction and map orientation; I²C to ESP32-S3 ESPHome node; one-time hard-iron calibration required; Phase 7 fusion layer consumer |
 | HW-18 | 3 | Install HSR1-25 25A NC relay × 2 — water heater AC and fridge AC | 🟡 Open | **Ordered 2026-06-13** — normally closed; activated on: (1) shore power absent, (2) grid current >25A, or (3) generator current >22A (thresholds provisional, expect tuning); driven by Waveshare 8-ch RS-485 relay board (HW-13); current feedback from KWS-303L grid (HW-08) and generator (HW-09) |
-| HW-19 | 3 | Install 12VDC-5VDC DC-DC converter to power waveshare 8 channel relay board. (Device in hand)
+| HW-19 | 3 | Install 12VDC→5VDC DC-DC converter to power Waveshare 8-ch relay board | 🟡 Open | Device in hand — required because EPEVER MPPT controller lacks sufficient current reserve to drive the relay board under multi-relay load |
 
 ### 7.3  Design / Documentation
 
@@ -602,6 +604,7 @@ RV-total-control/
 | DD-01 | 3 | System wiring drawing | 🟡 Open | Full system diagram |
 | DD-02 | 5 | ESP32 sensor node scope definition | 🟡 Open | Sensor types TBD |
 | DD-03 | 7 | Phase 7 sensor fusion architecture document | 🟡 Open | Topic schema, source types, staleness model |
+| DD-04 | 3 | Load protection controller design | 🟡 Open | Define implementation of the load shed protection function (Section 2.8). Options: dedicated ESPHome node, systemd service on J45, or standalone microcontroller. Must subscribe to EVO-2212 MQTT topics, evaluate thresholds, drive relay board via direct Modbus TCP, and publish own state to Mosquitto. Must not depend on HA or any other consumer being alive. |
 
 ---
 
@@ -682,43 +685,90 @@ sqlite3 installed on host. archive_day_rain corruption diagnosed and fixed (rebu
 
 ### 2026-06-16  (Home base — Rogers)
 - DT-R016 found inoperative on bench test — retired from RVTC scope
-- Replacement ordered: Waveshare 8-channel relay board, RS-485 Modbus RTU interface (no standalone Ethernet/IP of its own) — wired into Waveshare RS-485 gateway port RS-485/8, IP 192.168.88.12, TCP 4001
+- Replacement ordered: Waveshare 8-channel relay board, RS-485 Modbus RTU interface — wired into Waveshare RS-485 gateway port RS-485/8, IP 192.168.88.12, TCP 4001
 - HW-13 updated to reflect new device, ordered, RS-485-based
 - HW-18 updated — driven by Waveshare relay board instead of DT-R016
-- IP map updated: 192.168.88.6 (previously reserved for DT-R016) freed — relay board has no dedicated IP
 - Section 2.6 RS-485 port table updated — port 8 now assigned to load-shed relay board (was spare)
 - Section 2.8 rewritten for the new device — channel spares reduced from 14 to 6 (8-ch board vs 16-ch DT-R016); Wiegand capability dropped (not required, was DT-R016-specific)
 - OI-37 added: Portainer container management UI for single-pane Docker visibility; potential future agent-mode link to club bridge Pi (OI-33)
-- **Correction:** load-shed logic was mistakenly documented as a binary shore-power-presence automation. Confirmed restored to the original three-condition model: shore power absent → shed both; grid >25A → shed water heater (restore <20A); generator >22A → shed water heater (restore <18A). Fridge relay only responds to the shore-absent condition. Threshold values are provisional and expected to be tuned once the system is live and tested.
+- **Correction:** load-shed logic restored to the original three-condition model: shore power absent → shed both; grid >25A → shed water heater (restore <20A); generator >22A → shed water heater (restore <18A). Fridge relay only responds to the shore-absent condition. Threshold values are provisional and expected to be tuned once the system is live and tested.
 
 ### 2026-06-17  (Home base — Rogers)
-- **Correction:** Waveshare 8-port RS-485 gateway addressing scheme fixed throughout document. The gateway is effectively two separate Modbus TCP devices in one enclosure — every channel answers on **TCP 4001**, channels are distinguished by **IP only** (192.168.88.5–12). Earlier drafts had incorrectly assigned per-port TCP numbers (4002 for SAMLUX, 4006 for GNSS, 4007 for WN90LP, 4008 for the load-shed relay board) — all corrected to 4001. Section 2.6 port table column headers also fixed (IP and TCP were mislabeled/swapped). Section 2.8 relay board entry corrected: it does receive a dedicated IP via gateway port 8 (192.168.88.12) — "no dedicated IP" language removed.
-- SAMLUX EVO-2212 commissioning started: TCP reachability confirmed (`nc -zv 192.168.88.6 4001` succeeded). Gateway config verified against device — TCP Server mode, 9600/8/N/1 serial settings match EVO-series spec sheet, Protocol = Modbus TCP to RTU. EVO-2212 default Modbus slave/unit address confirmed as 1 (01H, per manual). Noted minor housekeeping item: gateway's Destination IP/DNS field is set to 192.168.1.3 — stale value on a different subnet, inert in TCP Server mode but should be cleared/corrected to avoid confusion if Work Mode ever changes.
-- `mbpoll` added to required packages (not yet installed on J45) — needed for direct Modbus-level probing ahead of HA integration. **Added to `common` role package list** so it's provisioned by Ansible rather than manual `apt install`; until the role is re-run, install manually with `sudo apt install mbpoll`.
-- mbpoll installed manually (`sudo apt install mbpoll`) and used to probe the EVO-2212 directly — slave 1, register 1 answered (raw 2094), confirming the bus, wiring, and gateway bridging all work end to end.
-- **SAMLUX EVO-2212 communications fully confirmed.** A 10-register block scan (259–268) initially appeared to show a consistent +1 offset between the manual's hex addresses and the actual wire register. Further testing traced this to an `mbpoll` tooling artifact, not a real device offset (see below) — once corrected, three registers confirmed working with literal/direct addressing: Voltage of Grid Input (261, 119.03 V), Input Current (262, 4.41 A), Battery Voltage (276, 13.005 V). Full detail in new Section 2.9.
-- Drafted `modbus_samlux.yaml` for Home Assistant — read-only telemetry sensors only. Write/programming registers (charge profile, voltage cutoffs, etc.) explicitly deferred to a later, separate pass once read-side polling is fully trusted.
-- **OI-03 closed** (see Section 7.1) — SAMLUX protocol confirmed, `samlux` Ansible role design unblocked (deferred until register list stabilizes).
-- **Correction (same session):** the initial "+1 register offset" finding above was wrong. Root cause: `mbpoll` defaults to 1-based Modicon-style reference numbering and subtracts 1 from the typed `-r` value before sending it on the wire; the `-0` flag disables this and addresses the register literally. The block-scan polls omitted `-0`, making every register look shifted by exactly one — a known, common Modbus tooling pitfall (the "Modbus Shuffle"), not a SAMLUX-specific quirk. Re-confirmed all three working registers with `mbpoll -0`, getting the values shown above (literal/direct addresses, no offset).
-- Lesson for future Modbus work: always pass `-0` with `mbpoll` so its addressing matches both the manual and Home Assistant's `pymodbus`-based Modbus integration.
+- **Correction:** Waveshare 8-port RS-485 gateway addressing scheme fixed throughout document — every channel answers on **TCP 4001**, channels distinguished by **IP only** (192.168.88.5–12). Per-port TCP numbers from earlier drafts (4002/4006/4007/4008) were wrong and have been removed throughout.
+- SAMLUX EVO-2212 commissioning started: TCP reachability confirmed. Gateway config verified — TCP Server mode, 9600/8/N/1, Protocol = Modbus TCP to RTU. Slave address 1 (01H) confirmed correct. Minor housekeeping: gateway Destination IP/DNS still set to stale 192.168.1.3 — inert in TCP Server mode but should be cleared.
+- `mbpoll` added to `common` role package list and installed manually on J45
+- SAMLUX EVO-2212 communications fully confirmed via `mbpoll -0`. Three registers validated: Voltage of Grid Input (261, 119.03 V), Input Current (262, 4.41 A), Battery Voltage (276, 13.005 V). Full detail in Section 2.9.
+- Drafted `modbus_samlux.yaml` for Home Assistant — read-only telemetry only; write registers explicitly deferred.
+- **OI-03 closed** — SAMLUX protocol confirmed; `samlux` Ansible role unblocked, deferred pending stable register list.
+- **Correction (same session):** initial "+1 register offset" finding was a `mbpoll` tooling artifact (Modicon 1-based numbering, `-0` flag omitted). No real offset exists — literal/direct addressing per manual is correct. Always use `mbpoll -0` on this project.
+
+### 2026-06-18  (Home base — Rogers)
+- Good progress day — multiple RS-485 channels confirmed live via direct `mbpoll -0` polling (same method as SAMLUX commissioning 2026-06-17)
+- EPEVER MPPT60 (RS-485/1, 192.168.88.5, TCP 4001) — Modbus TCP reachability confirmed, registers responding; baud rate 115200 (shared with OEM remote control)
+- KWS-303L grid power meter (RS-485/3, 192.168.88.7, TCP 4001) — Modbus TCP reachability confirmed, registers responding
+- Waveshare 8-ch relay board (RS-485/8, 192.168.88.12, TCP 4001) — Modbus TCP reachability confirmed, coil registers responding
+- Relay board power supply issue identified: EPEVER MPPT controller lacks sufficient current reserve to drive the board under multi-relay load — DC-DC converter (HW-19, in hand) added to backlog for installation
+- RS-485 channel status updated in Section 2.6 port table to reflect confirmed connections
+- Document consistency audit completed — stale references corrected throughout (HW-01 status, HW-12 status, HW-14 in §5.4, OI-03 offset reference, §2.8 IP note, §3.1 IP table notes populated)
+- **Architecture decision:** Mosquitto is the single data bus. Every sensor uses a thin software adaptor to publish to Mosquitto; every consumer (HA, WeeWX, InfluxDB, Grafana, Phase 7) subscribes. HA must never be in the collection path — it is a consumer and automation engine only. Documented in Section 9.1. OI-38 opened to confirm whether the Waveshare gateway native MQTT capability can serve as the Modbus adaptor layer without an additional container.
+- **Architecture decision:** Load shedding is a protection function, not an HA automation. Data source changed from KWS-303L to SAMLUX EVO-2212 — the EVO-2212 has full visibility of system state across all operating modes (shore power, generator, battery-only); the KWS-303L grid meter is only relevant when shore power is present. Protection controller subscribes to EVO-2212 MQTT topics and drives the relay board via direct Modbus TCP, independent of HA. HA subscribes for visibility only. Section 2.8 and OI-24 updated; DD-04 opened for controller design.
 
 ### Next Session — Phase 3 Priorities
-1. GNSS E108-GN03G-485 — install and integrate (HW-10), Waveshare RS-485/6
-2. Waveshare 8-ch RS-485 relay board — commission via Waveshare gateway port RS-485/8, IP 192.168.88.12, TCP 4001; record Modbus coil addresses for load relay channels (HW-13)
-3. KWS-303L grid + generator power meters — install and integrate (HW-08, HW-09), Waveshare RS-485/3 and RS-485/4
-4. EPEVER MPPT60 Modbus integration (RS-485/1, IP 192.168.88.5, TCP 4001)
-5. Solar panel wiring (HW-03 / HW-04)
-6. Home Assistant onboarding — MQTT integration (OI-15)
-7. Rebuild Grafana dashboard (OI-16)
-8. WeeWX upstream bug report (OI-32)
-9. WN90LP commissioning when received (HW-16 — ships after June 15)
+1. Install DC-DC converter (HW-19) to resolve relay board power supply issue
+2. KWS-303L generator meter — complete generator AC wiring (HW-09)
+3. GNSS E108-GN03G-485 — install and integrate (HW-10), Waveshare RS-485/6
+4. Solar panel wiring (HW-03 / HW-04)
+5. Home Assistant onboarding — MQTT integration (OI-15)
+6. Rebuild Grafana dashboard (OI-16)
+7. WN90LP commissioning when received (HW-16)
+8. Waveshare 8-ch relay board — record Modbus coil addresses at commissioning (HW-13)
+9. WeeWX upstream bug report (OI-32)
 10. Consider Portainer deployment for container management (OI-37)
 
 ---
 
 ## 9  Architecture Notes
 
-### 9.1  Phase 7 — Sensor Fusion
+### 9.1  Data Architecture — Publish/Subscribe Bus
+
+**Design principle:** Mosquitto is the single, central data bus. Every sensor has a thin software adaptor whose only job is to put data onto the bus. Every consumer subscribes to the bus for whatever data it needs. No consumer owns or is responsible for any part of the data pipeline.
+
+```
+Sensor <==> Adaptor <==> Mosquitto (broker) <==> Consumers (HA, InfluxDB, Grafana, WeeWX, Phase 7 fusion)
+```
+
+This is a proven pattern from industrial and defence-grade systems — every sensor and system node is an independent producer or consumer on a common message bus; no single node owns the pipeline.
+
+**Why this matters:**
+- A Home Assistant update, misconfiguration, or container restart cannot create a data gap or break sensor ingestion — HA is a consumer, not a collector
+- Every sensor's data path is independently testable with `mosquitto_sub` alone
+- Adding or removing a consumer requires no changes to the sensor side
+- Mosquitto is a purpose-built broker with minimal attack surface and no business logic to break
+
+**Layers:**
+
+| Layer | Role |
+|---|---|
+| Sensor / device | Produces raw data — knows nothing about consumers |
+| Adaptor | Thin translation layer — polls or receives from the device, publishes to Mosquitto |
+| Mosquitto | The bus — single ingest point, single source of truth for all live data |
+| Consumer | Subscribes to relevant topics — HA, WeeWX, InfluxDB writer, Phase 7 fusion, Grafana |
+
+**Adaptor by source type:**
+
+| Source | Adaptor | Status |
+|---|---|---|
+| 433 MHz sensors | rtl_433 container | ✅ In place |
+| ESPHome nodes | ESPHome native MQTT publish | ✅ In place |
+| Modbus RS-485 via Waveshare gateway | Gateway native MQTT (preferred) or modbus2mqtt container | 🟡 OI-38 |
+| GNSS E108-GN03G-485 | Gateway MQTT or dedicated parser | 🟡 Pending HW-10 install |
+| WN90LP weather station | Gateway MQTT or dedicated parser | 🟡 Pending HW-16 commissioning |
+
+**Home Assistant's role:** HA subscribes to Mosquitto topics as a plain MQTT consumer. It does not poll Modbus devices directly and does not own any sensor's data path. HA provides automation, alerting, and dashboards — it is a consumer node on the bus, not a pipeline component.
+
+**Priority investigation (OI-38):** The Waveshare RS-485 gateway (Section 2.6) lists native MQTT as a supported protocol alongside Modbus TCP. If the gateway can poll Modbus registers on a schedule and publish directly to Mosquitto, the adaptor layer exists in hardware with no additional container required. This must be confirmed before a software modbus2mqtt solution is built.
+
+### 9.2  Phase 7 — Sensor Fusion
 
 A normalised MQTT sensor bus with a fusion/arbitration layer that assigns the best available source to each logical field, with configurable priority ordering and automatic fallback when a source goes stale.
 
@@ -740,7 +790,7 @@ A normalised MQTT sensor bus with a fusion/arbitration layer that assigns the be
 
 **Consumers:** WeeWX (via fused MQTT topic), Home Assistant, Grafana.
 
-### 9.2  Club Bridge Topology (OI-33 / OI-34)
+### 9.3  Club Bridge Topology (OI-33 / OI-34)
 
 - Small always-on Pi at Solsante Club: rtl_433 + WireGuard
 - Pi connects to home J45 only — never directly to RV
@@ -749,7 +799,7 @@ A normalised MQTT sensor bus with a fusion/arbitration layer that assigns the be
 - When RV is remote: club bridge feeds weather data to home J45 → forwarded to RV via VLAN
 - Reuses OI-20 VPN infrastructure (WireGuard). Prerequisite: HW-10
 
-### 9.3  Engineering Standards & Design Philosophy
+### 9.4  Engineering Standards & Design Philosophy
 
 The RV Total Control (RVTC) architecture rejects fragile consumer electronics conventions in favour of industrial-grade and marine-grade robustness. Because no single engineering standard covers a mobile, containerized smart environment, RVTC draws from proven frameworks across the automation, maritime, and automotive industries:
 
