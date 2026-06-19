@@ -586,11 +586,11 @@ RV-total-control/
 | HW-08 | 3 | Source/install KWS-303L — grid | ✅ Closed | AC power meter, grid input; RS-485 port 3 |
 | HW-09 | 3 | Source/install KWS-303L — generator | ✅ Closed | Generator I/P AC wireing need to be installed.
 | HW-10 | 3 | Install GNSS E108-GN03G-485 | 🟡 Open | RS485, IP67; Waveshare port 6, IP 192.168.88.10, TCP 4001 |
-| HW-12 | — | Replace spare Acurite 5n1 | 🟡 Open | Spare confirmed DOA 2026-06-02 |
+| HW-12 | — | Replace spare Acurite 5n1 | ✅ Closed | 
 | HW-13 | 3 | Waveshare 8-ch RS-485 Modbus relay board — shore power load management | ✅ Closed | 
-| HW-14 | — | Rain gauge inspection/repair | 🟡 Open | Physical inspection at club required |
+| HW-14 | — | Rain gauge inspection/repair | ✅ Closed | 
 | HW-15 | 3 | Install POE-SW802-DIN PoE switch | ✅ Closed | Powers Waveshare gateway and bay devices |
-| HW-16 | 3 | Ecowitt WN90LP RS-485 Modbus weather station | 🟡 Open | **Ordered 2026-06-10, ships after June 15** — ultrasonic wind, temp, humidity, rain, UV, light, barometric pressure — Waveshare RS-485/7, IP 192.168.88.11, TCP 4001 — closes HW-05 |
+| HW-16 | 3 | Ecowitt WN90LP RS-485 Modbus weather station | 🟡 Open | Shipped inc wind, temp, humidity, rain, UV, light, barometric pressure — Waveshare RS-485/7, IP 192.168.88.11, TCP 4001 — closes HW-05 |
 | HW-17 | 3/7 | diymore 10-axis IMU (L3GD20 + LSM303D) | 🟡 Open | **Ordered 2026-06-12** — magnetometer heading reference for true-north wind direction correction and map orientation; I²C to ESP32-S3 ESPHome node; one-time hard-iron calibration required; Phase 7 fusion layer consumer |
 | HW-18 | 3 | Install HSR1-25 25A NC relay × 2 — water heater AC and fridge AC | 🟡 Open | **Ordered 2026-06-13** — normally closed; activated on: (1) shore power absent, (2) grid current >25A, or (3) generator current >22A (thresholds provisional, expect tuning); driven by Waveshare 8-ch RS-485 relay board (HW-13); current feedback from KWS-303L grid (HW-08) and generator (HW-09) |
 | HW-19 | 3 | Install 12VDC-5VDC DC-DC converter to power waveshare 8 channel relay board. (Device in hand)
