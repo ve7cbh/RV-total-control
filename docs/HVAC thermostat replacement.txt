@@ -1,0 +1,28 @@
+Notes
+
+* Pin 5 (Grn/Yel) and Pin 6 (White) — measure with meter before connecting. 
+  May be zone 2 or heat strip — not used on single-zone cooling-only install.
+
+* Yellow (Pin 4) load shed is an INPUT to the A/C unit, not a thermostat output. 
+  The A/C shuts itself down when this line is pulled low by shore-power management.
+  RVTC already handles load shed via KWS-303L + relay board — wire this pin to GND or leave open (confirm behaviour first).
+
+* Furnace call (Pin 2, Blue) — relay coil 3 switches 12V onto this wire to call for heat. 
+  All gas valve and ignition sequencing is internal to the furnace.
+
+* Compressor short-cycle delay — handled by control board K1 inside the A/C unit. 
+  No ESPHome interlock required, but a 3-min software guard is good practice.
+
+* Furnace and A/C demand relays must be mutually exclusive in ESPHome — never energise both coils simultaneously.
+  
+  — — — Dashed line = RS-485 Modbus command path (logical, not physical wiring  )
+  
+  There's the proposed wiring. A few things to verify with your meter before connecting anything:
+Measure first:
+
+  Pin 1 to Pin 3 → expect ~12VDC (confirms Red = 12V+, Black = GND)
+  Pin 2 (Blue) to Pin 3 at rest → should be 0V; call for heat at the old thermostat (if still connected) → should go to 12V
+  Pin 4 (Yellow) to Pin 3 → note voltage at rest and when A/C is running 
+    — this tells you whether load shed is active-high or active-low
+  Pin 5 (Green/Yellow) and Pin 6 (White) → measure to GND in both states 
+    — if they stay at 0V in all modes they're probably not connected internally on your unit
