@@ -1,0 +1,259 @@
+# ============================================================
+# RVTC — EPEVER MPPT60 Modbus Integration
+# File: config/modbus_epever.yaml
+# Include in HA configuration.yaml:
+#   modbus: !include modbus_epever.yaml
+# (Append to existing modbus list if modbus_samlux.yaml is
+#  already included — see note below.)
+#
+# Gateway: Waveshare RS-485/1, IP 192.168.88.5, TCP 4001
+# Device: EPEVER Tracer MPPT60, Modbus slave 1
+# Baud: 115200 8N1 (set on gateway port 1 — not in this file)
+#
+# Addressing: all addresses are literal/direct (0-based PDU).
+# HA pymodbus addresses literally by default — no offset needed.
+# Equivalent mbpoll verification command uses -0 flag.
+#
+# Scale factors applied in HA via 'scale' parameter:
+#   Raw integer / 100  →  volts, amps, watts (×0.01)
+#   Raw integer / 1    →  SOC percent, status bitmask
+#
+# NOTE — multiple modbus: blocks in configuration.yaml:
+#   YAML does not allow duplicate top-level keys. If
+#   modbus_samlux.yaml is already included as:
+#     modbus: !include modbus_samlux.yaml
+#   change BOTH files to use a list and merge them:
+#     modbus:
+#       - !include config/modbus_epever.yaml
+#       - !include config/modbus_samlux.yaml
+#   See HA docs: https://www.home-assistant.io/integrations/modbus/
+# ============================================================
+
+- name: "epever_mppt60"
+  type: tcp
+  host: 192.168.88.5
+  port: 4001
+  delay: 0
+  timeout: 5
+  sensors:
+
+    # ----------------------------------------------------------
+    # PV ARRAY (source side)
+    # ----------------------------------------------------------
+
+    - name: "EPEVER PV Voltage"
+      unique_id: epever_pv_voltage
+      slave: 2
+      address: 12544        # 0x3100
+      input_type: input
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+
+    - name: "EPEVER PV Current"
+      unique_id: epever_pv_current
+      slave: 2
+      address: 12545        # 0x3101
+      input_type: input
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+
+    - name: "EPEVER PV Power"
+      unique_id: epever_pv_power
+      slave: 2
+      address: 12546        # 0x3102 — low word of 32-bit value
+      input_type: input
+      data_type: uint32     # 0x3102 (L) + 0x3103 (H) — two registers
+      scale: 0.01
+      precision: 1
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+
+    # ----------------------------------------------------------
+    # BATTERY (charge side)
+    # ----------------------------------------------------------
+
+    - name: "EPEVER Battery Voltage"
+      unique_id: epever_battery_voltage
+      slave: 2
+      address: 12548        # 0x3104
+      input_type: input
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+
+    - name: "EPEVER Charging Current"
+      unique_id: epever_charging_current
+      slave: 2
+      address: 12549        # 0x3105
+      input_type: input
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+
+    - name: "EPEVER Charging Power"
+      unique_id: epever_charging_power
+      slave: 2
+      address: 12550        # 0x3106 — low word of 32-bit value
+      input_type: input
+      data_type: uint32     # 0x3106 (L) + 0x3107 (H)
+      scale: 0.01
+      precision: 1
+      unit_of_measurement: "W"
+      device_class: power
+      state_class: measurement
+
+    # ----------------------------------------------------------
+    # LOAD OUTPUT (load terminals on controller)
+    # ----------------------------------------------------------
+
+    - name: "EPEVER Load Voltage"
+      unique_id: epever_load_voltage
+      slave: 2
+      address: 12556        # 0x310C
+      input_type: input
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "V"
+      device_class: voltage
+      state_class: measurement
+
+    - name: "EPEVER Load Current"
+      unique_id: epever_load_current
+      slave: 2
+      address: 12557        # 0x310D
+      input_type: input
+      data_type: uint16
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "A"
+      device_class: current
+      state_class: measurement
+
+    # ----------------------------------------------------------
+    # TEMPERATURES
+    # ----------------------------------------------------------
+
+    - name: "EPEVER Battery Temperature"
+      unique_id: epever_battery_temperature
+      slave: 2
+      address: 12560        # 0x3110 — RTS sensor (DC-powered, always live)
+      input_type: input
+      data_type: uint16
+      scale: 0.01
+      precision: 1
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      # This is the primary battery temp source for Tier 2 charge inhibit logic.
+      # Cross-validate against SAMLUX EVO-2212 temp register.
+
+    - name: "EPEVER Controller Temperature"
+      unique_id: epever_controller_temperature
+      slave: 2
+      address: 12561        # 0x3111 — MPPT controller internal temp
+      input_type: input
+      data_type: uint16
+      scale: 0.01
+      precision: 1
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+
+    # ----------------------------------------------------------
+    # STATE OF CHARGE
+    # ----------------------------------------------------------
+
+    - name: "EPEVER Battery SOC"
+      unique_id: epever_battery_soc
+      slave: 2
+      address: 12570        # 0x311A
+      input_type: input
+      data_type: uint16
+      scale: 1
+      precision: 0
+      unit_of_measurement: "%"
+      device_class: battery
+      state_class: measurement
+      # Used by HA Tier 4 SOC-based load-shed logic (Section 2.10).
+      # Threshold TBD pending confirmed battery bank capacity.
+
+    # ----------------------------------------------------------
+    # STATUS REGISTERS (bitmask — read as raw integer)
+    # Decode in HA template sensors or Grafana — see notes below.
+    # ----------------------------------------------------------
+
+    - name: "EPEVER Charging Status Raw"
+      unique_id: epever_charging_status_raw
+      slave: 2
+      address: 12800        # 0x3200 — charging equipment status
+      input_type: input
+      data_type: uint16
+      scale: 1
+      precision: 0
+      unit_of_measurement: ""
+      state_class: measurement
+      # Bit decode (key bits):
+      #   D15-D14  Input voltage status: 00=normal, 01=no input, 02=higher, 03=error
+      #   D4       Load: 1=on, 0=off
+      #   D3-D2    Charging status: 00=none, 01=float, 02=boost, 03=equalization
+      #   D1       Charging: 1=running, 0=standby
+      #   D0       Running: 1=running, 0=fault
+
+    - name: "EPEVER Battery Status Raw"
+      unique_id: epever_battery_status_raw
+      slave: 2
+      address: 12801        # 0x3201 — battery status
+      input_type: input
+      data_type: uint16
+      scale: 1
+      precision: 0
+      unit_of_measurement: ""
+      state_class: measurement
+      # Bit decode (key bits):
+      #   D3-D0  Voltage: 00=normal, 01=overvolt, 02=undervolt, 03=low, 04=fault
+      #   D7     Battery inner resistance abnormal: 1=abnormal
+      #   D15    Rated voltage ID wrong: 1=wrong
+
+    # ----------------------------------------------------------
+    # ENERGY TOTALS
+    # ----------------------------------------------------------
+
+    - name: "EPEVER Daily Energy Generated"
+      unique_id: epever_daily_energy_generated
+      slave: 2
+      address: 13068        # 0x330C — low word of 32-bit value
+      input_type: input
+      data_type: uint32     # 0x330C (L) + 0x330D (H)
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "kWh"
+      device_class: energy
+      state_class: total_increasing
+
+    - name: "EPEVER Total Energy Generated"
+      unique_id: epever_total_energy_generated
+      slave: 2
+      address: 13074        # 0x3312 — low word of 32-bit value
+      input_type: input
+      data_type: uint32     # 0x3312 (L) + 0x3313 (H)
+      scale: 0.01
+      precision: 2
+      unit_of_measurement: "kWh"
+      device_class: energy
+      state_class: total_increasing
