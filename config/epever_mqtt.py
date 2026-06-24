@@ -118,7 +118,7 @@ def decode_charging_status(raw: int) -> dict:
 # ── Modbus helpers ─────────────────────────────────────────────────────────────
 
 def read_single(client: ModbusTcpClient, address: int, slave: int) -> int | None:
-    result = client.read_input_registers(address, count=1, slave=slave)
+    result = client.read_input_registers(address, count=1, device_id=slave)
     if result.isError():
         log.warning("Modbus error reading address %d: %s", address, result)
         return None
@@ -126,7 +126,7 @@ def read_single(client: ModbusTcpClient, address: int, slave: int) -> int | None
 
 def read_double(client: ModbusTcpClient, address: int, slave: int) -> int | None:
     """Read two contiguous registers and combine as 32-bit (low word first)."""
-    result = client.read_input_registers(address, count=2, slave=slave)
+    result = client.read_input_registers(address, count=2, device_id=slave)
     if result.isError():
         log.warning("Modbus error reading address %d+1: %s", address, result)
         return None
@@ -164,9 +164,10 @@ def poll_once(modbus_client: ModbusTcpClient, mqttc: mqtt.Client):
 
         # Also decode status register into named sub-topics
         if field == "charging_status_raw":
-            decoded = decode_charging_status(raw)
-            for k, v in decoded.items():
-                publish(mqttc, k, v)
+            pass
+#             decoded = decode_charging_status(raw)
+#             for k, v in decoded.items():
+#                 publish(mqttc, k, v)
 
     # Double 32-bit registers
     for address, scale, field, unit in DOUBLE_REGISTERS:
@@ -181,7 +182,7 @@ def poll_once(modbus_client: ModbusTcpClient, mqttc: mqtt.Client):
     # (just logged, not published separately — register value is authoritative)
 
     # Health heartbeat
-    publish(mqttc, "last_updated", timestamp)
+    # publish(mqttc, "last_updated", timestamp)
     publish(mqttc, "poll_errors", errors)
 
     if errors:

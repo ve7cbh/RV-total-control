@@ -101,16 +101,14 @@ services:
       - TZ=America/Vancouver
       - FTLCONF_dns_listeningMode=all
 
-telegraf:
-  image: telegraf:latest
-  container_name: telegraf
-  restart: unless-stopped
-  networks:
-    - rvtc_net
-  volumes:
-    - ./config/telegraf_solar.conf:/etc/telegraf/telegraf.conf:ro
-  environment:
-    - INFLUXDB_TOKEN=${JJ6YvsntjdwdTwhe-8GYPMY0mjWhpp_MYTdmgwgfTnDFMtJRN0lWATXPslkh-DHcOD6CVon662twulqL6tfEvQ==}
-  depends_on:
-    - mosquitto
-    - influxdb
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    restart: unless-stopped
+    volumes:
+      - ./config/telegraf_solar.conf:/etc/telegraf/telegraf.conf:ro
+    environment:
+      - INFLUXDB_TOKEN=TdmgwgfTnDFMtJRN0lWATXPslkh-DHcOD6CVon662twulqL6tfEvQ==
+    depends_on:
+      - mosquitto
+      - influxdb
