@@ -8,13 +8,13 @@
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
 
   :root {
-    --bg:        #111318;
-    --surface:   #1c1f2a;
-    --surface2:  #242836;
-    --border:    #2e3347;
-    --sidebar:   #13161f;
-    --text:      #e2e6f0;
-    --muted:     #6b738f;
+    --bg:        #0e1017;
+    --surface:   #181c28;
+    --surface2:  #1e2332;
+    --border:    #2a3048;
+    --sidebar:   #0b0d14;
+    --text:      #edf0f8;
+    --muted:     #5a6280;
     --solar:     #ffd84d;
     --solar-dim: #3d3010;
     --green:     #4ade80;
@@ -40,33 +40,29 @@
 
   /* ── Sidebar ── */
   #sidebar {
-    width: 72px;
+    width: 110px;
     background: var(--sidebar);
-    border-right: 1px solid var(--border);
+    border-right: 2px solid var(--border);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px 0;
-    gap: 4px;
+    padding: 12px 0 16px;
+    gap: 6px;
     flex-shrink: 0;
   }
 
-  .logo {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--solar);
-    letter-spacing: 0.08em;
-    writing-mode: vertical-rl;
-    transform: rotate(180deg);
-    margin-bottom: 20px;
-    text-transform: uppercase;
+  .shield {
+    width: 82px;
+    height: auto;
+    margin-bottom: 10px;
+    opacity: 0.92;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.7));
   }
 
   .nav-btn {
-    width: 52px;
-    height: 52px;
-    border-radius: 12px;
+    width: 90px;
+    height: 72px;
+    border-radius: 14px;
     border: none;
     background: transparent;
     cursor: pointer;
@@ -74,60 +70,63 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 5px;
     color: var(--muted);
-    font-size: 22px;
+    font-size: 30px;
     transition: background 0.15s, color 0.15s;
     text-decoration: none;
   }
 
   .nav-btn span.label {
-    font-size: 9px;
+    font-size: 11px;
     font-family: var(--font-mono);
-    font-weight: 600;
-    letter-spacing: 0.05em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     line-height: 1;
   }
 
   .nav-btn:hover { background: var(--surface2); color: var(--text); }
-  .nav-btn.active { background: var(--solar-dim); color: var(--solar); }
-  .nav-btn.active-green { background: var(--green-dim); color: var(--green); }
-  .nav-btn.dim { opacity: 0.3; cursor: default; }
+  .nav-btn.active { background: var(--solar-dim); color: var(--solar); border: 1px solid #5a4400; }
+  .nav-btn.active-green { background: var(--green-dim); color: var(--green); border: 1px solid #1a5a30; }
+  .nav-btn.dim { opacity: 0.28; cursor: default; }
 
   .nav-divider {
-    width: 36px;
+    width: 70px;
     height: 1px;
     background: var(--border);
-    margin: 6px 0;
+    margin: 4px 0;
   }
 
   /* ── Main ── */
   #main {
     flex: 1;
-    overflow-y: auto;
-    padding: 28px 32px;
+    overflow: hidden;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
   }
 
-  .tab { display: none; }
-  .tab.active { display: block; }
+  .tab { display: none; flex-direction: column; gap: 14px; height: 100%; }
+  .tab.active { display: flex; }
 
   /* ── Page header ── */
   .page-header {
     display: flex;
     align-items: center;
-    margin-bottom: 28px;
     border-bottom: 1px solid var(--border);
-    padding-bottom: 18px;
+    padding-bottom: 14px;
+    flex-shrink: 0;
   }
 
   .page-title {
     font-family: var(--font-mono);
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
     color: var(--text);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
   }
 
   .last-updated {
@@ -138,8 +137,8 @@
   }
 
   #status-dot {
-    width: 8px;
-    height: 8px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     background: var(--green);
     display: inline-block;
@@ -149,43 +148,51 @@
 
   @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50%       { opacity: 0.25; }
+    50%       { opacity: 0.2; }
   }
 
-  /* ── Grids ── */
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
-  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
-  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+  /* ── Rows ── */
+  .row {
+    display: flex;
+    gap: 14px;
+    flex: 1;
+    min-height: 0;
+  }
 
   /* ── Cards ── */
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 22px 24px;
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
   }
 
   .card-label {
     font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
   }
 
   .card-value {
     font-family: var(--font-mono);
-    font-size: 52px;
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.03em;
+    font-size: clamp(40px, 5vw, 72px);
   }
 
   .card-unit {
     font-family: var(--font-mono);
-    font-size: 20px;
+    font-size: clamp(16px, 1.8vw, 26px);
     font-weight: 400;
     color: var(--muted);
     margin-left: 6px;
@@ -198,84 +205,76 @@
     margin-top: 8px;
   }
 
-  /* ── Hero ── */
+  /* ── Hero card ── */
   .card-hero {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 28px 32px;
-    margin-bottom: 16px;
+    border-radius: 16px;
+    padding: 22px 32px;
     display: flex;
     align-items: center;
     gap: 48px;
+    flex: 2;
+    min-width: 0;
   }
 
   .hero-value {
     font-family: var(--font-mono);
-    font-size: 96px;
     font-weight: 700;
     letter-spacing: -0.04em;
     line-height: 1;
     color: var(--solar);
+    font-size: clamp(72px, 9vw, 130px);
   }
 
   .hero-unit {
     font-family: var(--font-mono);
-    font-size: 32px;
+    font-size: clamp(24px, 3vw, 40px);
     color: var(--muted);
     margin-left: 8px;
   }
 
-  .hero-meta { display: flex; flex-direction: column; gap: 10px; }
+  .hero-meta { display: flex; flex-direction: column; gap: 12px; }
 
   .hero-row {
     font-family: var(--font-mono);
-    font-size: 15px;
+    font-size: clamp(14px, 1.4vw, 18px);
     color: var(--muted);
     display: flex;
-    gap: 8px;
+    align-items: baseline;
+    gap: 10px;
   }
 
   .hero-row .val {
     color: var(--text);
-    font-weight: 600;
-    min-width: 80px;
+    font-weight: 700;
+    min-width: 90px;
+    font-size: clamp(16px, 1.6vw, 22px);
   }
 
   /* ── SOC bar ── */
   .soc-bar-track {
-    height: 10px;
+    height: 12px;
     background: var(--border);
-    border-radius: 5px;
+    border-radius: 6px;
     overflow: hidden;
-    margin-top: 12px;
+    margin-top: 14px;
   }
 
   .soc-bar-fill {
     height: 100%;
-    border-radius: 5px;
+    border-radius: 6px;
     background: var(--green);
     transition: width 1s ease, background 0.5s ease;
-  }
-
-  /* ── Section label ── */
-  .section-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    margin: 24px 0 12px;
   }
 
   /* ── Badge ── */
   .badge {
     display: inline-block;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
-    padding: 4px 12px;
+    padding: 4px 14px;
     border-radius: 20px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -290,31 +289,27 @@
   .green  { color: var(--green);  }
   .blue   { color: var(--blue);   }
   .orange { color: var(--orange); }
-  .red    { color: var(--red);    }
-
-  /* scrollbar */
-  #main::-webkit-scrollbar { width: 4px; }
-  #main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
   /* coming soon */
   .coming-soon {
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 15px;
     color: var(--muted);
-    line-height: 2.2;
+    line-height: 2.4;
   }
 </style>
 </head>
 <body>
 
+<!-- ── Sidebar ── -->
 <nav id="sidebar">
-  <div class="logo">RVTC</div>
+  <img src="images/bradshaw_shield_transparent.png" class="shield" alt="Bradshaw">
 
   <button class="nav-btn active" onclick="showTab('solar')" id="btn-solar">
     <span>☀️</span><span class="label">Solar</span>
   </button>
   <button class="nav-btn" onclick="showTab('battery')" id="btn-battery">
-    <span>🔋</span><span class="label">Batt</span>
+    <span>🔋</span><span class="label">Battery</span>
   </button>
   <button class="nav-btn" onclick="showTab('power')" id="btn-power">
     <span>⚡</span><span class="label">Power</span>
@@ -323,7 +318,7 @@
   <div class="nav-divider"></div>
 
   <a class="nav-btn" href="http://weewx.lan" target="_blank">
-    <span>🌤️</span><span class="label">Wx</span>
+    <span>🌤️</span><span class="label">Weather</span>
   </a>
 
   <div class="nav-divider"></div>
@@ -339,6 +334,7 @@
   </button>
 </nav>
 
+<!-- ── Main ── -->
 <main id="main">
 
   <!-- ══ SOLAR ══ -->
@@ -351,26 +347,38 @@
       </div>
     </div>
 
-    <div class="card-hero">
-      <div>
-        <div class="card-label">PV Power</div>
+    <!-- Row 1: Hero + SOC -->
+    <div class="row">
+      <div class="card-hero">
         <div>
-          <span class="hero-value" id="s-pv-power">—</span>
-          <span class="hero-unit">W</span>
+          <div class="card-label">PV Power</div>
+          <div>
+            <span class="hero-value" id="s-pv-power">—</span>
+            <span class="hero-unit">W</span>
+          </div>
+        </div>
+        <div class="hero-meta">
+          <div class="hero-row"><span>PV Voltage</span><span class="val solar" id="s-pv-voltage">—</span><span>V</span></div>
+          <div class="hero-row"><span>PV Current</span><span class="val solar" id="s-pv-current">—</span><span>A</span></div>
+          <div class="hero-row"><span>Stage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span id="s-charge-stage"><span class="badge badge-none">—</span></span></div>
         </div>
       </div>
-      <div class="hero-meta">
-        <div class="hero-row"><span>PV Voltage</span><span class="val solar" id="s-pv-voltage">—</span><span>V</span></div>
-        <div class="hero-row"><span>PV Current</span><span class="val solar" id="s-pv-current">—</span><span>A</span></div>
-        <div class="hero-row"><span>Stage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span id="s-charge-stage"><span class="badge badge-none">—</span></span></div>
+
+      <div class="card" style="flex:1">
+        <div class="card-label">Battery SOC</div>
+        <div><span class="card-value green" id="s-soc">—</span><span class="card-unit">%</span></div>
+        <div class="soc-bar-track">
+          <div class="soc-bar-fill" id="s-soc-bar" style="width:0%"></div>
+        </div>
+        <div class="card-sub" style="margin-top:12px" id="s-batt-v-sub">Battery: — V</div>
       </div>
     </div>
 
-    <div class="grid-3">
+    <!-- Row 2: Stats -->
+    <div class="row">
       <div class="card">
         <div class="card-label">Charging Power</div>
         <div><span class="card-value green" id="s-charging-power">—</span><span class="card-unit">W</span></div>
-        <div class="card-sub">Into battery</div>
       </div>
       <div class="card">
         <div class="card-label">Today's Generation</div>
@@ -380,16 +388,12 @@
         <div class="card-label">Lifetime Generation</div>
         <div><span class="card-value" id="s-total-kwh">—</span><span class="card-unit">kWh</span></div>
       </div>
-    </div>
-
-    <div class="section-label">Temperatures</div>
-    <div class="grid-2">
       <div class="card">
-        <div class="card-label">Controller</div>
+        <div class="card-label">Controller Temp</div>
         <div><span class="card-value orange" id="s-ctrl-temp">—</span><span class="card-unit">°C</span></div>
       </div>
       <div class="card">
-        <div class="card-label">Battery (RTS sensor)</div>
+        <div class="card-label">Battery Temp</div>
         <div><span class="card-value blue" id="s-batt-temp">—</span><span class="card-unit">°C</span></div>
       </div>
     </div>
@@ -402,38 +406,28 @@
       <div class="last-updated"><span id="batt-updated">—</span></div>
     </div>
 
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-label">State of Charge</div>
-        <div><span class="card-value green" id="b-soc">—</span><span class="card-unit">%</span></div>
-        <div class="soc-bar-track">
-          <div class="soc-bar-fill" id="b-soc-bar" style="width:0%"></div>
+    <div class="row">
+      <div class="card-hero">
+        <div>
+          <div class="card-label">State of Charge</div>
+          <div><span class="hero-value green" id="b-soc">—</span><span class="hero-unit">%</span></div>
+          <div class="soc-bar-track" style="width:300px; margin-top:16px">
+            <div class="soc-bar-fill" id="b-soc-bar" style="width:0%"></div>
+          </div>
         </div>
-      </div>
-      <div class="card">
-        <div class="card-label">Battery Voltage</div>
-        <div><span class="card-value green" id="b-voltage">—</span><span class="card-unit">V</span></div>
-        <div class="card-sub">LiFePO4 nominal 12.8 V</div>
+        <div class="hero-meta">
+          <div class="hero-row"><span>Voltage&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="val green" id="b-voltage">—</span><span>V</span></div>
+          <div class="hero-row"><span>Charging&nbsp;&nbsp;&nbsp;</span><span class="val solar" id="b-charging-current">—</span><span>A</span></div>
+          <div class="hero-row"><span>Temperature</span><span class="val blue" id="b-temp">—</span><span>°C</span></div>
+        </div>
       </div>
     </div>
 
-    <div class="grid-3">
-      <div class="card">
-        <div class="card-label">Charging Current</div>
-        <div><span class="card-value solar" id="b-charging-current">—</span><span class="card-unit">A</span></div>
-      </div>
+    <div class="row">
       <div class="card">
         <div class="card-label">Charging Power</div>
         <div><span class="card-value solar" id="b-charging-power">—</span><span class="card-unit">W</span></div>
       </div>
-      <div class="card">
-        <div class="card-label">Temperature</div>
-        <div><span class="card-value blue" id="b-temp">—</span><span class="card-unit">°C</span></div>
-        <div class="card-sub">Inhibit &lt;5°C or &gt;45°C</div>
-      </div>
-    </div>
-
-    <div class="grid-2">
       <div class="card">
         <div class="card-label">Load Voltage</div>
         <div><span class="card-value" id="b-load-voltage">—</span><span class="card-unit">V</span></div>
@@ -451,13 +445,15 @@
     <div class="page-header">
       <div class="page-title">⚡ &nbsp;Power — Phase 3 in progress</div>
     </div>
-    <div class="card">
-      <div class="card-label">Planned sources</div>
-      <div class="coming-soon" style="margin-top:16px">
-        KWS-303L grid meter &nbsp;&nbsp;&nbsp; RS-485/3 slave 1<br>
-        KWS-303L generator &nbsp;&nbsp;&nbsp;&nbsp; RS-485/3 slave 2<br>
-        SAMLUX EVO-2212 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RS-485/2<br>
-        Waveshare relay board &nbsp; RS-485/8 — load shed status
+    <div class="row">
+      <div class="card">
+        <div class="card-label">Planned sources</div>
+        <div class="coming-soon" style="margin-top:20px">
+          KWS-303L grid meter &nbsp;&nbsp;&nbsp;&nbsp; RS-485/3 slave 1<br>
+          KWS-303L generator &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RS-485/3 slave 2<br>
+          SAMLUX EVO-2212 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RS-485/2<br>
+          Waveshare relay board &nbsp;&nbsp; RS-485/8
+        </div>
       </div>
     </div>
   </div>
@@ -504,16 +500,14 @@ function setChargeStage(raw) {
   el.innerHTML = `<span class="badge ${cls}">${label}</span>`;
 }
 
-async function fetchSolar() {
-  // Fetch each field individually — most reliable approach
-  const fields = [
-    'pv_power','pv_voltage','pv_current','charging_power',
-    'daily_energy_kwh','total_energy_kwh','controller_temperature',
-    'battery_temperature','battery_soc','battery_voltage',
-    'charging_current','load_voltage','load_current',
-    'charging_status_raw'
-  ];
+function updateSOCBar(barId, soc) {
+  const bar = document.getElementById(barId);
+  if (!bar || isNaN(soc)) return;
+  bar.style.width = Math.min(100, Math.max(0, soc)) + '%';
+  bar.style.background = soc > 50 ? 'var(--green)' : soc > 20 ? 'var(--orange)' : 'var(--red)';
+}
 
+async function fetchSolar() {
   const flux = `
 from(bucket: "${BUCKET}")
   |> range(start: -3m)
@@ -521,7 +515,6 @@ from(bucket: "${BUCKET}")
   |> filter(fn: (r) => r._field == "value")
   |> last()
 `;
-
   try {
     const resp = await fetch(`${INFLUX_URL}/api/v2/query?org=${INFLUX_ORG}`, {
       method: 'POST',
@@ -536,9 +529,8 @@ from(bucket: "${BUCKET}")
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     const csv = await resp.text();
 
-    // Parse CSV — find solar_field tag column and _value column
     const lines = csv.split('\n').filter(l => l.trim() && !l.startsWith('#'));
-    if (lines.length < 2) { console.warn('No data rows'); return; }
+    if (lines.length < 2) return;
 
     const headers = lines[0].split(',').map(h => h.trim());
     const valIdx  = headers.indexOf('_value');
@@ -553,37 +545,33 @@ from(bucket: "${BUCKET}")
       if (field) data[field] = val;
     }
 
-    console.log('Solar data:', data);
-
     // Solar tab
-    set('s-pv-power',       data.pv_power,                0);
-    set('s-pv-voltage',     data.pv_voltage,              1);
-    set('s-pv-current',     data.pv_current,              2);
-    set('s-charging-power', data.charging_power,          0);
-    set('s-daily-kwh',      data.daily_energy_kwh,        2);
-    set('s-total-kwh',      data.total_energy_kwh,        2);
-    set('s-ctrl-temp',      data.controller_temperature,  1);
-    set('s-batt-temp',      data.battery_temperature,     1);
+    set('s-pv-power',       data.pv_power,               0);
+    set('s-pv-voltage',     data.pv_voltage,             1);
+    set('s-pv-current',     data.pv_current,             2);
+    set('s-charging-power', data.charging_power,         0);
+    set('s-daily-kwh',      data.daily_energy_kwh,       2);
+    set('s-total-kwh',      data.total_energy_kwh,       2);
+    set('s-ctrl-temp',      data.controller_temperature, 1);
+    set('s-batt-temp',      data.battery_temperature,    1);
+    set('s-soc',            data.battery_soc,            0);
     setChargeStage(data.charging_status_raw || 0);
+    updateSOCBar('s-soc-bar', data.battery_soc);
+
+    const bv = data.battery_voltage;
+    const bvEl = document.getElementById('s-batt-v-sub');
+    if (bvEl && !isNaN(bv)) bvEl.textContent = `Battery: ${bv.toFixed(2)} V`;
 
     // Battery tab
-    const soc = data.battery_soc;
-    set('b-soc',              soc,                        0);
-    set('b-voltage',          data.battery_voltage,       2);
-    set('b-charging-current', data.charging_current,      1);
-    set('b-charging-power',   data.charging_power,        0);
-    set('b-temp',             data.battery_temperature,   1);
-    set('b-load-voltage',     data.load_voltage,          2);
-    set('b-load-current',     data.load_current,          1);
+    set('b-soc',              data.battery_soc,            0);
+    set('b-voltage',          data.battery_voltage,        2);
+    set('b-charging-current', data.charging_current,       1);
+    set('b-charging-power',   data.charging_power,         0);
+    set('b-temp',             data.battery_temperature,    1);
+    set('b-load-voltage',     data.load_voltage,           2);
+    set('b-load-current',     data.load_current,           1);
+    updateSOCBar('b-soc-bar', data.battery_soc);
 
-    // SOC bar
-    if (!isNaN(soc)) {
-      const bar = document.getElementById('b-soc-bar');
-      bar.style.width = Math.min(100, Math.max(0, soc)) + '%';
-      bar.style.background = soc > 50 ? 'var(--green)' : soc > 20 ? 'var(--orange)' : 'var(--red)';
-    }
-
-    // Status
     const now = new Date().toLocaleTimeString('en-CA',
       {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     document.getElementById('solar-updated').textContent = `updated ${now}`;
