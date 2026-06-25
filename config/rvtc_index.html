@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RVTC — RV Total Control</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg:        #111318;
+    --surface:   #1c1f2a;
+    --surface2:  #242836;
+    --border:    #2e3347;
+    --sidebar:   #13161f;
+    --text:      #e2e6f0;
+    --muted:     #6b738f;
+    --solar:     #ffd84d;
+    --solar-dim: #3d3010;
+    --green:     #4ade80;
+    --green-dim: #0f2b1a;
+    --blue:      #60b4ff;
+    --blue-dim:  #0c2040;
+    --red:       #ff6b6b;
+    --orange:    #ffaa4d;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-ui:   'Inter', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 72px;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--solar);
+    letter-spacing: 0.08em;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .nav-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--muted);
+    font-size: 22px;
+    transition: background 0.15s, color 0.15s;
+    text-decoration: none;
+  }
+
+  .nav-btn span.label {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .nav-btn:hover { background: var(--surface2); color: var(--text); }
+  .nav-btn.active { background: var(--solar-dim); color: var(--solar); }
+  .nav-btn.active-green { background: var(--green-dim); color: var(--green); }
+  .nav-btn.dim { opacity: 0.3; cursor: default; }
+
+  .nav-divider {
+    width: 36px;
+    height: 1px;
+    background: var(--border);
+    margin: 6px 0;
+  }
+
+  /* ── Main ── */
+  #main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+  }
+
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  /* ── Page header ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 18px;
+  }
+
+  .page-title {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .last-updated {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  #status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.25; }
+  }
+
+  /* ── Grids ── */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+
+  .card-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  .card-value {
+    font-family: var(--font-mono);
+    font-size: 52px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .card-unit {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-left: 6px;
+  }
+
+  .card-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* ── Hero ── */
+  .card-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .hero-value {
+    font-family: var(--font-mono);
+    font-size: 96px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--solar);
+  }
+
+  .hero-unit {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    color: var(--muted);
+    margin-left: 8px;
+  }
+
+  .hero-meta { display: flex; flex-direction: column; gap: 10px; }
+
+  .hero-row {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    color: var(--muted);
+    display: flex;
+    gap: 8px;
+  }
+
+  .hero-row .val {
+    color: var(--text);
+    font-weight: 600;
+    min-width: 80px;
+  }
+
+  /* ── SOC bar ── */
+  .soc-bar-track {
+    height: 10px;
+    background: var(--border);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 12px;
+  }
+
+  .soc-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    background: var(--green);
+    transition: width 1s ease, background 0.5s ease;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin: 24px 0 12px;
+  }
+
+  /* ── Badge ── */
+  .badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .badge-boost { background: var(--solar-dim); color: var(--solar); }
+  .badge-float { background: var(--green-dim); color: var(--green); }
+  .badge-none  { background: var(--border);    color: var(--muted); }
+  .badge-eq    { background: var(--blue-dim);  color: var(--blue);  }
+
+  /* colours */
+  .solar  { color: var(--solar);  }
+  .green  { color: var(--green);  }
+  .blue   { color: var(--blue);   }
+  .orange { color: var(--orange); }
+  .red    { color: var(--red);    }
+
+  /* scrollbar */
+  #main::-webkit-scrollbar { width: 4px; }
+  #main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* coming soon */
+  .coming-soon {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 2.2;
+  }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="logo">RVTC</div>
+
+  <button class="nav-btn active" onclick="showTab('solar')" id="btn-solar">
+    <span>☀️</span><span class="label">Solar</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('battery')" id="btn-battery">
+    <span>🔋</span><span class="label">Batt</span>
+  </button>
+  <button class="nav-btn" onclick="showTab('power')" id="btn-power">
+    <span>⚡</span><span class="label">Power</span>
+  </button>
+
+  <div class="nav-divider"></div>
+
+  <a class="nav-btn" href="http://weewx.lan" target="_blank">
+    <span>🌤️</span><span class="label">Wx</span>
+  </a>
+
+  <div class="nav-divider"></div>
+
+  <button class="nav-btn dim" title="Tanks — Phase 4">
+    <span>💧</span><span class="label">Tanks</span>
+  </button>
+  <button class="nav-btn dim" title="Water — Phase 5">
+    <span>🚰</span><span class="label">Water</span>
+  </button>
+  <button class="nav-btn dim" title="Map — Phase 7">
+    <span>📍</span><span class="label">Map</span>
+  </button>
+</nav>
+
+<main id="main">
+
+  <!-- ══ SOLAR ══ -->
+  <div class="tab active" id="tab-solar">
+    <div class="page-header">
+      <div class="page-title">☀️ &nbsp;Solar — EPEVER MPPT60</div>
+      <div class="last-updated">
+        <span id="status-dot"></span>
+        <span id="solar-updated">connecting…</span>
+      </div>
+    </div>
+
+    <div class="card-hero">
+      <div>
+        <div class="card-label">PV Power</div>
+        <div>
+          <span class="hero-value" id="s-pv-power">—</span>
+          <span class="hero-unit">W</span>
+        </div>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-row"><span>PV Voltage</span><span class="val solar" id="s-pv-voltage">—</span><span>V</span></div>
+        <div class="hero-row"><span>PV Current</span><span class="val solar" id="s-pv-current">—</span><span>A</span></div>
+        <div class="hero-row"><span>Stage&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span id="s-charge-stage"><span class="badge badge-none">—</span></span></div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-label">Charging Power</div>
+        <div><span class="card-value green" id="s-charging-power">—</span><span class="card-unit">W</span></div>
+        <div class="card-sub">Into battery</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Today's Generation</div>
+        <div><span class="card-value solar" id="s-daily-kwh">—</span><span class="card-unit">kWh</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Lifetime Generation</div>
+        <div><span class="card-value" id="s-total-kwh">—</span><span class="card-unit">kWh</span></div>
+      </div>
+    </div>
+
+    <div class="section-label">Temperatures</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">Controller</div>
+        <div><span class="card-value orange" id="s-ctrl-temp">—</span><span class="card-unit">°C</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Battery (RTS sensor)</div>
+        <div><span class="card-value blue" id="s-batt-temp">—</span><span class="card-unit">°C</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BATTERY ══ -->
+  <div class="tab" id="tab-battery">
+    <div class="page-header">
+      <div class="page-title">🔋 &nbsp;Battery — LiFePO4</div>
+      <div class="last-updated"><span id="batt-updated">—</span></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">State of Charge</div>
+        <div><span class="card-value green" id="b-soc">—</span><span class="card-unit">%</span></div>
+        <div class="soc-bar-track">
+          <div class="soc-bar-fill" id="b-soc-bar" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-label">Battery Voltage</div>
+        <div><span class="card-value green" id="b-voltage">—</span><span class="card-unit">V</span></div>
+        <div class="card-sub">LiFePO4 nominal 12.8 V</div>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-label">Charging Current</div>
+        <div><span class="card-value solar" id="b-charging-current">—</span><span class="card-unit">A</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Charging Power</div>
+        <div><span class="card-value solar" id="b-charging-power">—</span><span class="card-unit">W</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Temperature</div>
+        <div><span class="card-value blue" id="b-temp">—</span><span class="card-unit">°C</span></div>
+        <div class="card-sub">Inhibit &lt;5°C or &gt;45°C</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-label">Load Voltage</div>
+        <div><span class="card-value" id="b-load-voltage">—</span><span class="card-unit">V</span></div>
+        <div class="card-sub">EPEVER load terminals</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Load Current</div>
+        <div><span class="card-value" id="b-load-current">—</span><span class="card-unit">A</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ POWER ══ -->
+  <div class="tab" id="tab-power">
+    <div class="page-header">
+      <div class="page-title">⚡ &nbsp;Power — Phase 3 in progress</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Planned sources</div>
+      <div class="coming-soon" style="margin-top:16px">
+        KWS-303L grid meter &nbsp;&nbsp;&nbsp; RS-485/3 slave 1<br>
+        KWS-303L generator &nbsp;&nbsp;&nbsp;&nbsp; RS-485/3 slave 2<br>
+        SAMLUX EVO-2212 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RS-485/2<br>
+        Waveshare relay board &nbsp; RS-485/8 — load shed status
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const INFLUX_URL   = 'http://192.168.88.3:8086';
+const INFLUX_ORG   = 'rvtc';
+const INFLUX_TOKEN = 'JJ6YvsntjdwdTwhe-8GYPMY0mjWhpp_MYTdmgwgfTnDFMtJRN0lWATXPslkh-DHcOD6CVon662twulqL6tfEvQ==';
+const BUCKET       = 'rvtc';
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn:not(.dim)').forEach(b => {
+    b.classList.remove('active', 'active-green');
+  });
+  document.getElementById('tab-' + name).classList.add('active');
+  const btn = document.getElementById('btn-' + name);
+  if (btn) btn.classList.add(name === 'battery' ? 'active-green' : 'active');
+}
+
+function set(id, val, dec) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (val === null || val === undefined || isNaN(val)) {
+    el.textContent = '—';
+  } else {
+    el.textContent = (dec !== undefined) ? Number(val).toFixed(dec) : val;
+  }
+}
+
+function setChargeStage(raw) {
+  const el = document.getElementById('s-charge-stage');
+  if (!el) return;
+  const stage = (Math.round(raw || 0) >> 2) & 0x03;
+  const map = {
+    0: ['none',         'badge-none'],
+    1: ['float',        'badge-float'],
+    2: ['boost',        'badge-boost'],
+    3: ['equalization', 'badge-eq']
+  };
+  const [label, cls] = map[stage] || ['unknown', 'badge-none'];
+  el.innerHTML = `<span class="badge ${cls}">${label}</span>`;
+}
+
+async function fetchSolar() {
+  // Fetch each field individually — most reliable approach
+  const fields = [
+    'pv_power','pv_voltage','pv_current','charging_power',
+    'daily_energy_kwh','total_energy_kwh','controller_temperature',
+    'battery_temperature','battery_soc','battery_voltage',
+    'charging_current','load_voltage','load_current',
+    'charging_status_raw'
+  ];
+
+  const flux = `
+from(bucket: "${BUCKET}")
+  |> range(start: -3m)
+  |> filter(fn: (r) => r._measurement == "solar")
+  |> filter(fn: (r) => r._field == "value")
+  |> last()
+`;
+
+  try {
+    const resp = await fetch(`${INFLUX_URL}/api/v2/query?org=${INFLUX_ORG}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${INFLUX_TOKEN}`,
+        'Content-Type': 'application/vnd.flux',
+        'Accept': 'application/csv'
+      },
+      body: flux
+    });
+
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const csv = await resp.text();
+
+    // Parse CSV — find solar_field tag column and _value column
+    const lines = csv.split('\n').filter(l => l.trim() && !l.startsWith('#'));
+    if (lines.length < 2) { console.warn('No data rows'); return; }
+
+    const headers = lines[0].split(',').map(h => h.trim());
+    const valIdx  = headers.indexOf('_value');
+    const sfIdx   = headers.indexOf('solar_field');
+
+    const data = {};
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(',');
+      if (cols.length < Math.max(valIdx, sfIdx) + 1) continue;
+      const field = (cols[sfIdx] || '').trim();
+      const val   = parseFloat((cols[valIdx] || '').trim());
+      if (field) data[field] = val;
+    }
+
+    console.log('Solar data:', data);
+
+    // Solar tab
+    set('s-pv-power',       data.pv_power,                0);
+    set('s-pv-voltage',     data.pv_voltage,              1);
+    set('s-pv-current',     data.pv_current,              2);
+    set('s-charging-power', data.charging_power,          0);
+    set('s-daily-kwh',      data.daily_energy_kwh,        2);
+    set('s-total-kwh',      data.total_energy_kwh,        2);
+    set('s-ctrl-temp',      data.controller_temperature,  1);
+    set('s-batt-temp',      data.battery_temperature,     1);
+    setChargeStage(data.charging_status_raw || 0);
+
+    // Battery tab
+    const soc = data.battery_soc;
+    set('b-soc',              soc,                        0);
+    set('b-voltage',          data.battery_voltage,       2);
+    set('b-charging-current', data.charging_current,      1);
+    set('b-charging-power',   data.charging_power,        0);
+    set('b-temp',             data.battery_temperature,   1);
+    set('b-load-voltage',     data.load_voltage,          2);
+    set('b-load-current',     data.load_current,          1);
+
+    // SOC bar
+    if (!isNaN(soc)) {
+      const bar = document.getElementById('b-soc-bar');
+      bar.style.width = Math.min(100, Math.max(0, soc)) + '%';
+      bar.style.background = soc > 50 ? 'var(--green)' : soc > 20 ? 'var(--orange)' : 'var(--red)';
+    }
+
+    // Status
+    const now = new Date().toLocaleTimeString('en-CA',
+      {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    document.getElementById('solar-updated').textContent = `updated ${now}`;
+    document.getElementById('batt-updated').textContent  = `updated ${now}`;
+    document.getElementById('status-dot').style.background = 'var(--green)';
+
+  } catch(e) {
+    console.error('Fetch error:', e);
+    document.getElementById('status-dot').style.background = 'var(--red)';
+    document.getElementById('solar-updated').textContent = 'error — retrying';
+  }
+}
+
+fetchSolar();
+setInterval(fetchSolar, 10000);
+</script>
+</body>
+</html>
