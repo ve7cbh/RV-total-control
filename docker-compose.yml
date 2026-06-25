@@ -72,6 +72,7 @@ services:
     volumes:
       - /data/docker/volumes/weewx/public_html:/usr/share/nginx/html:ro
       - /data/docker/volumes/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /data/docker/volumes/nginx/rvtc:/usr/share/nginx/rvtc:ro
     depends_on:
       - grafana
       - weewx
@@ -106,9 +107,8 @@ services:
     container_name: telegraf
     restart: unless-stopped
     volumes:
-      - ./config/telegraf_solar.conf:/etc/telegraf/telegraf.conf:ro
-    environment:
-      - INFLUXDB_TOKEN=TdmgwgfTnDFMtJRN0lWATXPslkh-DHcOD6CVon662twulqL6tfEvQ==
+      - ./config/telegraf_solar.conf:/etc/telegraf/telegraf.d/solar.conf:ro
+      - ./config/telegraf_grid.conf:/etc/telegraf/telegraf.d/grid.conf:ro
     depends_on:
       - mosquitto
       - influxdb
