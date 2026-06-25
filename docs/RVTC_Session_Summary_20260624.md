@@ -190,3 +190,4 @@ Single-page application served by nginx with left sidebar tab navigation.
 6. HSR1-25 physical wiring — water heater and fridge AC relays (HW-18)
 7. Wire coil 5 — EVO BMS charge inhibit (HW-21)
 8. EPEVER RS485-1M2S — reconnect MT50 when splitter arrives (HW-23)
+9. Intergrate clamp current sensor RS485 current transformer split core current transducer modbus QNDBK1-20 Input DC 400A
