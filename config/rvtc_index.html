@@ -40,7 +40,7 @@
 
   /* ── Sidebar ── */
   #sidebar {
-    width: 130px;
+    width: 124px;
     background: var(--sidebar);
     border-right: 2px solid var(--border);
     display: flex;
@@ -52,7 +52,7 @@
   }
 
   .shield {
-    width: 101px;
+    width: 92px;
     height: auto;
     margin-bottom: 10px;
     opacity: 0.92;
@@ -72,7 +72,7 @@
     justify-content: center;
     gap: 5px;
     color: var(--muted);
-    font-size: 30px;
+    font-size: 34px;
     transition: background 0.15s, color 0.15s;
     text-decoration: none;
   }
@@ -89,10 +89,11 @@
   .nav-btn:hover { background: var(--surface2); color: var(--text); }
   .nav-btn.active { background: var(--solar-dim); color: var(--solar); border: 1px solid #5a4400; }
   .nav-btn.active-green { background: var(--green-dim); color: var(--green); border: 1px solid #1a5a30; }
+  .nav-btn.active-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #1a3a5a; }
   .nav-btn.dim { opacity: 0.28; cursor: default; }
 
   .nav-divider {
-    width: 70px;
+    width: 80px;
     height: 1px;
     background: var(--border);
     margin: 4px 0;
@@ -126,7 +127,7 @@
     font-weight: 700;
     color: var(--text);
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
   }
 
   .last-updated {
@@ -178,7 +179,7 @@
     font-weight: 700;
     color: var(--muted);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     margin-bottom: 8px;
   }
 
@@ -200,7 +201,7 @@
 
   .card-sub {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 13px;
     color: var(--muted);
     margin-top: 8px;
   }
@@ -238,7 +239,7 @@
 
   .hero-row {
     font-family: var(--font-mono);
-    font-size: clamp(14px, 1.4vw, 18px);
+    font-size: clamp(14px, 1.4vw, 20px);
     color: var(--muted);
     display: flex;
     align-items: baseline;
@@ -293,9 +294,9 @@
   /* coming soon */
   .coming-soon {
     font-family: var(--font-mono);
-    font-size: 15px;
+    font-size: 14px;
     color: var(--muted);
-    line-height: 2.4;
+    line-height: 2.2;
   }
 </style>
 </head>
@@ -347,7 +348,6 @@
       </div>
     </div>
 
-    <!-- Row 1: Hero + SOC -->
     <div class="row">
       <div class="card-hero">
         <div>
@@ -374,26 +374,25 @@
       </div>
     </div>
 
-    <!-- Row 2: Stats -->
     <div class="row">
       <div class="card">
-        <div class="card-label">Charging Power</div>
+        <div class="card-label">Charging<br>Power</div>
         <div><span class="card-value green" id="s-charging-power">—</span><span class="card-unit">W</span></div>
       </div>
       <div class="card">
-        <div class="card-label">Today's Generation</div>
+        <div class="card-label">Today's<br>Generation</div>
         <div><span class="card-value solar" id="s-daily-kwh">—</span><span class="card-unit">kWh</span></div>
       </div>
       <div class="card">
-        <div class="card-label">Lifetime Generation</div>
+        <div class="card-label">Lifetime<br>Generation</div>
         <div><span class="card-value" id="s-total-kwh">—</span><span class="card-unit">kWh</span></div>
       </div>
       <div class="card">
-        <div class="card-label">Controller Temp</div>
+        <div class="card-label">Controller<br>Temp</div>
         <div><span class="card-value orange" id="s-ctrl-temp">—</span><span class="card-unit">°C</span></div>
       </div>
       <div class="card">
-        <div class="card-label">Battery Temp</div>
+        <div class="card-label">Battery<br>Temp</div>
         <div><span class="card-value blue" id="s-batt-temp">—</span><span class="card-unit">°C</span></div>
       </div>
     </div>
@@ -425,16 +424,16 @@
 
     <div class="row">
       <div class="card">
-        <div class="card-label">Charging Power</div>
+        <div class="card-label">Charging<br>Power</div>
         <div><span class="card-value solar" id="b-charging-power">—</span><span class="card-unit">W</span></div>
       </div>
       <div class="card">
-        <div class="card-label">Load Voltage</div>
+        <div class="card-label">Load<br>Voltage</div>
         <div><span class="card-value" id="b-load-voltage">—</span><span class="card-unit">V</span></div>
         <div class="card-sub">EPEVER load terminals</div>
       </div>
       <div class="card">
-        <div class="card-label">Load Current</div>
+        <div class="card-label">Load<br>Current</div>
         <div><span class="card-value" id="b-load-current">—</span><span class="card-unit">A</span></div>
       </div>
     </div>
@@ -443,17 +442,47 @@
   <!-- ══ POWER ══ -->
   <div class="tab" id="tab-power">
     <div class="page-header">
-      <div class="page-title">⚡ &nbsp;Power — Phase 3 in progress</div>
+      <div class="page-title">⚡ &nbsp;Power — Grid (KWS-303L)</div>
+      <div class="last-updated"><span id="grid-updated">—</span></div>
     </div>
+
+    <div class="row">
+      <div class="card-hero">
+        <div>
+          <div class="card-label">Grid Power</div>
+          <div><span class="hero-value" style="color:var(--blue)" id="g-power">—</span><span class="hero-unit">W</span></div>
+        </div>
+        <div class="hero-meta">
+          <div class="hero-row"><span>Voltage&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="val blue" id="g-voltage">—</span><span>V</span></div>
+          <div class="hero-row"><span>Current&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="val blue" id="g-current">—</span><span>A</span></div>
+          <div class="hero-row"><span>Frequency&nbsp;&nbsp;</span><span class="val" id="g-frequency">—</span><span>Hz</span></div>
+        </div>
+      </div>
+      <div class="card" style="flex:1">
+        <div class="card-label">Power Factor</div>
+        <div><span class="card-value green" id="g-pf">—</span></div>
+        <div class="card-sub" style="margin-top:16px">Energy consumed</div>
+        <div style="margin-top:6px"><span class="card-value" style="font-size:36px" id="g-energy">—</span><span class="card-unit">kWh</span></div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="card">
-        <div class="card-label">Planned sources</div>
-        <div class="coming-soon" style="margin-top:20px">
-          KWS-303L grid meter &nbsp;&nbsp;&nbsp;&nbsp; RS-485/3 slave 1<br>
-          KWS-303L generator &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RS-485/3 slave 2<br>
-          SAMLUX EVO-2212 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RS-485/2<br>
-          Waveshare relay board &nbsp;&nbsp; RS-485/8
-        </div>
+        <div class="card-label">Meter<br>Temperature</div>
+        <div><span class="card-value orange" id="g-temp">—</span><span class="card-unit">°C</span></div>
+        <div class="card-sub">Internal NTC</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Alarm</div>
+        <div><span id="g-alarm" class="card-value green" style="font-size:28px">—</span></div>
+      </div>
+      <div class="card">
+        <div class="card-label">Generator</div>
+        <div class="coming-soon" style="margin-top:8px">RS-485/3 slave 2<br>pending install</div>
+      </div>
+      <div class="card">
+        <div class="card-label">EVO-2212</div>
+        <div class="coming-soon" style="margin-top:8px">RS-485/2<br>pending HA integration</div>
       </div>
     </div>
   </div>
@@ -469,11 +498,15 @@ const BUCKET       = 'rvtc';
 function showTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-btn:not(.dim)').forEach(b => {
-    b.classList.remove('active', 'active-green');
+    b.classList.remove('active', 'active-green', 'active-blue');
   });
   document.getElementById('tab-' + name).classList.add('active');
   const btn = document.getElementById('btn-' + name);
-  if (btn) btn.classList.add(name === 'battery' ? 'active-green' : 'active');
+  if (btn) {
+    if (name === 'battery') btn.classList.add('active-green');
+    else if (name === 'power') btn.classList.add('active-blue');
+    else btn.classList.add('active');
+  }
 }
 
 function set(id, val, dec) {
@@ -507,45 +540,49 @@ function updateSOCBar(barId, soc) {
   bar.style.background = soc > 50 ? 'var(--green)' : soc > 20 ? 'var(--orange)' : 'var(--red)';
 }
 
-async function fetchSolar() {
+async function queryInflux(measurement) {
   const flux = `
 from(bucket: "${BUCKET}")
   |> range(start: -3m)
-  |> filter(fn: (r) => r._measurement == "solar")
+  |> filter(fn: (r) => r._measurement == "${measurement}")
   |> filter(fn: (r) => r._field == "value")
   |> last()
 `;
+  const resp = await fetch(`${INFLUX_URL}/api/v2/query?org=${INFLUX_ORG}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Token ${INFLUX_TOKEN}`,
+      'Content-Type': 'application/vnd.flux',
+      'Accept': 'application/csv'
+    },
+    body: flux
+  });
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const csv = await resp.text();
+
+  const lines = csv.split('\n').filter(l => l.trim() && !l.startsWith('#'));
+  if (lines.length < 2) return {};
+
+  const headers = lines[0].split(',').map(h => h.trim());
+  const valIdx  = headers.indexOf('_value');
+  const topicIdx = headers.indexOf('topic');
+
+  const data = {};
+  for (let i = 1; i < lines.length; i++) {
+    const cols = lines[i].split(',');
+    if (cols.length < Math.max(valIdx, topicIdx) + 1) continue;
+    const topic = (cols[topicIdx] || '').trim();
+    const field = topic.split('/').pop();
+    const val   = parseFloat((cols[valIdx] || '').trim());
+    if (field) data[field] = val;
+  }
+  return data;
+}
+
+async function fetchSolar() {
   try {
-    const resp = await fetch(`${INFLUX_URL}/api/v2/query?org=${INFLUX_ORG}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Token ${INFLUX_TOKEN}`,
-        'Content-Type': 'application/vnd.flux',
-        'Accept': 'application/csv'
-      },
-      body: flux
-    });
+    const data = await queryInflux('solar');
 
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const csv = await resp.text();
-
-    const lines = csv.split('\n').filter(l => l.trim() && !l.startsWith('#'));
-    if (lines.length < 2) return;
-
-    const headers = lines[0].split(',').map(h => h.trim());
-    const valIdx  = headers.indexOf('_value');
-    const sfIdx   = headers.indexOf('solar_field');
-
-    const data = {};
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(',');
-      if (cols.length < Math.max(valIdx, sfIdx) + 1) continue;
-      const field = (cols[sfIdx] || '').trim();
-      const val   = parseFloat((cols[valIdx] || '').trim());
-      if (field) data[field] = val;
-    }
-
-    // Solar tab
     set('s-pv-power',       data.pv_power,               0);
     set('s-pv-voltage',     data.pv_voltage,             1);
     set('s-pv-current',     data.pv_current,             2);
@@ -562,7 +599,6 @@ from(bucket: "${BUCKET}")
     const bvEl = document.getElementById('s-batt-v-sub');
     if (bvEl && !isNaN(bv)) bvEl.textContent = `Battery: ${bv.toFixed(2)} V`;
 
-    // Battery tab
     set('b-soc',              data.battery_soc,            0);
     set('b-voltage',          data.battery_voltage,        2);
     set('b-charging-current', data.charging_current,       1);
@@ -579,14 +615,47 @@ from(bucket: "${BUCKET}")
     document.getElementById('status-dot').style.background = 'var(--green)';
 
   } catch(e) {
-    console.error('Fetch error:', e);
+    console.error('Solar fetch error:', e);
     document.getElementById('status-dot').style.background = 'var(--red)';
     document.getElementById('solar-updated').textContent = 'error — retrying';
   }
 }
 
+async function fetchGrid() {
+  try {
+    const data = await queryInflux('grid');
+
+    set('g-power',     data.power,        0);
+    set('g-voltage',   data.voltage,      1);
+    set('g-current',   data.current,      3);
+    set('g-frequency', data.frequency,    2);
+    set('g-pf',        data.power_factor, 3);
+    set('g-energy',    data.energy_kwh,   3);
+    set('g-temp',      data.temperature,  1);
+
+    const alarmEl = document.getElementById('g-alarm');
+    if (alarmEl) {
+      const code = Math.round(data.alarm_code || 0);
+      const alarmMap = {0:'✅ None', 1:'⚠️ Over Voltage', 2:'⚠️ Under Voltage',
+                        4:'⚠️ Over Current', 32:'🌡️ Over Temp'};
+      alarmEl.textContent = alarmMap[code] || `Code ${code}`;
+      alarmEl.style.color = code === 0 ? 'var(--green)' : 'var(--red)';
+    }
+
+    const now = new Date().toLocaleTimeString('en-CA',
+      {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    document.getElementById('grid-updated').textContent = `updated ${now}`;
+
+  } catch(e) {
+    console.error('Grid fetch error:', e);
+    document.getElementById('grid-updated').textContent = 'error — retrying';
+  }
+}
+
 fetchSolar();
+fetchGrid();
 setInterval(fetchSolar, 10000);
+setInterval(fetchGrid, 10000);
 </script>
 </body>
 </html>
