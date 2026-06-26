@@ -1,18 +1,13 @@
 # RVTC — Home Assistant Modbus config for KWS-303L AC Power Meters
-# Grid meter:     RS-485/3, IP 192.168.88.7, TCP 4001, slave 1
-# Generator meter: RS-485/3, IP 192.168.88.7, TCP 4001, slave 2 (pending physical install)
+# Grid meter:      RS-485/3, IP 192.168.88.7, TCP 4001, slave 1 — commissioned 2026-06-19
+# Generator meter: RS-485/3, IP 192.168.88.7, TCP 4001, slave 2 — pending physical install
 #
+# Both meters on same gateway port — single hub, two slaves.
 # Register map: KWS-303L_Register_Map_RVTC.docx (community reverse-engineered)
-# All addresses literal/direct — no Modicon offset. Same convention as SAMLUX and EPEVER.
-# Function Code 03 (holding registers).
-#
-# Note on energy register 55: Modbus value (~36 kWh) does not match meter display
-# (~102 kWh). The Modbus register is a separate accumulator — useful for relative
-# tracking but not absolute lifetime energy. Read absolute total from meter display.
-#
-# Parity: Even — confirmed live 2026-06-19. Set on gateway port 3 serial config.
+# All addresses literal/direct — no Modicon offset.
+# Function Code 03 (holding registers). Even parity set on gateway port 3.
 
-- name: kws_grid
+- name: kws303l
   type: tcp
   host: 192.168.88.7
   port: 4001
@@ -21,6 +16,8 @@
   message_wait_milliseconds: 30
 
   sensors:
+
+    # ── Grid meter — slave 1 ──────────────────────────────────────────────────
 
     - name: "Grid Voltage"
       unique_id: kws_grid_voltage
@@ -123,7 +120,6 @@
       unit_of_measurement: ""
       state_class: measurement
       scan_interval: 30
-      # 0=None, 1=Over Voltage, 2=Under Voltage, 4=Over Current, 32=Over Temperature
 
     - name: "Grid Relay State"
       unique_id: kws_grid_relay
@@ -136,20 +132,9 @@
       unit_of_measurement: ""
       state_class: measurement
       scan_interval: 30
-      # 1=ON, 0=OFF
 
-- name: kws_generator
-  type: tcp
-  host: 192.168.88.7
-  port: 4001
-  timeout: 5
-  delay: 0
-  message_wait_milliseconds: 30
-  # NOTE: generator meter slave 2 not yet physically wired.
-  # Entities will show unavailable until meter is installed.
-  # No config changes needed when meter is connected.
-
-  sensors:
+    # ── Generator meter — slave 2 (pending physical install) ──────────────────
+    # Entities will show unavailable until meter is wired. No config changes needed.
 
     - name: "Generator Voltage"
       unique_id: kws_generator_voltage
