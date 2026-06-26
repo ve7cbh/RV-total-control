@@ -48,7 +48,7 @@ MQTT_RETAIN    = True
 POLL_INTERVAL  = 10        # seconds
 
 # Set to True once generator meter is physically wired and slave 2 confirmed
-GENERATOR_ENABLED = False
+GENERATOR_ENABLED = True
 
 LOG_LEVEL = logging.INFO
 
@@ -148,10 +148,13 @@ def main():
 
             # Generator meter — slave 2 (enable when physically installed)
             if GENERATOR_ENABLED:
-                poll_meter(modbus_client, mqttc,
-                           slave=2,
-                           topic_base="rvtc/sensors/generator",
-                           label="Generator")
+                try:
+                    poll_meter(modbus_client, mqttc,
+                               slave=2,
+                               topic_base="rvtc/sensors/generator",
+                               label="Generator")
+                except Exception as exc:
+                    log.warning("Generator meter not responding: %s", exc)
 
         except Exception as exc:
             log.error("Poll exception: %s — retrying in %ds", exc, POLL_INTERVAL)
