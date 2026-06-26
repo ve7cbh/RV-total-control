@@ -1,0 +1,259 @@
+# RVTC — Home Assistant MQTT Sensor Definitions
+# File: /data/docker/volumes/homeassistant/mqtt_sensors.yaml
+# Include in configuration.yaml:
+#   mqtt: !include mqtt_sensors.yaml
+#
+# All sensors subscribe to topics published by the Python bridge scripts:
+#   epever_mqtt.py  → rvtc/sensors/solar/#
+#   kws_mqtt.py     → rvtc/sensors/grid/#  and  rvtc/sensors/generator/#
+#   samlux_mqtt.py  → rvtc/sensors/inverter/#  (to be built)
+#
+# HA is a data consumer only — no Modbus polling from HA side.
+# Data flow: Device → Modbus → Python bridge → MQTT → HA (this file)
+#                                                    → Telegraf → InfluxDB → Grafana
+
+# ============================================================
+# MQTT platform config — required wrapper for sensor list
+# ============================================================
+
+sensor:
+
+  # ── EPEVER MPPT60 — Solar ─────────────────────────────────────────────────
+
+  - name: "EPEVER PV Voltage"
+    unique_id: mqtt_epever_pv_voltage
+    state_topic: "rvtc/sensors/solar/pv_voltage"
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER PV Current"
+    unique_id: mqtt_epever_pv_current
+    state_topic: "rvtc/sensors/solar/pv_current"
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER PV Power"
+    unique_id: mqtt_epever_pv_power
+    state_topic: "rvtc/sensors/solar/pv_power"
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER Battery Voltage"
+    unique_id: mqtt_epever_battery_voltage
+    state_topic: "rvtc/sensors/solar/battery_voltage"
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER Charging Current"
+    unique_id: mqtt_epever_charging_current
+    state_topic: "rvtc/sensors/solar/charging_current"
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER Charging Power"
+    unique_id: mqtt_epever_charging_power
+    state_topic: "rvtc/sensors/solar/charging_power"
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER Load Voltage"
+    unique_id: mqtt_epever_load_voltage
+    state_topic: "rvtc/sensors/solar/load_voltage"
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER Load Current"
+    unique_id: mqtt_epever_load_current
+    state_topic: "rvtc/sensors/solar/load_current"
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER Battery Temperature"
+    unique_id: mqtt_epever_battery_temperature
+    state_topic: "rvtc/sensors/solar/battery_temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 60
+    # Primary battery temp source for Tier 2 charge inhibit logic
+
+  - name: "EPEVER Controller Temperature"
+    unique_id: mqtt_epever_controller_temperature
+    state_topic: "rvtc/sensors/solar/controller_temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER Battery SOC"
+    unique_id: mqtt_epever_battery_soc
+    state_topic: "rvtc/sensors/solar/battery_soc"
+    unit_of_measurement: "%"
+    device_class: battery
+    state_class: measurement
+    expire_after: 60
+    # Used by Tier 4 SOC-based load shed logic
+
+  - name: "EPEVER Charging Status Raw"
+    unique_id: mqtt_epever_charging_status_raw
+    state_topic: "rvtc/sensors/solar/charging_status_raw"
+    state_class: measurement
+    expire_after: 60
+
+  - name: "EPEVER Daily Energy"
+    unique_id: mqtt_epever_daily_energy
+    state_topic: "rvtc/sensors/solar/daily_energy_kwh"
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    expire_after: 60
+
+  - name: "EPEVER Total Energy"
+    unique_id: mqtt_epever_total_energy
+    state_topic: "rvtc/sensors/solar/total_energy_kwh"
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    expire_after: 60
+
+  - name: "EPEVER Poll Errors"
+    unique_id: mqtt_epever_poll_errors
+    state_topic: "rvtc/sensors/solar/poll_errors"
+    state_class: measurement
+    expire_after: 60
+
+  # ── KWS-303L — Grid Meter ─────────────────────────────────────────────────
+
+  - name: "Grid Voltage"
+    unique_id: mqtt_grid_voltage
+    state_topic: "rvtc/sensors/grid/voltage"
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    expire_after: 60
+    # Shore power present/absent detection — use for Tier 1 trigger
+
+  - name: "Grid Current"
+    unique_id: mqtt_grid_current
+    state_topic: "rvtc/sensors/grid/current"
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    expire_after: 60
+    # Tier 3 overload threshold — grid >25A sustained 30s
+
+  - name: "Grid Power"
+    unique_id: mqtt_grid_power
+    state_topic: "rvtc/sensors/grid/power"
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Grid Power Factor"
+    unique_id: mqtt_grid_power_factor
+    state_topic: "rvtc/sensors/grid/power_factor"
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Grid Frequency"
+    unique_id: mqtt_grid_frequency
+    state_topic: "rvtc/sensors/grid/frequency"
+    unit_of_measurement: "Hz"
+    device_class: frequency
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Grid Energy"
+    unique_id: mqtt_grid_energy
+    state_topic: "rvtc/sensors/grid/energy_kwh"
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    expire_after: 60
+
+  - name: "Grid Meter Temperature"
+    unique_id: mqtt_grid_temperature
+    state_topic: "rvtc/sensors/grid/temperature"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 120
+
+  - name: "Grid Alarm Code"
+    unique_id: mqtt_grid_alarm
+    state_topic: "rvtc/sensors/grid/alarm_code"
+    state_class: measurement
+    expire_after: 60
+
+  # ── KWS-303L — Generator Meter ────────────────────────────────────────────
+  # Pending physical install — entities will be unavailable until wired
+
+  - name: "Generator Voltage"
+    unique_id: mqtt_generator_voltage
+    state_topic: "rvtc/sensors/generator/voltage"
+    unit_of_measurement: "V"
+    device_class: voltage
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Generator Current"
+    unique_id: mqtt_generator_current
+    state_topic: "rvtc/sensors/generator/current"
+    unit_of_measurement: "A"
+    device_class: current
+    state_class: measurement
+    expire_after: 60
+    # Tier 3 overload threshold — generator >22A sustained 30s
+
+  - name: "Generator Power"
+    unique_id: mqtt_generator_power
+    state_topic: "rvtc/sensors/generator/power"
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Generator Power Factor"
+    unique_id: mqtt_generator_power_factor
+    state_topic: "rvtc/sensors/generator/power_factor"
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Generator Frequency"
+    unique_id: mqtt_generator_frequency
+    state_topic: "rvtc/sensors/generator/frequency"
+    unit_of_measurement: "Hz"
+    device_class: frequency
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Generator Energy"
+    unique_id: mqtt_generator_energy
+    state_topic: "rvtc/sensors/generator/energy_kwh"
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: total_increasing
+    expire_after: 60
+
+  - name: "Generator Alarm Code"
+    unique_id: mqtt_generator_alarm
+    state_topic: "rvtc/sensors/generator/alarm_code"
+    state_class: measurement
+    expire_after: 60
