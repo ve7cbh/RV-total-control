@@ -51,7 +51,7 @@ MQTT_PORT      = 1883
 MQTT_BASE      = "rvtc/sensors/inverter"
 MQTT_RETAIN    = True
 
-POLL_INTERVAL  = 10        # seconds
+POLL_INTERVAL  = 3        # seconds
 
 LOG_LEVEL = logging.INFO
 
@@ -101,15 +101,15 @@ REGISTERS = [
 
 # Operating mode decode (register 284) — key for Tier 1 load management
 # Values from EVO-2212 manual — confirm against live readings
+
 OPERATING_MODES = {
     0: "standby",
-    1: "line",           # passthrough / grid charging
-    2: "inverter",       # on battery — Tier 1 trigger
-    3: "bypass",
-    4: "battery_test",
+    1: "line",        # confirm
+    2: "charging",    # on grid, charging + passthrough — confirmed live
+    3: "inverter",    # on battery — Tier 1 trigger — confirm when grid drops
+    4: "bypass",
     5: "fault",
 }
-
 # ── Modbus helpers ─────────────────────────────────────────────────────────────
 
 def read_register(client: ModbusTcpClient, address: int, signed: bool) -> int | None:
