@@ -45,10 +45,10 @@ MQTT_HOST      = "192.168.88.3"
 MQTT_PORT      = 1883
 MQTT_RETAIN    = True
 
-POLL_INTERVAL  = 10        # seconds
+POLL_INTERVAL  = 2        # seconds
 
 # Set to True once generator meter is physically wired and slave 2 confirmed
-GENERATOR_ENABLED = True
+GENERATOR_ENABLED = False
 
 LOG_LEVEL = logging.INFO
 

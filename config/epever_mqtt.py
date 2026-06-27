@@ -55,7 +55,7 @@ MQTT_PORT = 1883
 MQTT_TOPIC_BASE = "rvtc/sensors/solar"
 MQTT_RETAIN = True        # retain last value so dashboard always shows something
 
-POLL_INTERVAL = 10        # seconds between full register reads
+POLL_INTERVAL = 3        # seconds between full register reads
 
 LOG_LEVEL = logging.INFO
 
