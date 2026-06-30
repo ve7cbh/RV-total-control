@@ -47,7 +47,7 @@ import paho.mqtt.client as mqtt
 
 MODBUS_HOST = "192.168.88.5"
 MODBUS_PORT = 4001
-MODBUS_SLAVE = 2
+MODBUS_SLAVE = 1
 MODBUS_TIMEOUT = 5        # seconds
 
 MQTT_HOST = "192.168.88.3"
