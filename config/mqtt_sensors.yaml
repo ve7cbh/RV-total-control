@@ -202,6 +202,15 @@ sensor:
     state_class: measurement
     expire_after: 60
 
+  - name: "Grid Relay State"
+    unique_id: mqtt_grid_relay_state
+    state_topic: "rvtc/sensors/grid/relay_state"
+    state_class: measurement
+    expire_after: 60
+    # 1=connected, 0=disconnected — internal KWS-303L relay (register 63)
+    # Confirmed via mbpoll 2026-06-30: 1 = connected/under load, no
+    # inverted logic (unlike the Waveshare NC relay coils).
+
   # ── KWS-303L — Generator Meter ────────────────────────────────────────────
   # Pending physical install — entities will be unavailable until wired
 
@@ -257,6 +266,14 @@ sensor:
     state_topic: "rvtc/sensors/generator/alarm_code"
     state_class: measurement
     expire_after: 60
+
+  - name: "Generator Relay State"
+    unique_id: mqtt_generator_relay_state
+    state_topic: "rvtc/sensors/generator/relay_state"
+    state_class: measurement
+    expire_after: 60
+    # 1=connected, 0=disconnected — inert until generator meter is wired
+    # and GENERATOR_ENABLED = True in kws_mqtt.py
 
 # ── SAMLUX EVO-2212 — Inverter-Charger ───────────────────────────────────
 
@@ -384,4 +401,3 @@ sensor:
     state_topic: "rvtc/sensors/inverter/fan_speed"
     state_class: measurement
     expire_after: 60
-
