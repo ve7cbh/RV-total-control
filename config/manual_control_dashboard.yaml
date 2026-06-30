@@ -1,0 +1,39 @@
+# Manual Control — Dashboard view
+#
+# Add this as a new view (tab) in your Lovelace dashboard config.
+# UI route: Settings -> Dashboards -> [your dashboard] -> Edit -> Add View
+# -> raw config editor, paste the contents under "cards:".
+# Or if you manage Lovelace via YAML mode, add this whole block under
+# your dashboard's `views:` list.
+
+title: Manual Control
+path: manual-control
+icon: mdi:toggle-switch-outline
+cards:
+  - type: heading
+    heading: Load Shed (Tier 3 override)
+  - type: entities
+    title: Manual Load Shed
+    show_header_toggle: false
+    entities:
+      - entity: input_boolean.manual_shed_water_heater
+        name: Water Heater
+        icon: mdi:water-boiler
+      - entity: input_boolean.manual_shed_microwave
+        name: Microwave
+        icon: mdi:microwave
+  - type: entities
+    title: Coil Status (actual relay state)
+    show_header_toggle: false
+    entities:
+      - entity: input_boolean.coil1_energised
+        name: Coil 1 — Water Heater shed
+      - entity: input_boolean.coil2_energised
+        name: Coil 2 — Microwave shed
+
+  # Room for future manual controls (lighting etc.) — add more
+  # `type: entities` cards below as you wire them up.
+  # - type: entities
+  #   title: Lighting
+  #   entities:
+  #     - entity: switch.example_light

@@ -1,0 +1,141 @@
+# Tier 3 — Automations
+# Add to automations.yaml (or !include it).
+#
+# Shed automations: fire once when current crosses the entry threshold and
+# stays there 30s (debounce per spec). mode: single + script's own mode:
+# single means a re-trigger mid-sequence is just ignored, not stacked.
+#
+# Restore automations: checked every minute while a coil is energised, so
+# the script's own numeric_state conditions decide whether anything happens.
+# This avoids needing a "for:" duration on every restore threshold individually.
+
+automation:
+
+  - alias: "Tier 3 - Grid Overload Trigger"
+    id: tier3_grid_overload_trigger
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.grid_current
+        above: 25
+        for: "00:00:30"
+    condition:
+      - condition: template
+        value_template: "{{ states('sensor.samlux_operating_mode_text') | lower != 'inverting' }}"
+    action:
+      - service: script.tier3_grid_overload_response
+
+  - alias: "Tier 3 - Grid Restore Check"
+    id: tier3_grid_restore_check
+    trigger:
+      - platform: time_pattern
+        minutes: "/1"
+    condition:
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_boolean.coil1_energised
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.coil2_energised
+            state: "on"
+    action:
+      - service: script.tier3_grid_restore
+
+  - alias: "Tier 3 - Generator Overload Trigger"
+    id: tier3_generator_overload_trigger
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.generator_current
+        above: 22
+        for: "00:00:30"
+    condition:
+      - condition: template
+        value_template: "{{ states('sensor.samlux_operating_mode_text') | lower != 'inverting' }}"
+    action:
+      - service: script.tier3_generator_overload_response
+
+  - alias: "Tier 3 - Generator Restore Check"
+    id: tier3_generator_restore_check
+    trigger:
+      - platform: time_pattern
+        minutes: "/1"
+    condition:
+      - condition: or
+        conditions:
+          - condition: state
+            entity_id: input_boolean.coil1_energised
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.coil2_energised
+            state: "on"
+    action:
+      - service: script.tier3_generator_restore
+
+  # Manual override switches (Manual Control dashboard tab).
+  # Turning ON: shed the load immediately, regardless of current.
+  # Turning OFF: hand back to Tier 3 — call both restore scripts, which only
+  # actually restore if current is under threshold for that source.
+
+  - alias: "Manual Shed - Water Heater"
+    id: manual_shed_water_heater_toggle
+    trigger:
+      - platform: state
+        entity_id: input_boolean.manual_shed_water_heater
+    action:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.manual_shed_water_heater
+                state: "on"
+            sequence:
+              - service: shell_command.relay_1_on
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.coil1_energised
+              - service: logbook.log
+                data:
+                  name: "Manual Shed"
+                  message: "Water heater manually shed (coil 1 ON)"
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.manual_shed_water_heater
+                state: "off"
+            sequence:
+              - service: logbook.log
+                data:
+                  name: "Manual Shed"
+                  message: "Water heater manual override released — handing back to Tier 3"
+              - service: script.tier3_grid_restore
+              - service: script.tier3_generator_restore
+
+  - alias: "Manual Shed - Microwave"
+    id: manual_shed_microwave_toggle
+    trigger:
+      - platform: state
+        entity_id: input_boolean.manual_shed_microwave
+    action:
+      - choose:
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.manual_shed_microwave
+                state: "on"
+            sequence:
+              - service: shell_command.relay_2_on
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.coil2_energised
+              - service: logbook.log
+                data:
+                  name: "Manual Shed"
+                  message: "Microwave manually shed (coil 2 ON)"
+          - conditions:
+              - condition: state
+                entity_id: input_boolean.manual_shed_microwave
+                state: "off"
+            sequence:
+              - service: logbook.log
+                data:
+                  name: "Manual Shed"
+                  message: "Microwave manual override released — handing back to Tier 3"
+              - service: script.tier3_grid_restore
+              - service: script.tier3_generator_restore
