@@ -75,6 +75,7 @@ KWS_REGISTERS = [
     (55,       0.001,  "energy_kwh",        "kWh"),   # Consumed Energy (cumulative)
     (60,       1.0,    "temperature",       "C"),     # Internal NTC temperature
     (62,       1.0,    "alarm_code",        ""),      # 0=none,1=OV,2=UV,4=OC,32=OT
+    (63,       1.0,    "relay_state",       ""),      # 1=ON, 0=OFF 
 ]
 
 # ── Modbus helper ──────────────────────────────────────────────────────────────
