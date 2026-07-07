@@ -181,6 +181,9 @@
     min-width: 0;
   }
  
+  /* FONT SIZE: default card title (e.g. "PV Power", "Battery SOC") — used on Solar/Battery
+     tabs and anywhere a card doesn't override it inline. Change 20px to resize every
+     default card title at once. */
   .card-label {
     font-family: var(--font-mono);
     font-size: 20px;
@@ -191,6 +194,9 @@
     margin-bottom: 8px;
   }
  
+  /* FONT SIZE: default big number in a .card (Solar page's SOC %, kWh figures, etc.) —
+     clamp(floor, scales-with-window-width, ceiling). Raise 72px for a bigger max on wide
+     screens; raise 40px to make the floor bigger on narrow/zoomed-in views. */
   .card-value {
     font-family: var(--font-mono);
     font-weight: 700;
@@ -199,6 +205,7 @@
     font-size: clamp(40px, 5vw, 72px);
   }
  
+  /* FONT SIZE: the small unit label beside a .card-value (e.g. the "%" or "kWh"). */
   .card-unit {
     font-family: var(--font-mono);
     font-size: clamp(16px, 1.8vw, 26px);
@@ -207,6 +214,7 @@
     margin-left: 6px;
   }
  
+  /* FONT SIZE: small caption text under a card value (e.g. "Internal NTC", "Battery: — V"). */
   .card-sub {
     font-family: var(--font-mono);
     font-size: 13px;
@@ -227,6 +235,9 @@
     min-width: 0;
   }
  
+  /* FONT SIZE: the huge number on a .card-hero (Solar tab "PV Power", Battery tab "SOC").
+     NOT used on the Power tab — the Power tab hero has its own .active-hero-value below,
+     and Grid/EVO use .inv-mode-text inline overrides instead. */
   .hero-value {
     font-family: var(--font-mono);
     font-weight: 700;
@@ -236,6 +247,7 @@
     font-size: clamp(72px, 9vw, 130px);
   }
  
+  /* FONT SIZE: unit beside .hero-value (Solar/Battery tabs), e.g. the "W" after PV Power. */
   .hero-unit {
     font-family: var(--font-mono);
     font-size: clamp(24px, 3vw, 40px);
@@ -245,6 +257,8 @@
  
   .hero-meta { display: flex; flex-direction: column; gap: 12px; }
  
+  /* FONT SIZE: label text in the sidebar list next to a hero card
+     (Solar/Battery tabs, e.g. "PV Voltage", "PV Current"). */
   .hero-row {
     font-family: var(--font-mono);
     font-size: clamp(14px, 1.4vw, 20px);
@@ -254,6 +268,8 @@
     gap: 10px;
   }
  
+  /* FONT SIZE: the actual VALUE (not label) in that same sidebar list, e.g. "119.6" in
+     "PV Voltage 119.6 V". Usually a touch bigger than .hero-row above it. */
   .hero-row .val {
     color: var(--text);
     font-weight: 700;
@@ -266,14 +282,18 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 16px;
-    padding: 14px 24px;
+    padding: 10px 18px;
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 22px;
     flex: 2;
     min-width: 0;
   }
 
+  /* FONT SIZE: base size for the big number inside an .inv-hero box (Power tab's Grid
+     and EVO-2212 boxes both use .inv-hero). Both currently override this inline in the
+     HTML below (search for "inv-mode-text" style=), so changing this value alone may not
+     visibly change anything — check those inline overrides too. */
   .inv-mode-text {
     font-family: var(--font-mono);
     font-weight: 700;
@@ -283,12 +303,14 @@
     white-space: nowrap;
   }
 
+  /* FONT SIZE: the small stat LABELS in the Power tab's Grid/EVO-2212 boxes
+     (the words "Volt", "Curr", "Batt V", "Out Hz" etc). Power tab only. */
   .inv-meta {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px 24px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4px 12px;
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 14px;
     color: var(--muted);
   }
 
@@ -299,10 +321,12 @@
     white-space: nowrap;
   }
 
+  /* FONT SIZE: the stat VALUES next to those labels above (e.g. the "119.6" in "Volt 119.6").
+     Raise this if you want the Grid/EVO stat numbers bigger. */
   .inv-meta .iv {
     color: var(--text);
     font-weight: 700;
-    font-size: 15px;
+    font-size: 16px;
   }
  
   /* ── SOC bar ── */
@@ -347,28 +371,137 @@
   .red    { color: var(--red);    }
  
   /* coming soon */
+  /* FONT SIZE: the "pending install" placeholder text (currently only the Generator card). */
   .coming-soon {
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-size: 15px;
     color: var(--muted);
-    line-height: 2.2;
+    line-height: 1.9;
   }
 
   /* ── Inverter temp grid ── */
+  /* FONT SIZE: the EVO-2212 Temperatures card — both labels (Battery, Transformer...) and,
+     via .tv below, the values use this size (the .tv rule below only changes colour/weight,
+     not size). */
   .temp-grid {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 2px 12px;
-    margin-top: 8px;
+    gap: 3px 10px;
+    margin-top: 6px;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--muted);
-    line-height: 1.7;
+    line-height: 1.6;
   }
   .temp-grid .tv {
     color: var(--orange);
     font-weight: 700;
   }
+
+  /* -- Active-source hero band -- */
+  .active-hero {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 36px;
+    flex-shrink: 0;
+    transition: border-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+  }
+
+  .active-hero-main { text-align: center; }
+
+  /* FONT SIZE: Power tab top hero — small label above the big number ("GRID", "EVO / SOLAR" etc). */
+  .active-hero-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+  }
+
+  /* FONT SIZE: Power tab top hero — THE big number (e.g. "1686"). This is the main dial.
+     clamp(floor, scales-with-width, ceiling) — raise 170px for a bigger max on wide screens,
+     raise 90px to make it bigger even at narrow width or high browser zoom. */
+  .active-hero-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-size: clamp(64px, 8vw, 124px);
+    transition: color 0.3s ease;
+  }
+
+  /* FONT SIZE: Power tab top hero — the "W" unit beside the big number. */
+  .active-hero-unit {
+    font-family: var(--font-mono);
+    font-size: clamp(16px, 1.8vw, 26px);
+    color: var(--muted);
+    margin-left: 8px;
+  }
+
+  /* FONT SIZE: Power tab top hero — small line under the big number
+     (e.g. "119.7 V · 14.8 A" or "Battery · 41.2A · 13.2V"). */
+  .active-hero-sub {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .lamp-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-left: 32px;
+    border-left: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .lamp-item { display: flex; align-items: center; gap: 10px; }
+
+  .lamp-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  /* FONT SIZE: Power tab top hero — "GRID" / "GENERATOR" / "EVO / SOLAR" words next to
+     the indicator lamp dots on the right side of the hero band. */
+  .lamp-label {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    white-space: nowrap;
+    transition: color 0.3s ease;
+  }
+
+  /* -- 3-column source detail row -- */
+  .detail-row { display: flex; gap: 14px; flex: 1; min-height: 0; }
+
+  .detail-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .detail-col.dim { opacity: 0.55; }
+
+  .col { display: flex; flex-direction: column; gap: 14px; flex: 1; min-height: 0; }
 </style>
 </head>
 <body>
@@ -449,6 +582,7 @@
       <div class="card">
         <div class="card-label">Charging<br>Power</div>
         <div><span class="card-value green" id="s-charging-power">—</span><span class="card-unit">W</span></div>
+        <div class="card-sub" style="margin-top:8px"><span id="s-charging-current">—</span> A</div>
       </div>
       <div class="card">
         <div class="card-label">Today's<br>Generation</div>
@@ -513,93 +647,121 @@
   <!-- ══ POWER ══ -->
   <div class="tab" id="tab-power">
     <div class="page-header">
-      <div class="page-title">⚡ &nbsp;Power — Grid &amp; Inverter</div>
+      <div class="page-title">⚡ &nbsp;Power — Grid, Generator &amp; Inverter</div>
       <div class="last-updated"><span id="grid-updated">—</span></div>
     </div>
 
-    <!-- Row 1: Grid hero + power factor/energy -->
-    <div class="row">
-      <div class="card-hero">
-        <div>
-          <div class="card-label">Grid Power (KWS-303L)</div>
-          <div><span class="hero-value" style="color:var(--blue)" id="g-power">—</span><span class="hero-unit">W</span></div>
-        </div>
-        <div class="hero-meta">
-          <div class="hero-row"><span>Voltage&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="val blue" id="g-voltage">—</span><span>V</span></div>
-          <div class="hero-row"><span>Current&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="val blue" id="g-current">—</span><span>A</span></div>
-          <div class="hero-row"><span>Frequency&nbsp;&nbsp;</span><span class="val" id="g-frequency">—</span><span>Hz</span></div>
-        </div>
+    <!-- Active-source hero: whichever source is live, big and centered, with lamp indicators -->
+    <div class="active-hero" id="active-hero">
+      <div class="active-hero-main">
+        <div class="active-hero-label" id="ah-label">—</div>
+        <div><span class="active-hero-value" id="ah-watt">—</span><span class="active-hero-unit">W</span></div>
+        <div class="active-hero-sub" id="ah-sub">—</div>
       </div>
-      <div class="card" style="flex:1">
-        <div class="card-label">Power Factor</div>
-        <div><span class="card-value green" id="g-pf">—</span></div>
-        <div class="card-sub" style="margin-top:16px">Energy consumed</div>
-        <div style="margin-top:6px"><span class="card-value" style="font-size:36px" id="g-energy">—</span><span class="card-unit">kWh</span></div>
+      <div class="lamp-col">
+        <div class="lamp-item"><div class="lamp-dot" id="lamp-grid"></div><span class="lamp-label">Grid</span></div>
+        <div class="lamp-item"><div class="lamp-dot" id="lamp-gen"></div><span class="lamp-label">Generator</span></div>
+        <div class="lamp-item"><div class="lamp-dot" id="lamp-evo"></div><span class="lamp-label">EVO / Solar</span></div>
       </div>
     </div>
 
-    <!-- Row 2: Grid lower cards + EVO mode badge -->
-    <div class="row">
-      <div class="card">
-        <div class="card-label">Meter<br>Temperature</div>
-        <div><span class="card-value orange" id="g-temp">—</span><span class="card-unit">°C</span></div>
-        <div class="card-sub">Internal NTC</div>
-      </div>
-      <div class="card">
-        <div class="card-label">Alarm</div>
-        <div style="margin-top:6px"><span id="g-alarm" class="card-value green" style="font-size:28px">—</span></div>
-      </div>
-      <div class="card">
-        <div class="card-label">Generator</div>
-        <div class="coming-soon" style="margin-top:8px">RS-485/3 slave 2<br>pending install</div>
-      </div>
-      <div class="card">
-        <div class="card-label">EVO-2212</div>
-        <div style="margin-top:10px"><span id="i-mode" class="badge badge-none">—</span></div>
-        <div class="card-sub" style="margin-top:8px">Inverter / Charger</div>
-      </div>
-    </div>
+    <!-- Always-visible detail, 3 columns side by side -->
+    <div class="detail-row">
 
-    <!-- Row 3: EVO-2212 detail — fixed height, compact layout -->
-    <div class="row-fixed">
-
-      <!-- Compact inv hero: mode text left, 2-col data grid right -->
-      <div class="inv-hero" style="flex:2">
-        <div>
-          <div class="card-label" style="font-size:14px;margin-bottom:6px">EVO-2212 — Mode</div>
-          <span id="i-mode-hero" class="inv-mode-text">—</span>
+      <!-- GRID column -->
+      <div class="detail-col" id="col-grid">
+        <div class="inv-hero" style="flex:0 0 auto">
+          <div>
+            <!-- FONT SIZE: "Grid (KWS-303L)" title -->
+            <div class="card-label" style="font-size:13px;margin-bottom:4px">Grid (KWS-303L)</div>
+            <!-- FONT SIZE: the big Grid watt number (currently 42px) and its "W" unit (16px) -->
+            <span class="inv-mode-text" style="font-size:32px;color:var(--blue)"><span id="g-power">—</span><span style="font-size:13px;color:var(--muted);margin-left:4px">W</span></span>
+          </div>
+          <div class="inv-meta">
+            <div class="im-row"><span>Volt</span><span class="iv blue" id="g-voltage">—</span><span>V</span></div>
+            <div class="im-row"><span>Curr</span><span class="iv blue" id="g-current">—</span><span>A</span></div>
+            <div class="im-row"><span>Freq</span><span class="iv" id="g-frequency">—</span><span>Hz</span></div>
+            <div class="im-row"><span>PF</span><span class="iv green" id="g-pf">—</span><span>&nbsp;</span></div>
+          </div>
         </div>
-        <div class="inv-meta">
-          <div class="im-row"><span>Input</span><span class="iv blue" id="i-input-watt">—</span><span>W</span></div>
-          <div class="im-row"><span>Batt V</span><span class="iv green" id="i-batt-voltage">—</span><span>V</span></div>
-          <div class="im-row"><span>Out V</span><span class="iv" id="i-output-voltage">—</span><span>V</span></div>
-          <div class="im-row"><span>Batt A</span><span class="iv" id="i-batt-current">—</span><span>A</span></div>
-          <div class="im-row"><span>Out Hz</span><span class="iv" id="i-output-freq">—</span><span>Hz</span></div>
-          <div class="im-row"><span>Fan</span><span class="iv" id="i-fan">—</span><span>RPM</span></div>
+        <div class="col">
+          <div class="row">
+            <div class="card" style="flex:1">
+              <!-- FONT SIZE: "Meter Temp" title -->
+              <div class="card-label" style="font-size:13px">Meter Temp</div>
+              <!-- FONT SIZE: the big temperature number (44px) -->
+              <div><span class="card-value orange" style="font-size:32px" id="g-temp">—</span><span class="card-unit">°C</span></div>
+              <!-- FONT SIZE: "Internal NTC" caption -->
+              <div class="card-sub" style="font-size:12px">Internal NTC</div>
+            </div>
+            <div class="card" style="flex:1">
+              <!-- FONT SIZE: "Alarm" title -->
+              <div class="card-label" style="font-size:13px">Alarm</div>
+              <!-- FONT SIZE: the "None" / alarm-code text (30px) -->
+              <div style="margin-top:4px"><span id="g-alarm" class="card-value green" style="font-size:22px">—</span></div>
+              <!-- FONT SIZE: "Energy: ... kWh" caption -->
+              <div class="card-sub" style="margin-top:6px;font-size:12px">Energy: <span id="g-energy">—</span> kWh</div>
+            </div>
+          </div>
         </div>
-      </div>
+      </div><!-- /col-grid -->
 
-      <!-- Temperatures -->
-      <div class="card">
-        <div class="card-label" style="font-size:14px;margin-bottom:4px">Temperatures</div>
-        <div class="temp-grid">
-          <span>Battery</span>     <span class="tv" id="i-temp-batt">—</span>
-          <span>Transformer</span> <span class="tv" id="i-temp-xfmr">—</span>
-          <span>Busbar</span>      <span class="tv" id="i-temp-bus">—</span>
-          <span>Heatsink</span>    <span class="tv" id="i-temp-sink">—</span>
+      <!-- GENERATOR column -->
+      <div class="detail-col" id="col-generator">
+        <div class="card" style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center">
+          <div>
+            <!-- FONT SIZE: "Generator" title -->
+            <div class="card-label" style="font-size:13px;margin-bottom:6px">Generator</div>
+            <!-- FONT SIZE: "pending install" text comes from .coming-soon in the CSS above, no inline override -->
+            <div class="coming-soon">RS-485/3 slave 2<br>pending install</div>
+          </div>
         </div>
-        <div class="card-sub" style="margin-top:4px;font-size:11px">°C</div>
-      </div>
+      </div><!-- /col-generator -->
 
-      <!-- Fault -->
-      <div class="card">
-        <div class="card-label" style="font-size:14px;margin-bottom:4px">Error Code</div>
-        <div style="margin-top:8px">
-          <span id="i-error" style="font-family:var(--font-mono);font-weight:700;font-size:20px;color:var(--green)">—</span>
+      <!-- EVO-2212 / battery column -->
+      <div class="detail-col" id="col-evo">
+        <div class="inv-hero" style="flex:0 0 auto">
+          <div>
+            <!-- FONT SIZE: "EVO-2212" title -->
+            <div class="card-label" style="font-size:13px;margin-bottom:4px">EVO-2212</div>
+            <!-- FONT SIZE: the "INVERTING"/"CHARGING" badge text comes from .badge in the CSS above -->
+            <span id="i-mode" class="badge badge-none">—</span>
+          </div>
+          <div class="inv-meta">
+            <div class="im-row"><span id="i-watt-label">Input</span><span class="iv blue" id="i-input-watt">—</span><span>W</span></div>
+            <div class="im-row"><span>Batt V</span><span class="iv green" id="i-batt-voltage">—</span><span>V</span></div>
+            <div class="im-row"><span>Out V</span><span class="iv" id="i-output-voltage">—</span><span>V</span></div>
+            <div class="im-row"><span>Batt A</span><span class="iv" id="i-batt-current">—</span><span>A</span></div>
+            <div class="im-row"><span>Out Hz</span><span class="iv" id="i-output-freq">—</span><span>Hz</span></div>
+            <div class="im-row"><span>Fan</span><span class="iv" id="i-fan">—</span><span>RPM</span></div>
+          </div>
         </div>
-      </div>
+        <div class="col">
+          <div class="row">
+            <div class="card" style="flex:1">
+              <!-- FONT SIZE: "Temperatures" title -->
+              <div class="card-label" style="font-size:13px;margin-bottom:3px">Temperatures</div>
+              <!-- FONT SIZE: the Battery/Transformer/Busbar/Heatsink rows come from .temp-grid in the CSS above -->
+              <div class="temp-grid">
+                <span>Battery</span>     <span class="tv" id="i-temp-batt">—</span>
+                <span>Transformer</span> <span class="tv" id="i-temp-xfmr">—</span>
+                <span>Busbar</span>      <span class="tv" id="i-temp-bus">—</span>
+                <span>Heatsink</span>    <span class="tv" id="i-temp-sink">—</span>
+              </div>
+              <!-- FONT SIZE: the "°C" unit line under Temperatures -->
+              <div class="card-sub" style="margin-top:3px;font-size:12px">°C</div>
+            </div>
+            <div class="card" style="flex:1">
+              <!-- FONT SIZE: "Error Code" title -->
+              <div class="card-label" style="font-size:13px;margin-bottom:3px">Error Code</div>
+              <!-- FONT SIZE: the "None"/error-code text (26px) -->
+              <div style="margin-top:8px"><span id="i-error" style="font-family:var(--font-mono);font-weight:700;font-size:20px;color:var(--green)">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /col-evo -->
 
-    </div><!-- /row-fixed -->
+    </div><!-- /detail-row -->
 
   </div><!-- /tab-power -->
  
@@ -698,9 +860,9 @@ from(bucket: "${BUCKET}")
 // ── Operating mode decode ────────────────────────────────────────────────────
 const INV_MODE_MAP = {
   0: { label: 'Standby',   cls: 'badge-none',   colour: 'var(--muted)'  },
-  1: { label: 'Line',      cls: 'badge-float',  colour: 'var(--green)'  },
+  1: { label: 'Inverting', cls: 'badge-boost',  colour: 'var(--solar)'  },
   2: { label: 'Charging',  cls: 'badge-float',  colour: 'var(--green)'  },
-  3: { label: 'Inverting', cls: 'badge-boost',  colour: 'var(--solar)'  },
+  3: { label: 'Line',      cls: 'badge-float',  colour: 'var(--green)'  },
   4: { label: 'Bypass',    cls: 'badge-eq',     colour: 'var(--blue)'   },
   5: { label: 'Fault',     cls: 'badge-red',    colour: 'var(--red)'    },
 };
@@ -713,6 +875,7 @@ async function fetchSolar() {
     set('s-pv-voltage',     data.pv_voltage,             1);
     set('s-pv-current',     data.pv_current,             2);
     set('s-charging-power', data.charging_power,         0);
+    set('s-charging-current', data.charging_current,       1);
     set('s-daily-kwh',      data.daily_energy_kwh,       2);
     set('s-total-kwh',      data.total_energy_kwh,       2);
     set('s-ctrl-temp',      data.controller_temperature, 1);
@@ -767,6 +930,10 @@ async function fetchGrid() {
       alarmEl.textContent = alarmMap[code] || `Code ${code}`;
       alarmEl.style.color = code === 0 ? 'var(--green)' : 'var(--red)';
     }
+
+    lastGrid.power = data.power;
+    lastGrid.voltage = data.voltage;
+    lastGrid.current = data.current;
  
     const now = new Date().toLocaleTimeString('en-CA',
       {hour:'2-digit', minute:'2-digit', second:'2-digit'});
@@ -776,6 +943,69 @@ async function fetchGrid() {
     console.error('Grid fetch error:', e);
     document.getElementById('grid-updated').textContent = 'error — retrying';
   }
+}
+
+// -- Active-source hero + lamps (Grid / Generator / EVO+Solar) --------------
+const lastGrid = { power: undefined, voltage: undefined, current: undefined };
+
+function updateActiveHero(gridActive, genActive, evoActive, invData) {
+  const heroBox = document.getElementById('active-hero');
+  const labelEl = document.getElementById('ah-label');
+  const wattEl  = document.getElementById('ah-watt');
+  const subEl   = document.getElementById('ah-sub');
+
+  let colour = 'var(--muted)', label = 'Standby', watt = '—', sub = '—';
+
+  if (gridActive) {
+    colour = 'var(--blue)';
+    label = 'Grid';
+    watt = (lastGrid.power === undefined || isNaN(lastGrid.power)) ? '—' : Number(lastGrid.power).toFixed(0);
+    sub = (!isNaN(lastGrid.voltage) && !isNaN(lastGrid.current))
+      ? `${Number(lastGrid.voltage).toFixed(1)} V · ${Number(lastGrid.current).toFixed(3)} A`
+      : '—';
+  } else if (genActive) {
+    colour = 'var(--orange)';
+    label = 'Generator';
+    watt = '—';
+    sub = 'Pending install';
+  } else if (evoActive) {
+    colour = 'var(--solar)';
+    label = 'EVO / Solar';
+    const invW = invData && invData.invert_charge_watt;
+    watt = (invW === undefined || isNaN(invW)) ? '—' : Math.abs(invW).toFixed(0);
+    const battA = invData && invData.battery_current;
+    const battV = invData && invData.battery_voltage;
+    sub = (!isNaN(battA) && !isNaN(battV))
+      ? `Battery · ${Number(battA).toFixed(1)}A · ${Number(battV).toFixed(1)}V`
+      : 'Battery';
+  }
+
+  if (heroBox) heroBox.style.borderColor = (gridActive || genActive || evoActive) ? colour : 'var(--border)';
+  if (labelEl) { labelEl.textContent = label; labelEl.style.color = colour; }
+  if (wattEl)  { wattEl.textContent  = watt;  wattEl.style.color  = colour; }
+  if (subEl)   subEl.textContent = sub;
+
+  const lamps = [
+    { dotId: 'lamp-grid', active: gridActive, colour: 'var(--blue)'   },
+    { dotId: 'lamp-gen',  active: genActive,  colour: 'var(--orange)' },
+    { dotId: 'lamp-evo',  active: evoActive,  colour: 'var(--solar)'  },
+  ];
+  lamps.forEach(l => {
+    const dot = document.getElementById(l.dotId);
+    if (!dot) return;
+    dot.style.background = l.active ? l.colour : 'var(--border)';
+    dot.style.boxShadow   = l.active ? `0 0 8px ${l.colour}` : 'none';
+  });
+
+  const cols = [
+    { colId: 'col-grid',      active: gridActive },
+    { colId: 'col-generator', active: genActive  },
+    { colId: 'col-evo',       active: evoActive  },
+  ];
+  cols.forEach(c => {
+    const col = document.getElementById(c.colId);
+    if (col) col.classList.toggle('dim', !c.active);
+  });
 }
 
 async function fetchInverter() {
@@ -788,10 +1018,32 @@ async function fetchInverter() {
     const modeEl = document.getElementById('i-mode');
     if (modeEl) { modeEl.textContent = m.label; modeEl.className = `badge ${m.cls}`; }
 
-    const heroEl = document.getElementById('i-mode-hero');
-    if (heroEl) { heroEl.textContent = m.label; heroEl.style.color = m.colour; }
+    // status_grid_input / status_gen_input register behaviour NOT confirmed live (2026-07-05
+    // incident: both read active simultaneously while genuinely off-grid/inverting) -- do not
+    // use them until verified with mosquitto_sub during a real state. Falling back to the
+    // confirmed operating_mode value only. Generator hardcoded inactive until HW-09 is installed
+    // and its own status is actually confirmed.
+    const gridActive = mode === 2;
+    const genActive  = false;
+    const evoActive  = mode === 1;
+    updateActiveHero(gridActive, genActive, evoActive, data);
 
-    set('i-input-watt',     data.input_watt,              0);
+    const labelEl = document.getElementById('i-watt-label');
+    const invW = data.invert_charge_watt;
+    if (mode === 1) {
+      // Inverting: show actual output power delivered to loads, not grid input (always 0 here)
+      if (labelEl) labelEl.textContent = 'Output';
+      set('i-input-watt', invW === undefined ? undefined : Math.abs(invW), 0);
+    } else if (mode === 2) {
+      // Charging: sign convention for invert_charge_watt while charging not yet confirmed live —
+      // fall back to input_watt (grid draw) until confirmed, per project convention of not
+      // guessing at unconfirmed register behaviour
+      if (labelEl) labelEl.textContent = 'Input';
+      set('i-input-watt', data.input_watt, 0);
+    } else {
+      if (labelEl) labelEl.textContent = 'Input';
+      set('i-input-watt', data.input_watt, 0);
+    }
     set('i-output-voltage', data.output_voltage,          1);
     set('i-output-freq',    data.output_frequency,        2);
     set('i-batt-voltage',   data.battery_voltage,         2);
