@@ -1,11 +1,10 @@
 # RVTC — Consolidated Reference Document
 
-**Version 1.1** — supersedes Version 1.0. Changes in this revision: SOC/power
-web-panel smoothing, GPS bridge deployment, RouterOS v7 upgrade, Telegraf/SNMP
-monitoring framework, IMU node build (HW-25, corrected to RS-485-primary
-architecture), and a full reconciliation of the RS-485 gateway addressing
-table (Section 5.5) against live hardware — see [Part 4](#part-4--chronological-session-log)
-for session-by-session detail.
+**Version 1.2** — supersedes Version 1.1. Changes in this revision: full
+hardware bring-up of the IMU node (HW-25) — every dependency, compile, and
+wiring bug found and fixed, confirmed working end-to-end on both its RS-485
+Modbus (primary) and WiFi/MQTT/web (secondary) paths. See
+[Part 4](#part-4--chronological-session-log) for session-by-session detail.
 
 *Rationalized from session notes dated 2026-06-26 through 2026-07-06. This document
 merges: `RVTC_Session_Summary_20260626.md`, `Section9_Phase7_addition_20260630.md`,
@@ -13,9 +12,10 @@ merges: `RVTC_Session_Summary_20260626.md`, `Section9_Phase7_addition_20260630.m
 `RVTC_SessionLog_20260706_MicrowaveRelay.md`, `RVTC_SessionLog_20260706_LoadShedRace.md`,
 and the 2026-07-06 chat session covering the EPEVER SOC investigation.
 Updated 2026-07-07 with the SOC/power web-panel smoothing, GPS bridge, RouterOS
-v7 upgrade, and Telegraf/SNMP deployment sessions, and 2026-07-09 with the IMU
-node build — see [Part 4](#part-4--chronological-session-log)
-for full detail.*
+v7 upgrade, and Telegraf/SNMP deployment sessions; 2026-07-09 with the IMU
+node build; and 2026-07-10 with the IMU node's full hardware bring-up,
+confirmed working end-to-end on both its RS-485 and WiFi/MQTT paths — see
+[Part 4](#part-4--chronological-session-log) for full detail.*
 
 *Purpose: one searchable document instead of five+ separate files. Organized by
 **topic** (Parts 1–3) for "what's the current state / how do I fix this" lookups,
@@ -845,7 +845,8 @@ only VOIP/general internet access has been checked.
 | HW-22 | Install battery heater, wire coil 6 | Open |
 | HW-23 | RS485-1M2S — reconnect MT50 | ✅ Closed 2026-07-06 — installed, MT50 reconnected, confirmed as a documented passive multi-drop tap (see [1.5](#15-rs-485--modbus-gateway-topology)) |
 | HW-24 | DC shunt 400A RS-485 (ordered) | Open — see [2.1](#21-epever-battery-soc-swings--resolved), true fix for voltage-based SOC limitation |
-| HW-25 | IMU node — NodeMCU ESP32 + Adafruit 10-DOF (LSM303DLHC/L3GD20/BMP180) + SH1106 OLED | In progress 2026-07-09 — firmware written, not yet flashed/bench-tested. Heading feeds future wind-direction true-north correction; local phone page shows live heading/pitch/roll/bounce. See [5.1](#51-device--gateway-inventory) |
+| HW-25 | IMU node — NodeMCU ESP32 + Adafruit 10-DOF (LSM303DLHC/L3GD20/BMP180) + SH1106 OLED | ✅ Closed 2026-07-10 — bring-up complete. Both paths confirmed working end-to-end: RS-485 Modbus (primary) verified via a real `pymodbus` read through the Waveshare gateway, and WiFi/MQTT/web (secondary) confirmed via live browser + `mosquitto_sub`. Full bring-up log, every bug found and fixed, at [2026-07-10 log](#2026-07-10--imu-node-bring-up-hw-25). See [5.1](#51-device--gateway-inventory) |
+| HW-26 | Synology DS223 NAS — 4TB, RAID 1 (mirrored) | ✅ Closed 2026-07-09 — installed, commissioning. RAID 1 mirrors both disks — one disk can fail and the array keeps running on the other, unlike a striped RAID 0 array (briefly, incorrectly logged as RAID 0 in this entry originally; corrected same day). Usable capacity is roughly half the combined raw disk capacity, not the sum, since the second disk is a live copy rather than added space. The per-disk SMART monitoring in [5.1](#51-device--gateway-inventory)/Infrastructure dashboard is still worth watching regardless — RAID 1 protects against one disk failing, not against both failing close together, and catching a degrading disk early is what gives you time to replace it before that becomes a real risk. |
 
 ### 3.2 Software
 
@@ -1112,8 +1113,114 @@ addressing screenshot. That same screenshot prompted a full reconciliation of
 stale/unconfirmed entries — see that section for the corrected table,
 including the KWS grid/generator port-bundling decision (finally consolidated
 into [1.5C](#15-rs-485--modbus-gateway-topology) after being "buried in the
-notes" per the user) and one still-unresolved conflict over SAMLUX's actual
-gateway IP that needs checking against `samlux_mqtt.py` directly.
+notes" per the user) and a SAMLUX gateway-IP conflict that was flagged here
+and then resolved later the same day via a second, matching screenshot —
+see [5.5](#55-rs-485-bus--gateway-ip-addressing).
+
+---
+
+### 2026-07-10 — IMU Node Bring-Up (HW-25) — Confirmed Working End-to-End
+
+First real hardware session for the IMU node — dependency resolution,
+compiling, flashing, and debugging on actual hardware for the first time.
+Nothing worked on the first try; everything worked by the end. Full list of
+what broke and how it got fixed, since several of these are the kind of
+mistake worth recognizing quickly if they ever recur on a different board:
+
+**Dependency/library issues (all resolved by removing over-specific version
+pins):**
+- `platformio.ini` had guessed-wrong version numbers for all five Adafruit
+  sensor libraries (e.g. requested LSM303DLHC `^1.0.7`, actual latest
+  published is `1.0.4`) — caused `UnknownPackageError` on every attempt.
+  Fixed by dropping version pins entirely and letting PlatformIO resolve to
+  whatever's actually current.
+- `ModbusSlave` by Yaacov Zamir isn't listed in Arduino's official Library
+  Manager index (being on GitHub with a valid `library.properties` doesn't
+  guarantee registry inclusion) — worked around by pointing `lib_deps`
+  directly at the GitHub URL instead of a registry name.
+
+**Compile-time bugs, found only once real compilation was possible:**
+- `Modbus slave(...)` constructor had arguments in the wrong order —
+  written as `(slaveId, stream, pin)`, but the real library wants
+  `(stream, slaveId, pin)`. Confirmed against the library's actual source
+  while looking up its author name, before this ever hit a build.
+- The Modbus read-holding-registers callback (`readHoldingRegisters`) was
+  missing a 4th parameter (`void *callbackContext`) that the real library's
+  callback type requires — `invalid conversion` compile error until fixed.
+- One `PI` redefinition warning from `Adafruit_10DOF.cpp` — cosmetic only,
+  not fixed, doesn't block anything.
+
+**Hardware/board mismatch:**
+- Firmware originally used GPIO16/17 for RS-485 RX/TX, copied from an
+  assumption that didn't hold for the actual board in hand — the plain
+  30-pin ESP32-WROOM-32 DevKit doesn't break those pins out at all (only
+  the wider 38-pin variant does). Moved to GPIO18 (RX) / GPIO19 (TX),
+  keeping DE/RE on GPIO4.
+
+**OLED — genuinely resolved by hardware evidence overriding earlier
+arithmetic:** the silkscreen-decode reasoning from a few nights back
+(`0x7B` → 7-bit `0x3D`) turned out wrong once actually tested — an I2C
+scanner sketch, run standalone on the real hardware, showed the display
+answering at the standard default `0x3C`, not `0x3D`. Removed the incorrect
+`setI2CAddress(0x7A)` override entirely. Worth remembering generally: a
+confident-looking derivation from a datasheet/silkscreen is still a
+prediction until it's checked against the real device — this one was wrong
+despite being logically consistent, because the actual board's strapping
+just didn't match what was printed on it.
+
+**Process lessons, not code bugs:**
+- A VS Code "Problems panel" full of `cannot open source file` errors
+  turned out to be stale IntelliSense, not real compile failures — the
+  actual PlatformIO dependency install just hadn't finished yet. The
+  Problems panel and an actual `pio run` can disagree; the build output is
+  the one that's authoritative.
+- `Ctrl+C` in the serial monitor terminal resets the ESP32 — a side effect
+  of the DTR/RTS-to-EN/GPIO0 auto-reset wiring most DevKits have for
+  upload automation, not a bug specific to this board. Explains an earlier
+  same-session mystery where the device seemed to vanish from the network
+  right after a monitor session was closed.
+- Copy-pasting incremental firmware fixes by hand into an already-open
+  editor tab risks silent corruption (a dropped brace, etc.) that produces
+  confusing, seemingly-unrelated compile errors far from the actual
+  mistake. Switched to always replacing the whole file and comparing
+  line-count + MD5 hash, once a `REG_ROLL was not declared` error turned
+  out to be exactly this kind of partial-paste artifact.
+- Having a backup copy of `main.cpp` sitting inside `src/` (even under a
+  different filename) causes a linker error — PlatformIO compiles every
+  `.cpp` file in that folder, not just the one that's open, so two files
+  both defining `setup()`/`loop()` collide. Backups need to live outside
+  `src/` entirely, or use a non-`.cpp` extension.
+
+**RS-485 troubleshooting — the actual bug was almost comically simple.**
+Modbus requests confirmed (via oscilloscope, probing directly at the
+level-converter module) to be arriving correctly on the RS-485 side, but
+never reaching the ESP32 — extensive troubleshooting covered DE/RE
+polarity, common ground, and possible split DE/RE pins, before the actual
+cause turned up: **GPIO4 was never physically connected to the module at
+all.** Once wired, a real `pymodbus` read through the gateway returned
+correct, sensibly-scaled data on the first try (Heading 259.0°, Pitch
+-3.3°, Roll +3.4°).
+
+**End state, confirmed working:**
+- **RS-485 Modbus (primary)** — verified via a real Modbus TCP-to-RTU read
+  through the Waveshare gateway (`192.168.88.8:4001`), using a small
+  `pymodbus`-based test script (`rvtc-imu/test_modbus_read.py`)
+- **WiFi/MQTT/web (secondary)** — verified via the browser-rendered
+  leveling page, live-updating and correctly color-coding pitch/roll past
+  their ±1.5°/±3.0° thresholds, plus MQTT publish confirmed
+- **OLED** — confirmed initializing and displaying correctly at `0x3C`
+
+**Still open, not urgent:** hard-iron magnetometer calibration (needs the
+unit mounted in its final trailer position, and a towing/rotation
+procedure since humans can't be inside a moving trailer — raw
+magnetometer axis values aren't currently exposed anywhere, which will
+need adding before calibration is actually possible); OTA firmware
+updates (deliberately deferred until base firmware is fully proven, per
+the "one thing at a time" approach used all session); the gyro
+(`L3GD20`) answers at I2C `0x69`, not whatever address the Adafruit
+library defaults to — not blocking since the gyro isn't used in the
+orientation math yet, but would need the same kind of address-override
+fix as the OLED if it's ever wired in.
 
 ---
 
@@ -1130,7 +1237,7 @@ gateway IP that needs checking against `samlux_mqtt.py` directly.
 | GNSS E108-GN03G-485 | RS-485 bus 6 (`485-6`, confirmed via HW-10 cross-reference) | `192.168.88.10:4001` — TCP serial gateway, module replaced 2026-07-06/07 with a working u-blox unit | `gps_mqtt.py` — **not a direct gateway poller**; runs as a client of the host's own `gpsd` (port 2947), which is already gpsd's single TCP client of the gateway. Deliberate departure from the direct-poll pattern used by the other bridges — see script header comment for reasoning. | `gps_mqtt.service` | `rvtc/sensors/gps/#` (`latitude`, `longitude`, `altitude_m`, `speed_kmh`, `track_deg`, `time_utc`, `fix_mode`, `hdop`, `satellites_used`, `satellites_visible`, `availability`) |
 | Ecowitt WN90LP weather station | RS-485 bus 7 (`485-7`, confirmed via HW-16 cross-reference) | `192.168.88.11` (reserved; device shipped, not yet installed — HW-16 open) | *(not yet written — HW-16 open)* | — | *(likely `rvtc/sensors/weather/#`, pending `weewx-mqtt`)* |
 | MT50 remote | RS485-1M2S slave port, shares EPEVER line | n/a (direct RS-485, not TCP) | n/a | n/a | n/a |
-| IMU node — NodeMCU ESP32 + Adafruit 10-DOF + SH1106 OLED | RS-485 bus 4 (`485-4`) — **PRIMARY path**, dedicated gateway port (corrected 2026-07-09; an earlier draft this same day briefly and incorrectly assumed WiFi-only) | `192.168.88.8:4001` | `main.cpp` (PlatformIO, C++, not Python like the other bridges) — repo: `rvtc-imu/`. WiFi + MQTT + local web page are secondary/convenience paths only, matching [1.5](#15-rs-485--modbus-gateway-topology)'s general principle | *(runs as the ESP32's own firmware, no host-side systemd service)* | Modbus holding registers 0-2 (heading/pitch/roll, ×10 scaled int16) via RS-485; `rvtc/sensors/imu/#` (`heading`, `pitch`, `roll`, `heave`, `status`) via MQTT — **not persisted to InfluxDB**, real-time only |
+| IMU node — NodeMCU ESP32 (plain, not S3 — 30-pin variant, no GPIO16/17 broken out) + Adafruit 10-DOF + SH1106 OLED | RS-485 bus 4 (`485-4`) — **PRIMARY path**, dedicated gateway port, ✅ confirmed working end-to-end 2026-07-10 via real Modbus read | `192.168.88.8:4001` | `main.cpp` (PlatformIO, C++, not Python like the other bridges) — repo: `rvtc-imu/`. RS-485 pins: RX=GPIO18, TX=GPIO19, DE/RE=GPIO4 (moved off 16/17 — not present on this board). WiFi + MQTT + local web page are secondary/convenience paths only, matching [1.5](#15-rs-485--modbus-gateway-topology)'s general principle. OLED confirmed at I2C address 0x3C (standard default — no override needed; an earlier assumed 0x3D was wrong) | *(runs as the ESP32's own firmware, no host-side systemd service)* | Modbus holding registers 0-2 (heading/pitch/roll, ×10 scaled int16) via RS-485; `rvtc/sensors/imu/#` (`heading`, `pitch`, `roll`, `heave`, `status`) via MQTT — **not persisted to InfluxDB**, real-time only |
 
 **SNMP-monitored devices (2026-07-07)** — separate mechanism from the
 MQTT-bridge devices above. These are polled directly by Telegraf's
@@ -1142,7 +1249,7 @@ Telegraf writes straight to InfluxDB (`rvtc` bucket) for these.
 | Device | IP | SNMP status | Measurements collected |
 |---|---|---|---|
 | MikroTik CRS109 router | `192.168.88.1` | Confirmed working | `sysUptime`; per-interface `ifInOctets`/`ifOutOctets`/`ifInErrors`/`ifOutErrors`/`ifOperStatus` for every ether port, `bridge`, `wlan1`, `rogers-wan`, `starlink-wan` |
-| Synology DS223 NAS | `192.168.88.4` | Confirmed working | System + per-disk temperature, system status, per-volume status/total/used bytes, full per-disk SMART attribute table (reallocated sectors, power-on hours, spin retry count, etc.) |
+| Synology DS223 NAS — 4TB, RAID 1 mirrored (installed/commissioning, HW-26) | `192.168.88.4` | Confirmed working | System + per-disk temperature, system status, per-volume status/total/used bytes, full per-disk SMART attribute table (reallocated sectors, power-on hours, spin retry count, etc.) |
 | Brother MFC-L2710DW printer | `192.168.88.20` | Confirmed working | Drum level/capacity, lifetime page count |
 | Fanvil 4XG phone | `192.168.88.21` | Not yet responding | — likely needs SNMP enabled in its own admin UI |
 | Grandstream WP-820 phone | `192.168.88.24` | Not yet responding | — likely needs SNMP enabled in its own admin UI |
@@ -1265,7 +1372,7 @@ see [1.7](#17-network--router-topology-mikrotik).
 | `485-1` | `192.168.88.5` | **Confirmed: EPEVER MPPT60** (Power — Solar) | ✅ Connected, tested (baud 115200) |
 | `485-2` | `192.168.88.6` | **Confirmed: SAMLUX EVO-2212** (Power — Inverter) | ✅ Connected, tested |
 | `485-3` | `192.168.88.7` | **Confirmed: KWS-303L, grid.** Generator KWS-303L will be bundled onto this same port once installed — see [1.5C](#15-rs-485--modbus-gateway-topology) | ✅ Connected, tested (grid); generator pending physical install |
-| `485-4` | `192.168.88.8` | **Confirmed: IMU node** (HW-25) — Custom protocol (not standard Modbus register map of the other devices, own Phase 3 firmware) | 🟡 In progress — firmware written, not yet flashed |
+| `485-4` | `192.168.88.8` | **Confirmed: IMU node** (HW-25) — Custom protocol (not standard Modbus register map of the other devices, own Phase 3 firmware) | ✅ Connected, tested — confirmed working via real Modbus read 2026-07-10 |
 | `485-5` | `192.168.88.9` | **Confirmed: Water sensors** — pressure + filter ΔP + turbidity | Pending Phase 5 |
 | `485-6` | `192.168.88.10` | **Confirmed: GNSS E108-GN03G-485** | ✅ Installed and confirmed working (see [2026-07-07 log](#2026-07-07--grafana-socpower-smoothing-gps-bridge-routeros-v7-upgrade-telegrafsnmp-deployment)) — this table wasn't updated at the time; corrected now |
 | `485-7` | `192.168.88.11` | **Confirmed: Ecowitt WN90LP weather station** | Shipped, not yet installed |
@@ -1380,7 +1487,7 @@ needed, rather than assuming this was purely a paperwork mistake.
 
 **GPS / gpsd / gps_mqtt.py** → [5.1](#51-device--gateway-inventory), [2026-07-07 log](#2026-07-07--grafana-socpower-smoothing-gps-bridge-routeros-v7-upgrade-telegrafsnmp-deployment)
 
-**IMU node (HW-25)** → [5.1](#51-device--gateway-inventory), [1.5](#15-rs-485--modbus-gateway-topology), [2026-07-09 log](#2026-07-09--imu-node-build-hw-25)
+**IMU node (HW-25)** → [5.1](#51-device--gateway-inventory), [1.5](#15-rs-485--modbus-gateway-topology), [2026-07-09 log](#2026-07-09--imu-node-build-hw-25), [2026-07-10 bring-up log](#2026-07-10--imu-node-bring-up-hw-25--confirmed-working-end-to-end)
 
 **KWS-303L grid/generator port bundling** → [1.5](#15-rs-485--modbus-gateway-topology)
 
