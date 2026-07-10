@@ -207,12 +207,12 @@ const char INDEX_HTML[] PROGMEM = R"rawliteral(
     <div class="card">
       <div class="label">PITCH</div>
       <div class="value" id="pitch">---</div>
-      <div class="unit">nose up (+)</div>
+      <div class="unit">Bow up (+)</div>
     </div>
     <div class="card">
       <div class="label">ROLL</div>
       <div class="value" id="roll">---</div>
-      <div class="unit">stbd down (+)</div>
+      <div class="unit">Stbd down (+)</div>
     </div>
     <div class="card full">
       <div class="label">BOUNCE (2s peak-to-peak)</div>
