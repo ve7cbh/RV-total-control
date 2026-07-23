@@ -109,6 +109,18 @@ services:
     volumes:
       - ./config/telegraf_solar.conf:/etc/telegraf/telegraf.d/solar.conf:ro
       - ./config/telegraf_grid.conf:/etc/telegraf/telegraf.d/grid.conf:ro
+      - ./config/telegraf_generator.conf:/etc/telegraf/telegraf.d/generator.conf:ro
+      - ./config/telegraf_weather.conf:/etc/telegraf/telegraf.d/weather.conf:ro
     depends_on:
       - mosquitto
       - influxdb
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /data/docker/volumes/portainer:/data
+    ports:
+      - "9000:9000"

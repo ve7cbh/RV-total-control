@@ -32,12 +32,12 @@ GATEWAY_PORT = 4001
 SLAVE_ADDRESS = 144            # 0x90 - Ecowitt WN90LP/WS90 default
 START_REGISTER = 0x0165
 REGISTER_COUNT = 9
-POLL_INTERVAL_SEC = 9          # matches sensor's own ~8.75s internal refresh cadence
+POLL_INTERVAL_SEC = 3          # matches sensor's own ~2s internal refresh cadence for wind 
 MAX_RETRIES = 3
 RETRY_BACKOFF_SEC = 0.5
 
 # --- MQTT config ---
-MQTT_HOST = 'mosquitto'        # container/service name on rvtc_net
+MQTT_HOST = 'localhost'        # container/service name on rvtc_net
 MQTT_PORT = 1883
 MQTT_BASE_TOPIC = 'rvtc/sensors/weather'
 MQTT_JSON_TOPIC = f'{MQTT_BASE_TOPIC}/json'
@@ -54,8 +54,10 @@ def val_or_none(raw, transform):
 
 def decode(registers):
     light, uvi, temp_raw, humi, wind, gust, wdir, rain, pressure = registers
+    light_lux = val_or_none(light, lambda v: round(v * 10, 1))
     return {
-        'light_lux':        val_or_none(light, lambda v: round(v * 10, 1)),
+        'light_lux':        light_lux,
+        'solarRadiation':   None if light_lux is None else round(light_lux / 126, 1),  # indicator only, not calibrated
         'uvi':              val_or_none(uvi, lambda v: round(v / 10, 1)),
         'outTemp':          val_or_none(temp_raw, lambda v: round((v - 400) / 10, 1)),
         'outHumidity':      val_or_none(humi, lambda v: v),
@@ -66,7 +68,6 @@ def decode(registers):
         'barometer':        val_or_none(pressure, lambda v: round(v * 0.1, 1)),
         'time': int(time.time()),
     }
-
 
 def read_weather(client):
     for attempt in range(1, MAX_RETRIES + 1):
