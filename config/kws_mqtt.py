@@ -48,7 +48,7 @@ MQTT_RETAIN    = True
 POLL_INTERVAL  = 2        # seconds
 
 # Set to True once generator meter is physically wired and slave 2 confirmed
-GENERATOR_ENABLED = False
+GENERATOR_ENABLED = True
 
 LOG_LEVEL = logging.INFO
 
