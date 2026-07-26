@@ -17,8 +17,19 @@ Confirmed working 2026-07-16 bench bring-up (see RVTC doc, HW-16 / 2026-07-16 lo
 NOTE (temporary, as of 2026-07-16): sensor is bench-wired to 485-6
 (192.168.88.10:4001), NOT its nominal 485-7 (192.168.88.11). Update
 GATEWAY_IP below once the permanent 485-7 run is in place.
+
+NOTE (2026-07-24): initial gateway connect now retries with backoff instead
+of failing once and exiting. Previously a single failed connect attempt at
+boot (e.g. gateway not yet up after a power cycle) caused the script to
+`return` from main() with exit code 0 — which systemd's Restart=on-failure
+never treats as a failure, so the service just sat dead until someone
+manually ran `systemctl restart`. Fixed two ways: (1) retry the connect
+itself with backoff before giving up, (2) if retries are exhausted, exit
+non-zero so systemd's existing Restart=on-failure policy actually engages
+as a backstop. See RVTC session log 2026-07-24 for full diagnosis.
 """
 
+import sys
 import json
 import time
 import logging
@@ -35,6 +46,10 @@ REGISTER_COUNT = 9
 POLL_INTERVAL_SEC = 3          # matches sensor's own ~2s internal refresh cadence for wind 
 MAX_RETRIES = 3
 RETRY_BACKOFF_SEC = 0.5
+
+# --- Initial connection retry config (2026-07-24) ---
+CONNECT_MAX_ATTEMPTS = 30      # 30 x 10s = 5 minutes of patient retrying before giving up
+CONNECT_RETRY_DELAY_SEC = 10
 
 # --- MQTT config ---
 MQTT_HOST = 'localhost'        # container/service name on rvtc_net
@@ -69,6 +84,23 @@ def decode(registers):
         'time': int(time.time()),
     }
 
+
+def connect_with_retry(client, max_attempts=CONNECT_MAX_ATTEMPTS, delay_sec=CONNECT_RETRY_DELAY_SEC):
+    """Retry the initial Modbus TCP connect with backoff instead of failing
+    once. Handles the gateway not being up yet (e.g. right after a power
+    cycle) without needing a manual service restart."""
+    for attempt in range(1, max_attempts + 1):
+        if client.connect():
+            log.info("Connected to gateway on attempt %d", attempt)
+            return True
+        log.warning(
+            "Connect attempt %d/%d to %s:%s failed, retrying in %ds",
+            attempt, max_attempts, GATEWAY_IP, GATEWAY_PORT, delay_sec,
+        )
+        time.sleep(delay_sec)
+    return False
+
+
 def read_weather(client):
     for attempt in range(1, MAX_RETRIES + 1):
         result = client.read_holding_registers(
@@ -96,9 +128,16 @@ def publish(mqttc, data):
 
 def main():
     modbus_client = ModbusTcpClient(GATEWAY_IP, port=GATEWAY_PORT, timeout=1)
-    if not modbus_client.connect():
-        log.error("Could not connect to gateway at %s:%s", GATEWAY_IP, GATEWAY_PORT)
-        return
+    if not connect_with_retry(modbus_client):
+        log.error(
+            "Could not connect to gateway at %s:%s after %d attempts over ~%d minutes - giving up",
+            GATEWAY_IP, GATEWAY_PORT, CONNECT_MAX_ATTEMPTS,
+            (CONNECT_MAX_ATTEMPTS * CONNECT_RETRY_DELAY_SEC) // 60,
+        )
+        # Exit non-zero so systemd's Restart=on-failure actually engages as
+        # a backstop, instead of a bare `return` (exit 0) that systemd
+        # treats as a clean, intentional stop and never restarts.
+        sys.exit(1)
 
     mqttc = mqtt.Client(client_id='wn90_mqtt', protocol=mqtt.MQTTv311)
     mqttc.connect(MQTT_HOST, MQTT_PORT, keepalive=60)

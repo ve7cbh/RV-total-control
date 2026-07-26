@@ -103,12 +103,12 @@ REGISTERS = [
 # Values from EVO-2212 manual — confirm against live readings
 
 OPERATING_MODES = {
-    0: "standby",     # confirm
-    1: "inverter",    # on battery — Tier 1 trigger — CONFIRMED live 2026-07-05 (batt discharge ~41-61A, 0A grid draw)
-    2: "charging",    # on grid, charging + passthrough — confirmed live
-    3: "line",        # confirm — previously assumed = mode 1, disproven 2026-07-05, now unconfirmed guess
-    4: "bypass",      # confirm
-    5: "fault",       # confirm
+    0: "standby",       # confirmed — combined standby/fault per manufacturer doc
+    1: "inverter",      # on battery — CONFIRMED live 2026-07-05 and 2026-07-21
+    2: "charging",      # on grid, charging + passthrough — confirmed live
+    3: "power_saving",  # confirmed per manufacturer doc — NOT "line" as previously guessed
+}
+   
 }
 # ── Modbus helpers ─────────────────────────────────────────────────────────────
 
