@@ -91,11 +91,11 @@ by Home Assistant directly (see Section 8).
 |---|---|---|---|---|
 | `485-1` | `192.168.88.5:4001` | EPEVER MPPT60 (solar controller) — shares this line with the MT50 remote display via an EPEVER RS485-1M2S passive multi-drop tap (not an arbitrator — see note below) | `epever_mqtt.py` | `rvtc/sensors/solar/#` |
 | `485-2` | `192.168.88.6:4001` | SAMLUX EVO-2212 (inverter/charger) | `samlux_mqtt.py` | `rvtc/sensors/inverter/#` |
-| `485-3` | `192.168.88.7:4001` | KWS-303L grid meter. Generator KWS-303L bundles onto this same port once physically installed (both meters live in the same breaker box) | `kws_mqtt.py` | `rvtc/sensors/grid/#`, `rvtc/sensors/generator/#` |
-| `485-4` | `192.168.88.8:4001` | *(freed)* — formerly the ESP32/Adafruit IMU node, abandoned due to enclosure-induced magnetic interference. Slated for the WitMotion WTGAHRS3-485 GPS-IMU (HW-27) once purchased | — | `rvtc/sensors/imu/#` (planned) |
+| `485-3` | `192.168.88.7:4001` | KWS-303L grid and Gen meters. G | `kws_mqtt.py` | `rvtc/sensors/grid/#`, `rvtc/sensors/generator/#` |
+| `485-4` | `192.168.88.8:4001` | WitMotion WTGAHRS3-485 GPS-IMU (HW-27) | — | `rvtc/sensors/imu/# |
 | `485-5` | `192.168.88.9:4001` | Water sensors — pressure, filter ΔP, turbidity | — | Pending Phase 5 |
-| `485-6` | `192.168.88.10:4001` | 400A battery current shunt (HW-24) | *(not yet deployed)* | `rvtc/sensors/battery_current/#` (planned) |
-| `485-7` | `192.168.88.11:4001` | WN90LP weather station — permanent home | `WN90_mqtt.py` | `rvtc/sensors/weather/#` |
+| `485-6` | `192.168.88.10:4001` | WN90LP weather station — permanent home | `WN90_mqtt.py` | `rvtc/sensors/weather/#` |
+| `485-7` | `192.168.88.11:4001` | 400A battery current shunt (HW-24) | *(not yet deployed)* | `rvtc/sensors/battery_current/#` (planned) |
 | `485-8` | `192.168.88.12:4001` | Waveshare 8-ch relay board (load shed actuation) | `relay.py` (called via HA `shell_command`, not a polling daemon) | — |
 
 **EPEVER's RS485-1M2S module is a passive electrical tap, not a bus arbitrator** — no collision
