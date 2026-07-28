@@ -91,11 +91,11 @@ by Home Assistant directly (see Section 8).
 |---|---|---|---|---|
 | `485-1` | `192.168.88.5:4001` | EPEVER MPPT60 (solar controller) — shares this line with the MT50 remote display via an EPEVER RS485-1M2S passive multi-drop tap (not an arbitrator — see note below) | `epever_mqtt.py` | `rvtc/sensors/solar/#` |
 | `485-2` | `192.168.88.6:4001` | SAMLUX EVO-2212 (inverter/charger) | `samlux_mqtt.py` | `rvtc/sensors/inverter/#` |
-| `485-3` | `192.168.88.7:4001` | KWS-303L grid meter. Generator KWS-303L bundles onto this same port once physically installed (both meters live in the same breaker box) | `kws_mqtt.py` | `rvtc/sensors/grid/#`, `rvtc/sensors/generator/#` |
-| `485-4` | `192.168.88.8:4001` | *(freed)* — formerly the ESP32/Adafruit IMU node, abandoned due to enclosure-induced magnetic interference. Slated for the WitMotion WTGAHRS3-485 GPS-IMU (HW-27) once purchased | — | `rvtc/sensors/imu/#` (planned) |
+| `485-3` | `192.168.88.7:4001` | KWS-303L grid and Gen meters. G | `kws_mqtt.py` | `rvtc/sensors/grid/#`, `rvtc/sensors/generator/#` |
+| `485-4` | `192.168.88.8:4001` | WitMotion WTGAHRS3-485 GPS-IMU (HW-27) | `imu_mqtt.py` (written 2026-07-25, not yet deployed — unit still bench-tested only, blocked on HW-19's 12V→5V DC-DC converter) | `rvtc/sensors/imu/#`, `rvtc/sensors/gps/#` |
 | `485-5` | `192.168.88.9:4001` | Water sensors — pressure, filter ΔP, turbidity | — | Pending Phase 5 |
-| `485-6` | `192.168.88.10:4001` | 400A battery current shunt (HW-24) | *(not yet deployed)* | `rvtc/sensors/battery_current/#` (planned) |
-| `485-7` | `192.168.88.11:4001` | WN90LP weather station — permanent home | `WN90_mqtt.py` | `rvtc/sensors/weather/#` |
+| `485-6` | `192.168.88.10:4001` | WN90LP weather station — permanent home | `WN90_mqtt.py` | `rvtc/sensors/weather/#` |
+| `485-7` | `192.168.88.11:4001` | 400A battery current shunt (HW-24) | *(not yet deployed)* | `rvtc/sensors/battery_current/#` (planned) |
 | `485-8` | `192.168.88.12:4001` | Waveshare 8-ch relay board (load shed actuation) | `relay.py` (called via HA `shell_command`, not a polling daemon) | — |
 
 **EPEVER's RS485-1M2S module is a passive electrical tap, not a bus arbitrator** — no collision
@@ -271,6 +271,7 @@ which adaptor sits closest to the hardware:
 | SAMLUX EVO-2212 (inverter) | `samlux_mqtt.py` | `rvtc/sensors/inverter/#` | `telegraf_solar.conf` (shared file) | `inverter` |
 | KWS-303L (grid/generator) | `kws_mqtt.py` | `rvtc/sensors/grid/#`, `rvtc/sensors/generator/#` | `telegraf_grid.conf` | `grid` |
 | WN90LP (weather) | `WN90_mqtt.py` (raw Modbus → MQTT, flat topics) **+** WeeWX (`MQTTSubscribeDriver` in, `weewx-mqtt` out) | raw: `rvtc/sensors/weather/#` · corrected: `rvtc/sensors/weather/corrected/loop` | `telegraf_weather.conf` (subscribes to the **corrected** topic only) | `weewx` |
+| WitMotion WTGAHRS3-485 (IMU/GPS, HW-27) | `imu_mqtt.py` (Modbus poll → MQTT) | `rvtc/sensors/imu/#` (heading/pitch/roll), `rvtc/sensors/gps/#` (lat/lon/satellites/hdop) | *(none — see note below)* | *(none)* |
 
 **Weather is the one two-stage adaptor**, and it's worth understanding why: `WN90_mqtt.py` only
 does register decoding (raw Modbus values → sane units). It does **not** do sea-level pressure
@@ -302,7 +303,29 @@ again, check `systemctl status telegraf` on the host before assuming the bug is 
 **The IMU's MQTT topic (`rvtc/sensors/imu/#`) is deliberately not persisted to InfluxDB.** Every
 other sensor gets picked up by a `telegraf_*.conf`; the IMU does not, on purpose — nobody needs a
 queryable history of past pitch/roll/heading, only the live value. If this ever looks like
-"missing" data during a future Telegraf review, that's expected, not a bug to fix.
+"missing" data during a future Telegraf review, that's expected, not a bug to fix. GPS position
+(`rvtc/sensors/gps/#`, also sourced from this same unit) likewise has no `telegraf_gps.conf` —
+this isn't an oversight to fix either; the earlier separate gpsd-based GPS path never had one, so
+persisting position history is a fresh decision, not a carried-over one, if it's ever wanted.
+
+**Roll/Pitch are trustworthy across a power cycle; Yaw/heading is not — confirmed on the bench,
+2026-07-26.** Roll and Pitch come straight from the accelerometer (an absolute measurement of
+gravity's direction), so they read correctly immediately on power-up — verified against a digital
+level after a cold power cycle, no drift or reset behavior observed. Yaw/heading is different: in
+9-axis mode the WitMotion's gyro+magnetometer fusion does **not** retain its true-heading lock
+across a power cycle. The unit needs sustained motion above roughly 5 km/h, with GPS attached, to
+re-lock onto true heading. Practical effect: heading is unknown/unreliable for the entire span
+between power-on and the next qualifying drive — which, for a trailer parked for days at a time,
+is most of the time the wind-direction correction actually needs it. **This means the leveling
+feature (Roll/Pitch) needs no init/recall logic, but the heading-based wind-direction correction
+does** — see the open item below.
+
+**The magnetometer's Z-axis (`HZ`) is only unreliable when GPS is attached to this unit —
+confirmed on the bench, 2026-07-26.** This explains the GPSHeight/GPSYAW-registers-mirror-HZ
+oddity first flagged during the 2026-07-25 CRC/register validation (GPSHeight and GPSYAW were
+bit-for-bit identical to HY/HZ across all 13 captured frames). If a magnetometer calibration is
+ever needed on this unit, it must be done with GPS temporarily disconnected — HZ readings with
+GPS attached are not real data.
 
 ---
 
@@ -421,8 +444,14 @@ for full history/context on any item below.
 - HW-21 — Wire coil 3 (EVO BMS charge inhibit) ✅ closed 2026-07-21
 - HW-22 — Install battery heater, wire coil 5 and 5 (?)  Two batteries, one heater each.
 - HW-24 — 400A battery current shunt (RS-485) — ordered, not yet in hand
-- HW-27 — WitMotion WTGAHRS3-485 GPS-IMU, roof-mounted — ordered, not yet in hand (replaces the
-  abandoned HW-25 ESP32/Adafruit IMU node — see the archived 2026-07-13 log if the history matters)
+- HW-27 — WitMotion WTGAHRS3-485 GPS-IMU, roof-mounted — in hand, bench-tested, not yet installed
+  (replaces the abandoned HW-25 ESP32/Adafruit IMU node — see the archived 2026-07-13 log if the
+  history matters). Blocked on HW-19 (12V→5V DC-DC converter) before it can go live on `485-4`.
+  Bench testing 2026-07-25/26 confirmed: register map/CRC validated against `imu_mqtt.py`; physical
+  mounting requires an axis swap (vehicle roll = WitMotion's Pitch register 0x3E, vehicle pitch =
+  WitMotion's Roll register 0x3D — annotated in `imu_mqtt.py`, don't "fix" it back); set to 9-axis
+  algorithm, not 6-axis (needed for magnetic-referenced heading); Roll/Pitch persist correctly
+  across power cycles, Yaw/heading does not — see Section 7 for the heading-recall implications.
 - HW-28 — ** Closed 2026-07-20 duplicate issue with HW-25 ✅
 - HW-29 — Holding tank metering system — modules in hand, not yet installed/wired
 - HW-30 — Storage compartment temperature sensors — in hand, not yet installed/wired
@@ -434,6 +463,13 @@ for full history/context on any item below.
 - OI-38 — ESP32-S3 thermostat firmware
 - OI-39 — ESP32 Modbus polling register list
 - OI-41 — VoIP PBX / LDAP
+- OI-42 — IMU heading recall/init state machine (HW-27) — needed because Yaw doesn't persist
+  true-heading lock across a power cycle (see Section 7). Design intent as of 2026-07-26: a small
+  persistent state file tracking `needs_init` / `recalled` / `trusted`, auto-populated from the
+  last heading seen while genuinely moving (detected via GPS lat/lon deltas, not the unverified
+  VTG-style speed/course registers), plus a manual init control on the leveling webpage for the
+  case auto-recall can't cover (trailer moved at low speed since last shutdown, before any
+  qualifying drive). Not yet built — blocked on HW-27 physically going live first.
 
 **Automation / live-test items (no formal number in the archive):**
 - Live bench test of the actual Tier 3 automatic trigger (only the manual override path has been

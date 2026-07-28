@@ -109,7 +109,6 @@ OPERATING_MODES = {
     3: "power_saving",  # confirmed per manufacturer doc — NOT "line" as previously guessed
 }
    
-}
 # ── Modbus helpers ─────────────────────────────────────────────────────────────
 
 def read_register(client: ModbusTcpClient, address: int, signed: bool) -> int | None:
