@@ -16,15 +16,29 @@ Replaces two things that are now obsolete:
     decimal places).
 
 Publishes:
-    rvtc/sensors/imu/heading           magnetic heading, degrees (0-360)
-    rvtc/sensors/imu/pitch             degrees, vehicle nose-up positive
-    rvtc/sensors/imu/roll              degrees, vehicle
-    rvtc/sensors/imu/status            "OK" (placeholder for future health checks)
-    rvtc/sensors/imu/availability      "online" / "offline" (LWT)
+    rvtc/sensors/imu/heading            true heading, degrees (0-360) -- raw
+                                         Yaw with the stored offset applied,
+                                         see set_imu_heading.py
+    rvtc/sensors/imu/heading_needs_init true/false -- true means the offset
+                                         hasn't been (re)established since the
+                                         last suspected power cycle, so the
+                                         heading value above shouldn't be
+                                         trusted. Consumers (index.html,
+                                         HA) should surface this as a warning
+                                         rather than silently showing a
+                                         possibly-wrong heading.
+    rvtc/sensors/imu/pitch              degrees, vehicle nose-up positive
+    rvtc/sensors/imu/roll               degrees, vehicle
+    rvtc/sensors/imu/status             "OK" (placeholder for future health checks)
+    rvtc/sensors/imu/availability       "online" / "offline" (LWT)
     rvtc/sensors/gps/latitude
     rvtc/sensors/gps/longitude
     rvtc/sensors/gps/satellites_used
     rvtc/sensors/gps/hdop
+
+Depends on a heading offset established by set_imu_heading.py, and on
+imu_heading_state.json being marked needs_init=true at every host boot by
+imu_needs_init_on_boot.service -- see those files for the full mechanism.
 
 NOT persisted to InfluxDB by design for the pose fields — System Reference
 Section 9: "nobody needs a queryable history of past pitch/roll/heading,
@@ -54,6 +68,7 @@ Requires:
     pip3 install paho-mqtt --break-system-packages
 """
 
+import json
 import logging
 import socket
 import time
@@ -61,10 +76,10 @@ import time
 import paho.mqtt.client as mqtt
 
 # ── Config ──────────────────────────────────────────────────────────────
-GATEWAY_HOST = "192.168.88.8"     # 485-4, per System Reference Section 3
+GATEWAY_HOST = "192.168.88.8"     # 485-4 -- confirmed working 2026-07-29 after IMU power supply swap
 GATEWAY_PORT = 4001
 
-SLAVE_ADDR = 0x50   # WitMotion default device address (IICADDR register 0x1A).
+SLAVE_ADDR = 80   # WitMotion default device address (IICADDR register 0x1A).
                      # Change here (and via IICADDR on the unit itself) if you
                      # readdress it to match the original slave-10 plan from
                      # the retired IMU_config.md.
@@ -84,11 +99,19 @@ IMU_TOPIC_BASE = "rvtc/sensors/imu"
 GPS_TOPIC_BASE = "rvtc/sensors/gps"
 AVAILABILITY_TOPIC = f"{IMU_TOPIC_BASE}/availability"
 
+# Written by set_imu_heading.py (manual init) and by
+# imu_needs_init_on_boot.service (sets needs_init=true at every host boot --
+# see that unit's comments for why this is a reasonable but imperfect proxy
+# for the IMU itself losing power). Re-read every poll cycle rather than
+# cached once, so a manual re-init while this script is already running
+# takes effect on the very next publish, not after a restart.
+HEADING_STATE_FILE = "/home/ve7cbh/RV-total-control/config/imu_heading_state.json"
+
 POLL_INTERVAL_SECONDS = 0.5   # 2 Hz -- plenty for a leveling display. 9600 baud
                                # leaves headroom to go faster later if it ever
                                # feels sluggish while actively jacking the trailer.
 SOCKET_TIMEOUT = 2.0
-RETRY_SECONDS = 5
+RETRY_SECONDS = 15
 
 logging.basicConfig(
     level=logging.INFO,
@@ -164,6 +187,21 @@ def to_s32(v: int) -> int:
     return v - 4294967296 if v >= 2147483648 else v
 
 
+def load_heading_state() -> dict:
+    """Returns {"needs_init": bool, "offset_deg": float}. Missing or
+    unreadable file is treated as needs_init -- fail toward "don't trust
+    the heading" rather than toward "assume it's fine"."""
+    try:
+        with open(HEADING_STATE_FILE) as f:
+            data = json.load(f)
+        return {
+            "needs_init": bool(data.get("needs_init", True)),
+            "offset_deg": float(data.get("offset_deg", 0.0)),
+        }
+    except (OSError, ValueError, json.JSONDecodeError):
+        return {"needs_init": True, "offset_deg": 0.0}
+
+
 def nmea_to_deg(raw: int) -> float:
     """Doc format: ddmm.mmmmm, packed *10^7 into a signed 32-bit int."""
     sign = -1 if raw < 0 else 1
@@ -201,11 +239,17 @@ def poll_once(client: mqtt.Client) -> None:
     witmotion_pitch = to_s16(angle_regs[1]) / 32768 * 180  # 0x3E -- this is vehicle ROLL
     witmotion_yaw = to_s16(angle_regs[2]) / 32768 * 180    # 0x3F -- heading, unaffected
 
-    heading_deg = witmotion_yaw if witmotion_yaw >= 0 else witmotion_yaw + 360
+    raw_heading_deg = witmotion_yaw if witmotion_yaw >= 0 else witmotion_yaw + 360
     vehicle_pitch_deg = witmotion_roll    # axis swap applied -- see module docstring
     vehicle_roll_deg = witmotion_pitch    # axis swap applied -- see module docstring
 
-    publish(client, f"{IMU_TOPIC_BASE}/heading", round(heading_deg, 1))
+    # Apply the software heading offset -- see set_imu_heading.py's docstring
+    # for why this exists (the WitMotion has no "set heading to X" register).
+    heading_state = load_heading_state()
+    corrected_heading_deg = (raw_heading_deg + heading_state["offset_deg"]) % 360
+
+    publish(client, f"{IMU_TOPIC_BASE}/heading", round(corrected_heading_deg, 1))
+    publish(client, f"{IMU_TOPIC_BASE}/heading_needs_init", heading_state["needs_init"])
     publish(client, f"{IMU_TOPIC_BASE}/pitch", round(vehicle_pitch_deg, 2))
     publish(client, f"{IMU_TOPIC_BASE}/roll", round(vehicle_roll_deg, 2))
     publish(client, f"{IMU_TOPIC_BASE}/status", "OK")
