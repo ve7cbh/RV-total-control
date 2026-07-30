@@ -1,0 +1,233 @@
+# Tier 3 — Overload shed/restore scripts
+# Add to scripts.yaml (or !include it).
+#
+# Step 3 (A/C shed via ESP32 CCC MQTT command) is STUBBED — RS-485/4 / HW-20
+# thermostat is not wired yet, so there's no climate entity or confirmed MQTT
+# topic to command. The `if: tier3_ac_shed_enabled` guard makes step 3 a no-op
+# until you flip that input_boolean on and fill in:
+#   - the climate entity ID (search for "climate." once HW-20 is live)
+#   - the actual MQTT topic/payload the ESP32 expects for CCC off/on
+#
+# Gate condition used throughout: SAMLUX must NOT be inverting (Tier 1 already
+# shed these loads in that case — Tier 3 only runs in passthrough/charging).
+
+script:
+
+  tier3_grid_overload_response:
+    alias: "Tier 3 - Grid Overload Response"
+    mode: single
+    sequence:
+      - condition: template
+        value_template: >
+          {{ states('sensor.samlux_operating_mode_text') | lower != 'inverting' }}
+
+      # Step 1: water heater off
+      - if:
+          - condition: state
+            entity_id: input_boolean.coil1_energised
+            state: "off"
+        then:
+          - service: shell_command.relay_1_on
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.coil1_energised
+          - service: logbook.log
+            data:
+              name: "Tier 3 Grid"
+              message: "Step 1 — water heater shed (coil 1 ON), grid current {{ states('sensor.grid_current') }} A"
+
+      - delay: "00:01:00"
+
+      # Step 2: microwave off, only if still over the step-2 threshold
+      - if:
+          - condition: numeric_state
+            entity_id: sensor.grid_current
+            above: 22
+          - condition: state
+            entity_id: input_boolean.coil2_energised
+            state: "off"
+        then:
+          - service: shell_command.relay_2_on
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.coil2_energised
+          - service: logbook.log
+            data:
+              name: "Tier 3 Grid"
+              message: "Step 2 — microwave shed (coil 2 ON), grid current {{ states('sensor.grid_current') }} A"
+
+      - delay: "00:01:00"
+
+      # Step 3: A/C shed — STUBBED until HW-20 thermostat is wired
+      - if:
+          - condition: numeric_state
+            entity_id: sensor.grid_current
+            above: 20
+          - condition: state
+            entity_id: input_boolean.tier3_ac_shed_enabled
+            state: "on"
+          # TODO once live: condition: state, entity_id: climate.dometic_ac, state: "cool" (or whatever "running" maps to)
+        then:
+          - service: logbook.log
+            data:
+              name: "Tier 3 Grid"
+              message: "Step 3 — A/C shed triggered (STUB — fill in MQTT command), grid current {{ states('sensor.grid_current') }} A"
+          # TODO once live:
+          # - service: mqtt.publish
+          #   data:
+          #     topic: "rvtc/esp32/ac/cmd"
+          #     payload: "off"
+
+  tier3_grid_restore:
+    alias: "Tier 3 - Grid Restore"
+    mode: single
+    sequence:
+      - if:
+          - condition: numeric_state
+            entity_id: sensor.grid_current
+            below: 20
+          - condition: state
+            entity_id: input_boolean.coil1_energised
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.manual_shed_water_heater
+            state: "off"
+        then:
+          - service: shell_command.relay_1_off
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.coil1_energised
+          - service: logbook.log
+            data:
+              name: "Tier 3 Grid"
+              message: "Restored — water heater back ON (coil 1 OFF)"
+
+      - if:
+          - condition: numeric_state
+            entity_id: sensor.grid_current
+            below: 20
+          - condition: state
+            entity_id: input_boolean.coil1_energised
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.coil2_energised
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.manual_shed_microwave
+            state: "off"
+        then:
+          - service: shell_command.relay_2_off
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.coil2_energised
+          - service: logbook.log
+            data:
+              name: "Tier 3 Grid"
+              message: "Restored — microwave back ON (coil 2 OFF)"
+
+      # A/C restore — STUBBED, same reasoning as shed step 3 above
+      # TODO once live: 3-min sustained <18A check + 5-min guard, then
+      # mqtt.publish rvtc/esp32/ac/cmd "on"
+
+  tier3_generator_overload_response:
+    alias: "Tier 3 - Generator Overload Response"
+    mode: single
+    sequence:
+      - condition: template
+        value_template: >
+          {{ states('sensor.samlux_operating_mode_text') | lower != 'inverting' }}
+
+      - if:
+          - condition: state
+            entity_id: input_boolean.coil1_energised
+            state: "off"
+        then:
+          - service: shell_command.relay_1_on
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.coil1_energised
+          - service: logbook.log
+            data:
+              name: "Tier 3 Generator"
+              message: "Step 1 — water heater shed (coil 1 ON), generator current {{ states('sensor.generator_current') }} A"
+
+      - delay: "00:01:00"
+
+      - if:
+          - condition: numeric_state
+            entity_id: sensor.generator_current
+            above: 19
+          - condition: state
+            entity_id: input_boolean.coil2_energised
+            state: "off"
+        then:
+          - service: shell_command.relay_2_on
+          - service: input_boolean.turn_on
+            target:
+              entity_id: input_boolean.coil2_energised
+          - service: logbook.log
+            data:
+              name: "Tier 3 Generator"
+              message: "Step 2 — microwave shed (coil 2 ON), generator current {{ states('sensor.generator_current') }} A"
+
+      - delay: "00:01:00"
+
+      - if:
+          - condition: numeric_state
+            entity_id: sensor.generator_current
+            above: 17
+          - condition: state
+            entity_id: input_boolean.tier3_ac_shed_enabled
+            state: "on"
+        then:
+          - service: logbook.log
+            data:
+              name: "Tier 3 Generator"
+              message: "Step 3 — A/C shed triggered (STUB — fill in MQTT command), generator current {{ states('sensor.generator_current') }} A"
+
+  tier3_generator_restore:
+    alias: "Tier 3 - Generator Restore"
+    mode: single
+    sequence:
+      - if:
+          - condition: numeric_state
+            entity_id: sensor.generator_current
+            below: 18
+          - condition: state
+            entity_id: input_boolean.coil1_energised
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.manual_shed_water_heater
+            state: "off"
+        then:
+          - service: shell_command.relay_1_off
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.coil1_energised
+          - service: logbook.log
+            data:
+              name: "Tier 3 Generator"
+              message: "Restored — water heater back ON (coil 1 OFF)"
+
+      - if:
+          - condition: numeric_state
+            entity_id: sensor.generator_current
+            below: 18
+          - condition: state
+            entity_id: input_boolean.coil1_energised
+            state: "off"
+          - condition: state
+            entity_id: input_boolean.coil2_energised
+            state: "on"
+          - condition: state
+            entity_id: input_boolean.manual_shed_microwave
+            state: "off"
+        then:
+          - service: shell_command.relay_2_off
+          - service: input_boolean.turn_off
+            target:
+              entity_id: input_boolean.coil2_energised
+          - service: logbook.log
+            data:
+              name: "Tier 3 Generator"
+              message: "Restored — microwave back ON (coil 2 OFF)"

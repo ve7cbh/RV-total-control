@@ -1,0 +1,23 @@
+[Unit]
+Description=RVTC WitMotion IMU-to-MQTT bridge (HW-27)
+# No gpsd dependency, unlike the retired gps_mqtt.service — this bridge talks
+# straight to the Waveshare gateway over the network, same as epever_mqtt.py
+# and samlux_mqtt.py.
+After=network-online.target
+Wants=network-online.target
+
+# Same lesson as the rest of the fleet: if the gateway isn't reachable yet
+# at boot, don't silently give up — just keep retrying. (Moved here from
+# [Service] — StartLimitIntervalSec/StartLimitBurst only take effect under
+# [Unit]; systemd was silently ignoring it in the old location.)
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/ve7cbh/RV-total-control/config/scripts/imu_mqtt.py
+Restart=on-failure
+RestartSec=10
+User=ve7cbh
+
+[Install]
+WantedBy=multi-user.target

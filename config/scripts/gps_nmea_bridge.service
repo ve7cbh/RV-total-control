@@ -1,0 +1,23 @@
+[Unit]
+Description=RVTC — GPS to NMEA bridge for APRS (HF5142B serial-1)
+# Depends on Mosquitto (for the rvtc/sensors/gps/# topics) and imu_mqtt.py
+# (the actual source of that data) both being up, but those run in Docker
+# and aren't systemd units this host's systemd can see -- so this can only
+# express a soft ordering (After=), not a real Requires=. The script itself
+# handles the "broker/data not up yet" case via its own MQTT reconnect
+# behavior and the "no GPS data yet" skip-cycle logic in build_sentences(),
+# not through systemd dependency ordering.
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ve7cbh
+Group=ve7cbh
+WorkingDirectory=/home/ve7cbh/RV-total-control/config
+ExecStart=/usr/bin/python3 /home/ve7cbh/RV-total-control/config/scripts/gps_nmea_bridge.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

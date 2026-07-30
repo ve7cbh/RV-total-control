@@ -1,0 +1,79 @@
+# RVTC — IMU leveling + position dashboard card (HW-25)
+#
+# Lovelace YAML for a dedicated leveling view. Pitch/roll thresholds match
+# the web page and printed build sheet: green within +/-1.5 deg, red
+# beyond +/-3.0 deg, amber in between. Lat/long come from the existing
+# GPS bridge (mqtt_gps.yaml), heading/pitch/roll come from the IMU's
+# Modbus registers (modbus_imu.yaml) — two different data paths, one
+# combined view.
+#
+# Add this as a card in an existing dashboard, or as its own view.
+
+type: vertical-stack
+cards:
+  - type: gauge
+    entity: sensor.imu_heading
+    name: Heading
+    min: 0
+    max: 360
+    needle: true
+
+  - type: horizontal-stack
+    cards:
+      - type: gauge
+        entity: sensor.imu_pitch
+        name: Pitch
+        min: -10
+        max: 10
+        needle: true
+        severity:
+          green: -1.5
+          yellow: -3.0
+          red: -10
+        # HA's gauge severity logic is written for one-directional (0-up)
+        # gauges by default — worth confirming the colors actually render
+        # as expected on a +/- centered gauge like this once real entities
+        # exist, rather than trusting this blind.
+
+      - type: gauge
+        entity: sensor.imu_roll
+        name: Roll
+        min: -10
+        max: 10
+        needle: true
+        severity:
+          green: -1.5
+          yellow: -3.0
+          red: -10
+
+  - type: entities
+    title: IMU Node (RS-485 primary path)
+    entities:
+      - entity: sensor.imu_heading
+        name: Heading
+      - entity: sensor.imu_pitch
+        name: Pitch
+      - entity: sensor.imu_roll
+        name: Roll
+
+  - type: entities
+    title: Position (GPS, via MQTT)
+    entities:
+      - entity: sensor.gps_latitude
+        name: Latitude
+      - entity: sensor.gps_longitude
+        name: Longitude
+      - entity: sensor.gps_fix_mode
+        name: Fix Mode
+
+  - type: map
+    entities:
+      - entity: sensor.gps_latitude
+    # NOTE: HA's map card normally expects a device_tracker entity with
+    # combined lat/long attributes, not two separate numeric sensors —
+    # this card definition will likely need adjusting once it's actually
+    # loaded in HA (e.g. a template-combined device_tracker, or the
+    # geo_location platform) rather than trusting this to just work.
+    # Flagging honestly rather than pretending this part is done —
+    # everything above (gauges, entities) is standard/reliable; this map
+    # card is the one piece worth treating as a draft.

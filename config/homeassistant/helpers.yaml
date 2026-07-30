@@ -1,0 +1,44 @@
+# Tier 3 — Helper entities
+# Add this block to configuration.yaml (or !include it).
+# These track relay coil state since shell_command writes have no read-back.
+# NC wiring reminder: coil ENERGISED = load OFF, coil DE-ENERGISED = load ON.
+
+input_boolean:
+  coil1_energised:
+    name: "Coil 1 Energised (Water Heater OFF)"
+    icon: mdi:water-boiler
+  coil2_energised:
+    name: "Coil 2 Energised (Microwave OFF)"
+    icon: mdi:microwave
+
+  # Set true once HW-20 thermostat is wired and Tier 3 step 3 is de-stubbed
+  tier3_ac_shed_enabled:
+    name: "Tier 3 — A/C Shed Step Enabled"
+    icon: mdi:air-conditioner
+
+  # Manual override switches — Energy/Manual Control dashboard tab.
+  # ON forces the load shed regardless of current draw, and blocks the
+  # automatic Tier 3 restore scripts from un-shedding it. Turning OFF hands
+  # control back to Tier 3, which will restore the load only if current is
+  # actually back under threshold.
+  manual_shed_water_heater:
+    name: "Manual Shed — Water Heater"
+    icon: mdi:water-boiler
+  manual_shed_microwave:
+    name: "Manual Shed — Microwave"
+    icon: mdi:microwave
+
+input_number:
+  # Tracks consecutive low-current minutes for the 3-min A/C restore window.
+  # Not used until Tier 3 step 3 is live, included now so the script doesn't
+  # need editing later — just toggle tier3_ac_shed_enabled.
+  tier3_ac_restore_timer_grid:
+    name: "Tier 3 Grid A/C Restore Timer"
+    min: 0
+    max: 999
+    step: 1
+  tier3_ac_restore_timer_gen:
+    name: "Tier 3 Generator A/C Restore Timer"
+    min: 0
+    max: 999
+    step: 1

@@ -1,0 +1,16 @@
+[Unit]
+Description=SAMLUX EVO-2212 MQTT Bridge
+After=network.target
+
+[Service]
+Type=simple
+User=ve7cbh
+WorkingDirectory=/home/ve7cbh/RV-total-control
+ExecStart=/usr/bin/python3 -u /home/ve7cbh/RV-total-control/config/scripts/samlux_mqtt.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

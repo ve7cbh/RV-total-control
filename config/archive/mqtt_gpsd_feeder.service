@@ -1,0 +1,22 @@
+[Unit]
+Description=RVTC MQTT-to-gpsd feeder for Direwolf APRS beaconing
+# Needs Mosquitto reachable, same as every other bridge script. gpsd itself
+# is a separate service, started independently once its DEVICES= line
+# points at the symlink this script creates (/tmp/rvtc_fake_gps) -- gpsd
+# does not need to be running before this one starts.
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/ve7cbh/RV-total-control/config/mqtt_gpsd_feeder.py
+Restart=on-failure
+RestartSec=10
+User=ve7cbh
+
+# Same lesson as the rest of the fleet: don't give up if Mosquitto isn't
+# reachable yet at boot -- just keep retrying.
+StartLimitIntervalSec=0
+
+[Install]
+WantedBy=multi-user.target

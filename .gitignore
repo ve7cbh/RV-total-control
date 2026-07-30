@@ -1,0 +1,17 @@
+# SAMLUX bridge script -- contains port numbers that are intentionally kept
+# private and excluded from the public repo.
+config/scripts/samlux_mqtt.py
+config/docs/samlux_mqtt.txt
+
+# Python bytecode cache -- regenerable, never belongs in git
+__pycache__/
+*.pyc
+
+# Backup files that shouldn't accumulate in the repo
+*.bak
+*.bak-*
+*~
+
+# Installer binaries -- not config, don't belong here
+*.exe
+*.msi

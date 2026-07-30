@@ -32,26 +32,6 @@ services:
     depends_on:
       - influxdb
 
-  rtl433:
-    image: hertzg/rtl_433:latest
-    container_name: rtl433
-    restart: unless-stopped
-    devices:
-      - /dev/bus/usb:/dev/bus/usb
-    command: ["-M", "si", "-d", "1024", "-F", "mqtt://mosquitto:1883,retain=1,events=rtl_433/rtl433/events"]
-    depends_on:
-      - mosquitto
-
-  rtl433b:
-    image: hertzg/rtl_433:latest
-    container_name: rtl433b
-    restart: unless-stopped
-    devices:
-      - /dev/bus/usb:/dev/bus/usb
-    command: ["-M", "si", "-d", "00000001", "-F", "mqtt://mosquitto:1883,retain=1,events=rtl_433/rtl433b/events"]
-    depends_on:
-      - mosquitto
-  
   weewx:
     image: felddy/weewx:latest
     container_name: weewx
@@ -112,10 +92,11 @@ services:
     container_name: telegraf
     restart: unless-stopped
     volumes:
-      - ./config/telegraf_solar.conf:/etc/telegraf/telegraf.d/solar.conf:ro
-      - ./config/telegraf_grid.conf:/etc/telegraf/telegraf.d/grid.conf:ro
-      - ./config/telegraf_generator.conf:/etc/telegraf/telegraf.d/generator.conf:ro
-      - ./config/telegraf_weather.conf:/etc/telegraf/telegraf.d/weather.conf:ro
+      - ./config/telegraf/telegraf_solar.conf:/etc/telegraf/telegraf.d/solar.conf:ro
+      - ./config/telegraf/telegraf_grid.conf:/etc/telegraf/telegraf.d/grid.conf:ro
+      - ./config/telegraf/telegraf_generator.conf:/etc/telegraf/telegraf.d/generator.conf:ro
+      - ./config/telegraf/telegraf_weather.conf:/etc/telegraf/telegraf.d/weather.conf:ro
+      - ./config/telegraf/telegraf_snmp.conf:/etc/telegraf/telegraf.d/snmp.conf:ro
     depends_on:
       - mosquitto
       - influxdb

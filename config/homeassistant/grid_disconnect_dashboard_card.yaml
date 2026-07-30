@@ -1,0 +1,17 @@
+# Add this as a new card in the "Load Control" dashboard's Manual Control
+# view (same view: list as the other cards, alongside Manual Load Shed and
+# Coil Status). Paste it as another item in that view's `cards:` list.
+
+      - type: entities
+        title: "Grid Connection (KWS-303L internal relay)"
+        show_header_toggle: false
+        entities:
+          - entity: switch.grid_connection
+            name: "Grid"
+          - entity: sensor.grid_alarm_code
+            name: "Alarm Code"
+      - type: markdown
+        content: >-
+          ⚠️ Remote reconnect is blocked automatically while an alarm is
+          active. Clear alarms on the meter's front panel — remote ON does
+          not clear them.
