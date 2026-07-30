@@ -144,7 +144,7 @@ Waveshare array too (RS-232/RS-422 in addition to RS-485).
 |---|---|---|---|
 | `mosquitto` | eclipse-mosquitto | `1883` | broker — no service config needed |
 | `influxdb` | influxdb:2 | `8086` | database — bucket `rvtc`, org `rvtc` |
-| `telegraf` | telegraf:latest | *(none exposed — outbound only)* | `config/telegraf_*.conf`, individually bind-mounted per file into `/etc/telegraf/telegraf.d/` — see Section 7 |
+| `telegraf` | telegraf:latest | *(none exposed — outbound only)* | `config/telegraf/telegraf_*.conf`, individually bind-mounted per file into `/etc/telegraf/telegraf.d/` — see Section 7 |
 | `grafana` | grafana/grafana | `3000` | — |
 | `weewx` | felddy/weewx | *(none exposed — served via nginx)* | `/data/docker/volumes/weewx/weewx.conf` |
 | `homeassistant` | ghcr.io/home-assistant/home-assistant:stable | `8123` | `/data/docker/volumes/homeassistant/configuration.yaml` |
@@ -154,11 +154,12 @@ Waveshare array too (RS-232/RS-422 in addition to RS-485).
 **Not currently running:** `rtl433` / `rtl433b` (removed — weather source is now the WN90LP, not
 the Acurite 5n1 / rtl_433 SDR path).
 
-**Telegraf's config directory pattern:** each source gets its own file
-(`telegraf_solar.conf`, `telegraf_grid.conf`, `telegraf_weather.conf`, `telegraf_snmp.conf`),
-individually bind-mounted in `docker-compose.yml` — there is no directory-level mount, so a new
-config file requires both creating the file **and** adding a mount line in the compose file, then
-`docker compose up -d telegraf` (a plain `docker restart` will not pick up a new mount).
+**Telegraf's config directory pattern:** each source gets its own file in `config/telegraf/`
+(`telegraf_solar.conf`, `telegraf_grid.conf`, `telegraf_generator.conf`, `telegraf_weather.conf`,
+`telegraf_snmp.conf`), individually bind-mounted in `docker-compose.yml` — there is no
+directory-level mount, so a new config file requires both creating the file **and** adding a
+mount line in the compose file, then `docker compose up -d telegraf` (a plain `docker restart`
+will not pick up a new mount).
 
 ---
 
@@ -386,6 +387,25 @@ log rotation limit is configured on this host — `docker logs <container>` (no 
 the entire history since container creation, which can be hundreds of MB and make it *look* like
 data is missing when it's really just buried. Use `--since`/`--until` to scope a query rather
 than assuming a gap means lost data.
+
+**`ExecStart` in a `.service` file must be a real symlink into `config/scripts/`, not a copy.**
+Two bridge services (`imu_mqtt.service`, `gps_nmea_bridge.service`) had silently drifted into
+independent, out-of-sync copies at `/etc/systemd/system/` instead of symlinks — one caused a
+production outage (crash-looping on a stray, never-git-tracked script at the repo root) before
+being caught. Every bridge service's unit file now lives in exactly one place,
+`config/scripts/`, symlinked from `/etc/systemd/system/` — confirmed 2026-07-30. If a bridge
+service ever crash-loops on `No such file or directory` for a path that looks plausible, check
+`ls -la /etc/systemd/system/<name>.service` first — if it's a real file instead of a symlink,
+that's the bug, not the script.
+
+**SNMP monitoring (MikroTik/printer/NAS) can silently stop for weeks with no error anywhere.**
+It went unmounted from `docker-compose.yml` at some point for reasons lost to time — there's no
+failure log for a data source Telegraf never tried to load, just a quietly stale measurement.
+`config/telegraf/telegraf_snmp.conf` is the correct, complete file (the only one of three
+near-identical drafts that includes its own `[[outputs.influxdb_v2]]` block); confirmed properly
+mounted and producing fresh `mikrotik`/`brother_printer`/`synology_nas` data as of 2026-07-30. If
+a `telegraf_*.conf` exists in the repo but its measurement hasn't shown fresh data recently,
+check the actual `docker-compose.yml` mount list first, not just whether the file exists.
 
 ---
 
