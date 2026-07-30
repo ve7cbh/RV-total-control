@@ -1,4 +1,5 @@
 # RV Total Control (RVTC) — System Reference
+**Version:** 2.0 — 2026-07-30
 **Owner:** Steve Bradshaw (ve7cbh) — Nanaimo, BC
 **GitHub:** https://github.com/ve7cbh/RV-total-control
 **Document purpose:** how the system is built, right now. Not a session log — historical
@@ -131,7 +132,7 @@ Waveshare array too (RS-232/RS-422 in addition to RS-485).
 
 | Port | Gateway IP | Use |
 |---|---|---|
-| `serial-1` | `192.168.88.13:4001` | *(unassigned — general purpose, see note above)* |
+| `serial-1` | `192.168.88.13:4001` | **Assigned 2026-07-30** — `gps_nmea_bridge.py` (`gps_nmea_bridge.service`), MQTT → NMEA ($GPRMC/$GPGGA) → APRS radio/tracker. One persistent TCP connection held open (raw serial pass-through, unlike the Modbus fresh-connection-per-poll pattern above) with reconnect-on-failure. Baud/parity set on the HF5142B's own web UI (currently 9600 8N1 — confirm this matches the APRS radio's NMEA input before final hookup, commonly 4800 for TNC-style input). Loopback-plug bench test not yet done — pending Steve having the DB9 connector shells on hand. |
 | `serial-2` | `192.168.88.14:4001` | *(unassigned)* |
 | `serial-3` | `192.168.88.15:4001` | *(unassigned)* |
 | `serial-4` | `192.168.88.16:4001` | *(unassigned)* |
@@ -198,13 +199,22 @@ external traffic reaches the router. External hostnames must be added explicitly
 will not be picked up automatically just because Pi-hole knows about a similarly-named `.lan`
 record.
 
-**Security note, not yet acted on:** InfluxDB (holds the API token), Grafana, and Mosquitto have
-not had an authentication/hardening review for exposure beyond the LAN. The only currently
-internet-reachable path is the single WeeWX forward above. Before adding any further NAT rules
-for other services, decide deliberately between direct port-forwarding (simple, but expands
-attack surface per service) versus a VPN back into the LAN (WireGuard — reuses infrastructure
-already planned for the club-bridge topology below) so every `.lan` hostname "just works" remotely
-without individually exposing each service.
+**Security note — InfluxDB partially addressed 2026-07-30, Grafana and Mosquitto still not:**
+the InfluxDB API token turned out to be a full org-admin-scope credential, not the narrow
+bucket-write token it should have been — and it was embedded both in Telegraf configs and
+client-side in the browser-served dashboard HTML (`config/nginx/*.html`), in a repo now confirmed
+genuinely public on GitHub, not just theoretically reachable. Rotated to two properly-scoped
+tokens: write-only on the `rvtc` bucket for Telegraf, read-only on the same bucket for the
+dashboard, which never needed write access at all. **The lesson to carry forward, not just for
+InfluxDB:** any credential that ends up in browser-served JavaScript should default to the
+narrowest possible scope from the start — don't reuse a write-capable backend token client-side
+to save a step, tighten it after the fact. Grafana and Mosquitto have had **no**
+authentication/hardening review at all — this is still fully open. The only currently
+internet-reachable path remains the single WeeWX forward above. Before adding any further NAT
+rules for other services, still need to decide deliberately between direct port-forwarding
+(simple, but expands attack surface per service) versus a VPN back into the LAN (WireGuard —
+reuses infrastructure already planned for the club-bridge topology below) so every `.lan`
+hostname "just works" remotely without individually exposing each service.
 
 ---
 
@@ -388,6 +398,16 @@ the entire history since container creation, which can be hundreds of MB and mak
 data is missing when it's really just buried. Use `--since`/`--until` to scope a query rather
 than assuming a gap means lost data.
 
+**WitMotion's on-chip time block reports LOCAL time, not UTC, despite the register map's field
+names.** `YYMM`/`DDHH`/`MMSS`/`MS` (`0x30`–`0x33`) looked like it should be GPS UTC. It isn't —
+the module applies its own `TIMEZONE` register (`0x6B`) offset internally before exposing that
+block. Confirmed 2026-07-30: `TIMEZONE` read back as `0x05` (UTC-7), and the on-chip block
+matched Nanaimo local time to the minute against an actual clock check, not UTC. `imu_mqtt.py`'s
+`gps/utc_time` field now reads `TIMEZONE` every poll and subtracts the offset to recover true
+UTC; `gps/chip_local_time` publishes the raw, uncorrected value alongside it as a diagnostic. If
+a GPS timestamp field on this device ever looks wrong again, check `TIMEZONE` before assuming the
+GPS fix itself is bad.
+
 **`ExecStart` in a `.service` file must be a real symlink into `config/scripts/`, not a copy.**
 Two bridge services (`imu_mqtt.service`, `gps_nmea_bridge.service`) had silently drifted into
 independent, out-of-sync copies at `/etc/systemd/system/` instead of symlinks — one caused a
@@ -441,8 +461,13 @@ for full history/context on any item below.
 - HW-21 — Wire coil 3 (EVO BMS charge inhibit) ✅ closed 2026-07-21
 - HW-22 — Install battery heater, wire coil 5 and 5 (?)  Two batteries, one heater each.
 - HW-24 — 400A battery current shunt (RS-485) — ordered, not yet in hand
-- HW-27 — WitMotion WTGAHRS3-485 GPS-IMU, roof-mounted — ordered, not yet in hand (replaces the
-  abandoned HW-25 ESP32/Adafruit IMU node — see the archived 2026-07-13 log if the history matters)
+- HW-27 — WitMotion WTGAHRS3-485 GPS-IMU, roof-mounted — **commissioned, in service on
+  `485-4`/`192.168.88.8`** (replaces the abandoned HW-25 ESP32/Adafruit IMU node — see the
+  archived 2026-07-13 log if the history matters). Heading/pitch/roll validated against a
+  digital level across power cycles. GPS lat/lon confirmed accurate to known Nanaimo location
+  (bench capture 2026-07-25). GPS fields extended 2026-07-30 for APRS use — altitude, course,
+  speed, and a derived true-UTC time field (`rvtc/sensors/gps/utc_time`) added to `imu_mqtt.py`.
+  See Section 9 for the on-chip-time/TIMEZONE-register quirk found while adding that field.
 - HW-28 — ** Closed 2026-07-20 duplicate issue with HW-25 ✅
 - HW-29 — Holding tank metering system — modules in hand, not yet installed/wired
 - HW-30 — Storage compartment temperature sensors — in hand, not yet installed/wired
@@ -454,6 +479,16 @@ for full history/context on any item below.
 - OI-38 — ESP32-S3 thermostat firmware
 - OI-39 — ESP32 Modbus polling register list
 - OI-41 — VoIP PBX / LDAP
+- OI-42 — IMU leveling page(s) — standalone mobile-first page (priority) + a tab on `rvtc.lan`
+  (lower priority, joins the existing Solar/Battery/Power/Weather tabs). Data's already flowing
+  (`rvtc/sensors/imu/heading|pitch|roll`, plus the APRS-driven GPS fields added 2026-07-30) — no
+  page built yet. **`imu.lan`/`192.168.88.20` was reserved for the earlier abandoned ESP32
+  design (HW-25) and is not part of the current WitMotion/Modbus architecture** — don't reuse
+  that address for the new page without first confirming nothing else has claimed it since.
+- OI-43 — HF5142B serial-1 loopback-plug bench test for `gps_nmea_bridge.service` — pending
+  Steve having the DB9 connector shells on hand. Once done, confirm sent/received frame counts
+  match on the gateway's Serial Port State page before considering the APRS output path
+  validated end-to-end.
 
 **Automation / live-test items (no formal number in the archive):**
 - Live bench test of the actual Tier 3 automatic trigger (only the manual override path has been
