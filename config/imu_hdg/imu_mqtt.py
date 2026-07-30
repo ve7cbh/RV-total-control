@@ -76,10 +76,10 @@ import time
 import paho.mqtt.client as mqtt
 
 # ── Config ──────────────────────────────────────────────────────────────
-GATEWAY_HOST = "192.168.88.8"     # 485-4 -- confirmed working 2026-07-29 after IMU power supply swap
+GATEWAY_HOST = "192.168.88.8"     # 485-4, per System Reference Section 3
 GATEWAY_PORT = 4001
 
-SLAVE_ADDR = 80   # WitMotion default device address (IICADDR register 0x1A).
+SLAVE_ADDR = 0x50   # WitMotion default device address (IICADDR register 0x1A).
                      # Change here (and via IICADDR on the unit itself) if you
                      # readdress it to match the original slave-10 plan from
                      # the retired IMU_config.md.
@@ -111,7 +111,7 @@ POLL_INTERVAL_SECONDS = 0.5   # 2 Hz -- plenty for a leveling display. 9600 baud
                                # leaves headroom to go faster later if it ever
                                # feels sluggish while actively jacking the trailer.
 SOCKET_TIMEOUT = 2.0
-RETRY_SECONDS = 15
+RETRY_SECONDS = 5
 
 logging.basicConfig(
     level=logging.INFO,
