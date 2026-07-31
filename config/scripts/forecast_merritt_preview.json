@@ -1,0 +1,74 @@
+{
+  "generated_utc": "2026-07-31T19:00:00+00:00",
+  "location": "Merritt (PREVIEW ONLY -- see note)",
+  "warnings": {
+    "active": true,
+    "count": 1,
+    "events": [
+      {
+        "type": "warning",
+        "colour": "orange",
+        "description": "ORANGE WARNING - AIR QUALITY",
+        "url": "https://weather.gc.ca/warnings/report_air_quality_e.html?mesoCode=aq1199#184613246923523409202607310502"
+      }
+    ]
+  },
+  "days": [
+    {
+      "label": "Today",
+      "icon_code": "44",
+      "high_c": 32,
+      "low_c": 17,
+      "pop_percent": null,
+      "condition": "Smoke"
+    },
+    {
+      "label": "Sat",
+      "icon_code": "09",
+      "high_c": 22,
+      "low_c": 10,
+      "pop_percent": 40,
+      "condition": "Chance of showers"
+    },
+    {
+      "label": "Sun",
+      "icon_code": "00",
+      "high_c": 24,
+      "low_c": 10,
+      "pop_percent": null,
+      "condition": "Sunny"
+    },
+    {
+      "label": "Mon",
+      "icon_code": "00",
+      "high_c": 24,
+      "low_c": 8,
+      "pop_percent": null,
+      "condition": "Sunny"
+    },
+    {
+      "label": "Tue",
+      "icon_code": "00",
+      "high_c": 27,
+      "low_c": 14,
+      "pop_percent": null,
+      "condition": "Sunny"
+    },
+    {
+      "label": "Wed",
+      "icon_code": "00",
+      "high_c": 32,
+      "low_c": 15,
+      "pop_percent": null,
+      "condition": "Sunny"
+    },
+    {
+      "label": "Thu",
+      "icon_code": "00",
+      "high_c": 32,
+      "low_c": null,
+      "pop_percent": null,
+      "condition": "Sunny"
+    }
+  ]
+}

@@ -25,7 +25,7 @@ import re
 import sys
 
 PATH = "/data/docker/volumes/weewx/skins/Belchertown/skin.conf"
-ECCC_URL = "https://weather.gc.ca/en/location/index.html?coords=48.691,-123.585"
+ECCC_URL = "https://weather.gc.ca/en/location/index.html?coords=48.691,-123.585#wb-cont"
 
 # Measured 2026-07-31 via window.scrollY in a browser resized to ~650px wide,
 # scrolled so the "Forecast" heading sits at the very top of the viewport.

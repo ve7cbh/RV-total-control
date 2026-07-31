@@ -1,0 +1,13 @@
+[Unit]
+Description=RVTC — periodic trigger for update_weewx_station_location.service
+
+[Timer]
+# Every 15 minutes is plenty to catch a real relocation without hammering
+# the 485-4 Modbus gateway -- the actual weewx.conf edit + restart only
+# happens if MOVE_THRESHOLD_KM is exceeded, not on every tick.
+OnCalendar=*:0/15
+OnBootSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

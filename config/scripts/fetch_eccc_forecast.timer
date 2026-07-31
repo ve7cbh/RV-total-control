@@ -1,0 +1,14 @@
+[Unit]
+Description=RVTC — hourly trigger for fetch_eccc_forecast.service
+
+[Timer]
+# ECCC's own citypage_weather XML updates hourly at minimum -- matching
+# that cadence rather than polling more often for no benefit.
+OnCalendar=hourly
+# Run once shortly after boot too, so the widget has data without waiting
+# up to an hour after a restart.
+OnBootSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

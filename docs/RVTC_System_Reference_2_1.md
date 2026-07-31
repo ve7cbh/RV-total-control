@@ -1,5 +1,5 @@
 # RV Total Control (RVTC) — System Reference
-**Version:** 2.0 — 2026-07-30
+**Version:** 2.1 — 2026-07-31
 **Owner:** Steve Bradshaw (ve7cbh) — Nanaimo, BC
 **GitHub:** https://github.com/ve7cbh/RV-total-control
 **Document purpose:** how the system is built, right now. Not a session log — historical
@@ -96,7 +96,7 @@ by Home Assistant directly (see Section 8).
 | `485-4` | `192.168.88.8:4001` | WitMotion WTGAHRS3-485 GPS-IMU (HW-27) | — | `rvtc/sensors/imu/# |
 | `485-5` | `192.168.88.9:4001` | Water sensors — pressure, filter ΔP, turbidity | — | Pending Phase 5 |
 | `485-6` | `192.168.88.10:4001` | WN90LP weather station — permanent home | `WN90_mqtt.py` | `rvtc/sensors/weather/#` |
-| `485-7` | `192.168.88.11:4001` | 400A battery current shunt (HW-24) | *(not yet deployed)* | `rvtc/sensors/battery_current/#` (planned) |
+| `485-7` | `192.168.88.11:4001` | 300A battery current shunt (HW-24) | *(not yet deployed)* | `rvtc/sensors/battery_current/#` (planned) |
 | `485-8` | `192.168.88.12:4001` | Waveshare 8-ch relay board (load shed actuation) | `relay.py` (called via HA `shell_command`, not a polling daemon) | — |
 
 **EPEVER's RS485-1M2S module is a passive electrical tap, not a bus arbitrator** — no collision
@@ -199,22 +199,13 @@ external traffic reaches the router. External hostnames must be added explicitly
 will not be picked up automatically just because Pi-hole knows about a similarly-named `.lan`
 record.
 
-**Security note — InfluxDB partially addressed 2026-07-30, Grafana and Mosquitto still not:**
-the InfluxDB API token turned out to be a full org-admin-scope credential, not the narrow
-bucket-write token it should have been — and it was embedded both in Telegraf configs and
-client-side in the browser-served dashboard HTML (`config/nginx/*.html`), in a repo now confirmed
-genuinely public on GitHub, not just theoretically reachable. Rotated to two properly-scoped
-tokens: write-only on the `rvtc` bucket for Telegraf, read-only on the same bucket for the
-dashboard, which never needed write access at all. **The lesson to carry forward, not just for
-InfluxDB:** any credential that ends up in browser-served JavaScript should default to the
-narrowest possible scope from the start — don't reuse a write-capable backend token client-side
-to save a step, tighten it after the fact. Grafana and Mosquitto have had **no**
-authentication/hardening review at all — this is still fully open. The only currently
-internet-reachable path remains the single WeeWX forward above. Before adding any further NAT
-rules for other services, still need to decide deliberately between direct port-forwarding
-(simple, but expands attack surface per service) versus a VPN back into the LAN (WireGuard —
-reuses infrastructure already planned for the club-bridge topology below) so every `.lan`
-hostname "just works" remotely without individually exposing each service.
+**Security note, not yet acted on:** InfluxDB (holds the API token), Grafana, and Mosquitto have
+not had an authentication/hardening review for exposure beyond the LAN. The only currently
+internet-reachable path is the single WeeWX forward above. Before adding any further NAT rules
+for other services, decide deliberately between direct port-forwarding (simple, but expands
+attack surface per service) versus a VPN back into the LAN (WireGuard — reuses infrastructure
+already planned for the club-bridge topology below) so every `.lan` hostname "just works" remotely
+without individually exposing each service.
 
 ---
 
@@ -460,7 +451,11 @@ for full history/context on any item below.
 - HW-20 — ESP32-S3 thermostat: fish DMX cable, firmware
 - HW-21 — Wire coil 3 (EVO BMS charge inhibit) ✅ closed 2026-07-21
 - HW-22 — Install battery heater, wire coil 5 and 5 (?)  Two batteries, one heater each.
-- HW-24 — 400A battery current shunt (RS-485) — ordered, not yet in hand
+- HW-24 — **300A** battery current shunt (RS-485) — corrected from earlier "400A" note, confirmed
+  2026-07-31. In hand, not yet installed/commissioned.
+- HW-31 — Battery temperature sensors — in hand, not yet installed/commissioned. Queued for
+  installation alongside HW-24 before the tank-level sensors (HW-29), which are deliberately
+  deferred to fall 2026.
 - HW-27 — WitMotion WTGAHRS3-485 GPS-IMU, roof-mounted — **commissioned, in service on
   `485-4`/`192.168.88.8`** (replaces the abandoned HW-25 ESP32/Adafruit IMU node — see the
   archived 2026-07-13 log if the history matters). Heading/pitch/roll validated against a
@@ -469,7 +464,9 @@ for full history/context on any item below.
   speed, and a derived true-UTC time field (`rvtc/sensors/gps/utc_time`) added to `imu_mqtt.py`.
   See Section 9 for the on-chip-time/TIMEZONE-register quirk found while adding that field.
 - HW-28 — ** Closed 2026-07-20 duplicate issue with HW-25 ✅
-- HW-29 — Holding tank metering system — modules in hand, not yet installed/wired
+- HW-29 — Holding tank metering system — modules in hand, not yet installed/wired. **Deliberately
+  deferred to fall 2026**, confirmed 2026-07-31 — not blocked on anything, just sequenced after
+  HW-24/HW-31 and the equipment-securing pass (OI-44).
 - HW-30 — Storage compartment temperature sensors — in hand, not yet installed/wired
 
 **Software / Infrastructure:**
@@ -489,6 +486,9 @@ for full history/context on any item below.
   Steve having the DB9 connector shells on hand. Once done, confirm sent/received frame counts
   match on the gateway's Serial Port State page before considering the APRS output path
   validated end-to-end.
+- OI-44 — Physical equipment securing pass — after HW-24/HW-31 are installed and commissioned,
+  a general tidy-up/securing pass on all RVTC equipment to withstand road vibration and
+  movement. Not a specific fault, just standing housekeeping before more driving.
 
 **Automation / live-test items (no formal number in the archive):**
 - Live bench test of the actual Tier 3 automatic trigger (only the manual override path has been
