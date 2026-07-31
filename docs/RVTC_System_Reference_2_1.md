@@ -1,5 +1,5 @@
 # RV Total Control (RVTC) — System Reference
-**Version:** 2.1 — 2026-07-31
+**Version:** 2.2 — 2026-07-31
 **Owner:** Steve Bradshaw (ve7cbh) — Nanaimo, BC
 **GitHub:** https://github.com/ve7cbh/RV-total-control
 **Document purpose:** how the system is built, right now. Not a session log — historical
@@ -135,7 +135,7 @@ Waveshare array too (RS-232/RS-422 in addition to RS-485).
 | `serial-1` | `192.168.88.13:4001` | **Assigned 2026-07-30** — `gps_nmea_bridge.py` (`gps_nmea_bridge.service`), MQTT → NMEA ($GPRMC/$GPGGA) → APRS radio/tracker. One persistent TCP connection held open (raw serial pass-through, unlike the Modbus fresh-connection-per-poll pattern above) with reconnect-on-failure. Baud/parity set on the HF5142B's own web UI (currently 9600 8N1 — confirm this matches the APRS radio's NMEA input before final hookup, commonly 4800 for TNC-style input). Loopback-plug bench test not yet done — pending Steve having the DB9 connector shells on hand. |
 | `serial-2` | `192.168.88.14:4001` | *(unassigned)* |
 | `serial-3` | `192.168.88.15:4001` | *(unassigned)* |
-| `serial-4` | `192.168.88.16:4001` | *(unassigned)* |
+| `serial-4` | `192.168.88.16:4001` | **Assigned 2026-07-31** — Ebyte EID041-G01S temp/humidity sensor (HW-32), equipment enclosure (where the J45 lives). 20cm cable, factory-default Modbus address 1. `eid041_mqtt.py` (`eid041_mqtt.service`). See Section 9 for the Protocol-mode gotcha found while commissioning this one. |
 
 ---
 
@@ -399,6 +399,17 @@ UTC; `gps/chip_local_time` publishes the raw, uncorrected value alongside it as 
 a GPS timestamp field on this device ever looks wrong again, check `TIMEZONE` before assuming the
 GPS fix itself is bad.
 
+**HF5142B ports have a "Protocol" setting (web UI) that must be `None`, not `Modbus`, for
+RVTC's bridge scripts to work.** Discovered 2026-07-31 commissioning the first EID041 sensor on
+`serial-4`: that port's Protocol was set to `Modbus` (default on at least this port), which on
+gateways like this typically means the unit does its own Modbus-TCP-to-RTU translation — expecting
+a standard Modbus TCP (MBAP) frame over the network and adding/stripping the RTU CRC itself.
+Every RVTC bridge script instead sends raw RTU frames straight over the TCP socket (the same
+"RTU-over-TCP passthrough" every Waveshare gateway and `serial-1`'s NMEA bridge already rely on)
+— those two framings aren't compatible. Fix: set Protocol to `None` on any HF5142B port a RVTC
+script talks to. Worth checking this setting on `serial-2`/`serial-3` too before wiring anything
+new into them, rather than discovering it the same way again.
+
 **`ExecStart` in a `.service` file must be a real symlink into `config/scripts/`, not a copy.**
 Two bridge services (`imu_mqtt.service`, `gps_nmea_bridge.service`) had silently drifted into
 independent, out-of-sync copies at `/etc/systemd/system/` instead of symlinks — one caused a
@@ -417,6 +428,21 @@ near-identical drafts that includes its own `[[outputs.influxdb_v2]]` block); co
 mounted and producing fresh `mikrotik`/`brother_printer`/`synology_nas` data as of 2026-07-30. If
 a `telegraf_*.conf` exists in the repo but its measurement hasn't shown fresh data recently,
 check the actual `docker-compose.yml` mount list first, not just whether the file exists.
+
+**Belchertown's `radar_html`/`radar_html_dark`/`radar_html_kiosk` skin.conf values must stay
+single-line — a multi-line value silently breaks the whole site, not just that widget.**
+ConfigObj happily accepts a multi-line triple-quoted (`'''...'''`) value, and `skin.conf`
+parses cleanly either way — **that is not proof the page works.** Somewhere in Belchertown's
+template chain, this value gets interpolated directly into a JavaScript string literal inside
+the generated `belchertown.js` (a `jQuery('.radar_image').html('...')` call), and a JS string
+literal can't contain a real line break. A multi-line value produces an `Uncaught SyntaxError`
+that kills parsing of the *entire* `belchertown.js` file — which silently breaks everything else
+that file defines (graph rendering, the homepage clock) along with it, not just the widget
+itself. Confirmed and fixed 2026-07-31. If editing these values again, keep the HTML+`<script>`
+content on one physical line, no embedded newlines — the widget's own JS is fully
+semicolon-terminated, so collapsing it to one line doesn't change behavior. If a Belchertown page
+ever looks broken again after a skin.conf edit and the config itself parses fine, check the
+browser console (F12) for a `SyntaxError`/`ReferenceError` before assuming a server-side cause.
 
 ---
 
@@ -468,6 +494,20 @@ for full history/context on any item below.
   deferred to fall 2026**, confirmed 2026-07-31 — not blocked on anything, just sequenced after
   HW-24/HW-31 and the equipment-securing pass (OI-44).
 - HW-30 — Storage compartment temperature sensors — in hand, not yet installed/wired
+- HW-32 — Ebyte EID041-G01S temp/humidity sensor, equipment enclosure (J45) — **installed and
+  commissioned 2026-07-31**, `serial-4` on the HF5142B, factory-default Modbus address 1 (single
+  device on its own line, no collision risk). `eid041_mqtt.py`. NOT yet persisted to InfluxDB —
+  deliberately deferred (needs a new `telegraf_enclosure.conf` + a docker-compose bind-mount +
+  `docker compose up -d telegraf`, not just a restart — see Section 4's Telegraf gotcha).
+- HW-33 — Three more Ebyte EID041-G01S units planned: equipment bay (near the Waveshare
+  array/batteries, but outside the battery enclosure itself), cargo compartment, holding tank
+  compartment. Wiring plan confirmed 2026-07-31: **a mix of dedicated lines and a shared bus**,
+  exact pairing TBD on-site (cable-run practicality, not yet decided). Only `serial-2`/`serial-3`
+  remain free on the HF5142B — not enough for all three as fully separate dedicated lines, so at
+  least one shared RS-485 line (multiple units, unique Modbus addresses) is likely regardless.
+  Addresses are reprogrammed via `set_eid041_address.py` (Hold Register `0x000A`, function 0x06)
+  BEFORE a unit joins a shared line — same bench-first pattern as the KWS meters (HW-09). Do not
+  wire two factory-default (address 1) units onto the same line before reprogramming one of them.
 
 **Software / Infrastructure:**
 - OI-18 — ESPHome Ansible role

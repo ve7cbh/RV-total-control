@@ -1,3 +1,0 @@
-Influx API token
-
-EEyfdTJcD5Rqw-sHyYqXlhN10d2d0rsg0aWh5GYB5nsv0HA5LQb3xl-3FkwGPGINAEsUsXuMBOV_Q2RBGu83sw==

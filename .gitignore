@@ -15,3 +15,5 @@ __pycache__/
 # Installer binaries -- not config, don't belong here
 *.exe
 *.msi
+# Any other stray token/credential dump files
+docs/influx_API_Token.txt
