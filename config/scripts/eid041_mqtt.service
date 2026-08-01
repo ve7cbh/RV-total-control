@@ -1,0 +1,19 @@
+[Unit]
+Description=RVTC — EID041-G01S enclosure temp/humidity bridge (serial-4)
+# Same "keep retrying if the gateway isn't reachable yet" lesson as the
+# rest of the fleet, see StartLimitIntervalSec below (in [Unit], where it
+# actually takes effect -- not [Service], per the imu_mqtt.service fix
+# earlier tonight).
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -u /home/ve7cbh/RV-total-control/config/scripts/eid041_mqtt.py
+Restart=on-failure
+RestartSec=10
+User=ve7cbh
+
+[Install]
+WantedBy=multi-user.target
