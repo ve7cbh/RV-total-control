@@ -119,9 +119,22 @@ All containers run on network `rvtc_net` from `~/RV-total-control/docker-compose
 
 ### Host processes
 
-| Process | Purpose |
+All bridge services run under systemd. Every unit in `/etc/systemd/system/` for
+RVTC is a **symlink** into `config/scripts/` -- edit the repo copy, then
+`sudo systemctl daemon-reload`. Never install a standalone copy.
+
+| Unit | Purpose |
 |---|---|
-| `config/epever_mqtt.py` | EPEVER MPPT60 Modbus → `rvtc/sensors/solar/#` MQTT (nohup daemon) |
+| `epever_mqtt` | EPEVER MPPT60 solar -> `rvtc/sensors/solar/#` |
+| `samlux_mqtt` | SAMLUX EVO-2212 inverter -> `rvtc/sensors/inverter/#` (script gitignored) |
+| `kws_mqtt` | KWS grid / generator meters |
+| `battery_current_mqtt` | Battery shunt current |
+| `WN90_mqtt` | WN90 weather station |
+| `eid041_mqtt` | EID041 temp/humidity |
+| `imu_mqtt`, `imu_web`, `imu_gps_heading_autoset` | WitMotion IMU, leveling web page, GPS heading autoset |
+| `gps_nmea_bridge`, `gps_nmea_geoclue` | GPS -> NMEA (APRS radio) and geoclue |
+| `meshcore_names`, `watchdog_mqtt` | MeshCore name resolver, service watchdog |
+| `fetch_eccc_forecast.timer`, `update_weewx_station_location.timer`, `auto_recalibrate_imu_heading.timer` | Scheduled jobs |
 
 ---
 
@@ -129,43 +142,43 @@ All containers run on network `rvtc_net` from `~/RV-total-control/docker-compose
 
 ```
 RV-total-control/
-├── ansible.cfg
-├── site.yml                      # Master playbook
-├── phase2.yml
-├── docker-compose.yml            # Canonical — always run from repo root
+├── ansible.cfg, site.yml, phase2.yml   # Ansible entry points
+├── docker-compose.yml            # Canonical -- always run from repo root
+├── docker_volume_backup.sh       # Nightly backup (cron, 02:00)
 ├── config/
-│   ├── epever_mqtt.py            # EPEVER Modbus → MQTT bridge
-│   ├── telegraf_solar.conf       # Telegraf MQTT → InfluxDB (solar)
-│   ├── rvtc_solar_dashboard.json # Grafana solar dashboard
-│   ├── rvtc_index.html           # rvtc.lan unified monitoring page
-│   ├── modbus_epever.yaml        # HA Modbus config — EPEVER (pending OI-15)
-│   ├── modbus_samlux.yaml        # HA Modbus config — SAMLUX EVO-2212
-│   ├── nginx.conf                # nginx reverse proxy config
-│   ├── rv-mikrotik-config.rsc    # MikroTik router config
-│   └── weewx.conf                # WeeWX config (managed on host)
+│   ├── scripts/                  # LIVE: bridge scripts + their systemd units (symlinked)
+│   ├── telegraf/                 # LIVE: telegraf_*.conf, bind-mounted by compose
+│   ├── tools/                    # One-off diagnostics, probes, setup helpers (not services)
+│   ├── homeassistant/            # HA YAML + relay scripts (reference copies; live in docker volume)
+│   ├── nginx/, grafana/          # Reference copies of dashboards / site
+│   ├── mikrotik/                 # Router configs
+│   ├── Tank_Mon/, i2c/           # Microcontroller firmware sources
+│   ├── docs/                     # Reference config copies (telegraf.conf, weewx.conf)
+│   └── archive/                  # Retired scripts kept for reference
 ├── docs/
-│   ├── RVTC_System_Architecture_V0.1.docx
-│   ├── RVTC_Ansible_Role_Structure_V0.1.docx
-│   ├── RVTC_Project_Reference_20260619.md
-│   └── RVTC_Session_Summary_*.md
-├── group_vars/all/
-│   ├── all.yml                   # Non-sensitive variables
-│   └── vault.yml                 # Ansible Vault — secrets
-├── host_vars/
-│   └── localhost.yml             # J45-specific overrides
-├── inventories/production/
-│   └── hosts.ini
-└── roles/
-    ├── common/
-    ├── mosquitto/
-    ├── influxdb/
-    ├── grafana/
-    ├── rtl433/
-    ├── weewx/
-    ├── nginx/
-    ├── homeassistant/
-    └── pihole/
+│   ├── RVTC_System_Reference_<ver>.md   # Current system reference (latest version only)
+│   ├── datasheets/               # Vendor manuals & Modbus register maps
+│   ├── handovers/                # Chat-Claude / session handover notes
+│   └── archive/                  # Superseded references & session logs
+├── tools/flux/                   # Saved InfluxDB Flux queries
+├── vendor/                       # Third-party firmware (RAK4631 MeshCore, WitMotion)
+├── images/
+├── group_vars/all/               # all.yml + vault.yml (Ansible Vault secrets)
+├── host_vars/, inventories/production/
+└── roles/                        # Ansible roles (mosquitto, influxdb, grafana, ...)
 ```
+
+Not in git (kept on the host in `~/rvtc-files/`): driver installers, large data
+exports, logs, and private notes. Runtime state files (`imu_heading_state.json`,
+`weewx_location_state.json`) are gitignored because they contain the RV position.
+
+---|---|
+| 192.168.88.1 | MikroTik gateway |
+| 192.168.88.2 | Windows workstation |
+| 192.168.88.3 | Beelink J45 — all services |
+| 192.168.88.5–12 | Waveshare RS-485 gateway ports 1–8 |
+
+DNS: Pi-hole at 192.168.88.3. All local domains use `.lan` TLD.
 
 ---
 

@@ -1,0 +1,7 @@
+PS C:\Users\ve7cbh\Desktop\com2tcp-1.3.0.0> .\com2tcp.exe --baud 9600 --ignore-dsr \\.\COM10 192.168.88.8 4001
+OpenC0C("\\.\COM10", baud=9600, data=8, parity=no, stop=1) - OK
+Connect("192.168.88.8", "4001") - OK
+InOut() START
+DSR is OFF
+DSR is ON
+DSR is OFF

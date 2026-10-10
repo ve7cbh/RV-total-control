@@ -22,3 +22,12 @@ docs/influx_API_Token.txt
 # GPS position, which should not be published in this public repo.
 config/scripts/imu_heading_state.json
 config/weewx_location_state.json
+
+# Kept outside the repo in ~/rvtc-files/ (host) -- vendor installers, driver
+# bundles, big data exports and logs don't belong in a public config repo.
+CP210x*
+platform-tools*
+*.xlsx
+/*.csv
+logs/
+*.log
