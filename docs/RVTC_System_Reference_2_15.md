@@ -1,7 +1,8 @@
 # RV Total Control (RVTC) — System Reference
 **Version:** 2.15 — 2026-10-10 — Section 9: json_v2 required-field gotcha (wind fields
 dropping whole weather packets) and its fix; Telegraf's InfluxDB token now supplied from a
-gitignored `.env`; dead WeeWX `[InfluxDB2]` stanza removed.
+gitignored `.env`; dead WeeWX `[InfluxDB2]` stanza removed; OI-48 (IPsec hash) closed;
+trailer↔home IPsec PSK rotated.
 **Owner:** Steve Bradshaw (ve7cbh) — Nanaimo, BC
 **GitHub:** https://github.com/ve7cbh/RV-total-control
 **Document purpose:** how the system is built, right now. Not a session log — historical
@@ -287,10 +288,20 @@ source IP varies between Club and Starlink WANs); trailer is Initiator. Home sid
 Confirmed working with a real `ping 192.168.0.1` (23–39ms) and a live Home Assistant dashboard
 load from the trailer's LAN, through the tunnel — not just SA-established.
 
-**Not yet confirmed:** the two sides' hash settings may not actually agree — home landed on
-SHA-512 by default click-path in the ER605's UI, MikroTik was configured to match SHA-256 —
-worth checking `/ip ipsec proposal print` against the ER605's config before trusting this long
-term (OI-48).
+**Crypto confirmed matching (OI-48 closed, 2026-10-10):** the ER605's Phase-1 proposal is
+`SHA-256 - AES256 - DH14` (its only proposal, so no weaker fallback can be negotiated), and the
+MikroTik's installed SAs (Phase 2 / ESP, both directions) show `sha256` / `aes-cbc` 256,
+`mature`. The earlier worry that home had landed on SHA-512 no longer applies. To re-check:
+ER605 VPN → IPsec → IPsec Policy → edit → Advanced; MikroTik `/ip ipsec installed-sa print`.
+
+**PSK rotated 2026-10-10.** The original key had been pasted into a chat session, so it was
+replaced. The current key is held only in `~/rvtc-files/private/` on the control host (and the
+owner's password manager) — never in this repo. Procedure that worked, from the trailer: change
+the far end (ER605) first while the tunnel is still up, then the MikroTik identity secret;
+applying the MikroTik change tears the tunnel down itself and it renegotiated on the new key in
+about a minute. If both ends are changed without a drop, force it with
+`/ip ipsec active-peers kill-connections` — existing SAs survive a PSK change, so a tunnel that
+stays up proves nothing until it has renegotiated.
 
 **Confirmed working over Starlink WAN, 2026-08-18** (previously only tested on Club WiFi — see
 OI-49). Real traffic (ping + interactive SSH into the home Pi at `192.168.0.3`) passed
@@ -839,10 +850,9 @@ for full history/context on any item below.
   duty to network-admin access (camera web UIs, general access into the club LAN) — see Section
   6. UDM Pro's native site-to-site VPN is IPsec/OpenVPN only; check whether the Pi can instead
   run WireGuard directly to an endpoint device before defaulting to IPsec here too.
-- OI-48 — **IPsec hash mismatch, trailer↔home VPN** — home's ER605 defaulted to SHA-512,
-  MikroTik was configured for SHA-256; not yet confirmed whether these actually agree in
-  practice despite the tunnel working. Check `/ip ipsec proposal print` against the ER605 config.
-  Still open — separate from OI-49's Starlink investigation, which didn't touch this.
+- OI-48 — ~~IPsec hash mismatch, trailer↔home VPN.~~ **Closed, 2026-10-10:** both phases on
+  SHA-256 / AES-256 (ER605 Phase-1 `SHA-256 - AES256 - DH14`; MikroTik installed SAs `sha256`,
+  `aes-cbc` 256). See Section 6.
 - OI-49 — ~~Trailer↔home VPN over Starlink WAN — only tested on Club WiFi so far.~~ **Closed,
   confirmed working 2026-08-18 — see Section 6.** Real root cause of the initial failure was a
   missing `ipsec-policy=out,none` exclusion on the Starlink NAT masquerade rules, not Starlink's
@@ -870,8 +880,8 @@ for full history/context on any item below.
   eMMC, headless SSH/user config set at image-write time. **Pi-hole installed and running.** No
   DNS cutover was needed — confirmed this Pi was never actually in the home network's active DNS
   path.
-- **Trailer↔home IPsec VPN — built and tested.** See Section 6 for full detail; one loose end
-  remains, tracked as OI-48 above.
+- **Trailer↔home IPsec VPN — built and tested.** See Section 6 for full detail. OI-48 (hash
+  agreement) closed 2026-10-10; PSK rotated the same day.
 - **Trailer↔home VPN over Starlink WAN — confirmed working, 2026-08-18.** OI-49 closed. Real
   fault was a missing `ipsec-policy=out,none` exclusion on the Starlink NAT masquerade rules
   (traffic was getting NAT'd and dropped before reaching the IPsec policy, while SAs stayed
