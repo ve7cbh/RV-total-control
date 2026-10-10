@@ -1,153 +1,141 @@
 # RV Total Control (RVTC)
 
-**Author:** Steve Bradshaw (ve7cbh) — Nanaimo, BC  
-**Status:** Phase 3 Active — Power Integration  
-**Last Updated:** June 24, 2026  
-**Host:** `http://rvtc.lan` · `http://weewx.lan` · `http://grafana.lan`
+**Author:** Steve Bradshaw (ve7cbh) — Nanaimo, BC
+**Last updated:** 2026-10-10
+**Web UIs:** `http://rvtc.lan` · `http://weewx.lan` · `http://grafana.lan` · `http://homeassistant.lan`
+
+Monitoring, control and data collection for a towed RV: solar, battery, inverter, grid and
+generator power, weather, attitude/GPS, enclosure climate, and load shedding. Runs on a Beelink
+J45 mini-PC with the core services in Docker Compose. Field devices are on wired RS-485 Modbus
+through Ethernet gateways.
+
+> **The authoritative, kept-current description of the system is
+> [`docs/RVTC_System_Reference_2_15.md`](docs/RVTC_System_Reference_2_15.md).** This README is the
+> front page only; when the two disagree, the System Reference wins. Only the latest version
+> lives in `docs/`; older ones are in `docs/archive/`.
 
 ---
 
-## Overview
+## Architecture — one path for every sensor
 
-RV Total Control is an integrated monitoring, control, and data-collection platform for a
-recreational vehicle. The system runs on a Beelink J45 mini-PC (Linux Mint LMDE) with all
-services containerised under Docker Compose and deployed via Ansible. A Waveshare 8-port
-RS-485 gateway connects the J45 to all field devices over wired RS-485 Modbus — WiFi is
-used only for devices where RS-485 is impractical.
+```
+Sensor  →  Adaptor (bridge script / WeeWX)  →  Mosquitto (MQTT)  →  Telegraf  →  InfluxDB  →  Grafana / HA / dashboards
+```
 
-The project draws on industrial, marine, and automotive engineering practice for signal
-integrity, grounding, and data architecture. See `docs/` for the full architecture and
-design documents.
+- Adaptors do all decoding and correction, then publish to MQTT under `rvtc/sensors/<source>/#`.
+- **Nothing writes to InfluxDB directly.** Telegraf's `mqtt_consumer` is the only writer.
+  WeeWX is an adaptor too: it republishes corrected weather to MQTT, it does not write to the DB.
+- Home Assistant is a consumer. Its one bounded exception is actuating load-shed relays.
 
----
-
-## Phase Status
-
-| Phase | Title | Status |
-|---|---|---|
-| 0 | Architecture & Design | ✅ Complete |
-| 1 | Beelink J45 Build | ✅ Complete |
-| 2 | Core Stack Deployment | ✅ Complete |
-| 3 | Power Integration | 🔄 Active |
-| 4 | Tank & Propane Sensing | ⏳ Pending |
-| 5 | Water Monitoring | ⏳ Pending |
-| 6 | Baseline & Handover | ⏳ Pending |
-| 7 | Sensor Fusion | ⏳ Architecture phase |
+Details: System Reference §1 (principle), §7 (data flow per sensor), §8 (Home Assistant's role).
 
 ---
 
-## What's Running
+## Web UIs
 
-| Service | URL | Notes |
-|---|---|---|
-| RVTC dashboard | http://rvtc.lan | Unified monitoring — Solar, Battery, Power, Weather tabs |
-| Grafana | http://grafana.lan | Solar dashboard live; weather dashboard pending rebuild |
-| WeeWX | http://weewx.lan | Belchertown skin, dark mode — Acurite 5n1 via RTL-SDR |
-| InfluxDB | http://influxdb.lan | Bucket: rvtc — weewx + solar measurements |
-| Home Assistant | http://homeassistant.lan | Onboarding pending (OI-15) |
-| Pi-hole | http://pihole.lan | DNS for all .lan domains |
+All served by nginx on port 80 by hostname. Pi-hole resolves the `.lan` names to `192.168.88.3`.
+
+| URL | What |
+|---|---|
+| http://rvtc.lan | Unified dashboard: Solar/Battery (InfluxDB) + live Telemetry tab (MQTT websocket, port 9001) |
+| http://weewx.lan | WeeWX, Belchertown skin (also public via `rv.malacat.ca`) |
+| http://grafana.lan | Grafana dashboards |
+| http://homeassistant.lan | Home Assistant |
+| http://influxdb.lan | InfluxDB UI (bucket and org `rvtc`) |
+| http://imu.lan | IMU leveling page (`imu_web.py`) |
+| http://pihole.lan | Pi-hole DNS admin |
+| http://portainer.lan | Portainer (Docker admin) |
 
 ---
 
 ## Hardware
 
-### Control Node
+**Control host:** Beelink J45 (Pentium J4205, 8 GB), LMDE 7, hostname `ve7cbh-control`,
+`192.168.88.3`. Root on the 238 GB disk; Docker volumes on `/data` (477 GB) under
+`/data/docker/volumes/<service>/`.
 
-| Item | Specification |
-|---|---|
-| Host | Beelink J45 |
-| CPU | Intel Pentium J4205 (4-core) |
-| RAM | 8 GB |
-| Root drive | /dev/sda — 256 GB — mounted / |
-| Data drive | /dev/sdb — 640 GB — mounted /data |
-| OS | Linux Mint LMDE (Debian trixie base) |
-| Hostname | ve7cbh-control |
-| IP | 192.168.88.3 (ethernet) — WiFi disabled |
+**RS-485 gateways** (all Modbus RTU over raw TCP, port 4001, protocol mode `None`):
 
-### RS-485 Gateway
-
-Waveshare 8-port RS-485 to Ethernet gateway (ASIN B0F5WXX4ZQ). All channels answer
-Modbus TCP on **port 4001**, distinguished by IP only (192.168.88.5–12).
-
-| Port | IP | Device | Status |
+| Bus | IP | Device | Adaptor |
 |---|---|---|---|
-| RS-485/1 | 192.168.88.5 | EPEVER MPPT60 solar charge controller | ✅ Live |
-| RS-485/2 | 192.168.88.6 | SAMLUX EVO-2212 inverter-charger | ✅ Commissioned |
-| RS-485/3 | 192.168.88.7 | KWS-303L grid meter (slave 1) + generator (slave 2) | 🔄 Grid live |
-| RS-485/4 | 192.168.88.8 | ESP32-S3 Touch LCD thermostat panel (HW-20) | ⏳ Cable pending |
-| RS-485/5 | 192.168.88.9 | Water sensors — pressure, flow, turbidity | ⏳ Phase 5 |
-| RS-485/6 | 192.168.88.10 | GNSS E108-GN03G-485 | ⏳ Pending install |
-| RS-485/7 | 192.168.88.11 | Ecowitt WN90LP weather station | ⏳ In transit |
-| RS-485/8 | 192.168.88.12 | Waveshare 8-ch relay board — load management | ✅ Commissioned |
+| 485-1 | 192.168.88.5 | EPEVER MPPT60 solar controller (+ MT50 display) | `epever_mqtt.py` |
+| 485-2 | 192.168.88.6 | SAMLUX EVO-2212 inverter/charger | `samlux_mqtt.py` |
+| 485-3 | 192.168.88.7 | KWS-303L grid + generator meters | `kws_mqtt.py` |
+| 485-4 | 192.168.88.8 | WitMotion WTGAHRS3-485 GPS-IMU (HW-27) | `imu_mqtt.py` |
+| 485-5 | 192.168.88.9 | Water sensors | pending |
+| 485-6 | 192.168.88.10 | Ecowitt WN90LP weather station | `WN90_mqtt.py` → WeeWX |
+| 485-7 | 192.168.88.11 | 300 A battery current shunt (HW-24) | `battery_current_mqtt.py` |
+| 485-8 | 192.168.88.12 | Waveshare 8-ch relay board (load shed) | `relay.py` via HA |
+| serial-1 | 192.168.88.13 | GPS → NMEA out to APRS radio | `gps_nmea_bridge.py` |
+| serial-2 | 192.168.88.14 | HVAC relay board (System Reference §12) | not yet wired |
+| serial-4 | 192.168.88.16 | EID041 enclosure temp/humidity (HW-32) | `eid041_mqtt.py` |
 
-### Field Devices
-
-| Device | Interface | Purpose |
-|---|---|---|
-| EPEVER MPPT60 | RS-485/1 Modbus RTU, slave 2, 115200 baud | Solar charge controller |
-| SAMLUX EVO-2212 | RS-485/2 Modbus RTU, slave 1, 9600 baud | Inverter-charger (online UPS) |
-| KWS-303L × 2 | RS-485/3 Modbus RTU, slaves 1+2, Even parity | AC power meters — grid + generator |
-| Waveshare relay board | RS-485/8 Modbus RTU, slave 1 | 8-ch load management + BMS interface |
-| HSR1-25 × 2 | Relay board coils 1+2 | Water heater AC + fridge AC (NO, 25A) |
-| RTL-SDR Blog V3 | USB (SN 1024) | Primary 433 MHz receiver |
-| RTL-SDR clone | USB (SN 00000001) | Secondary 433 MHz receiver |
-| Acurite 5n1 (ID 1111) | 433 MHz | Home base weather station |
-| Ecowitt WN90LP | RS-485/7 | RS-485 Modbus weather station (in transit) |
-| diymore IMU (L3GD20 + LSM303D) | I²C → ESP32-S3 | Heading reference for wind direction correction |
-| GNSS E108-GN03G-485 | RS-485/6 | Position and time |
-| ESP32-S3 Touch LCD 4.3 | RS-485/4 via DMX cable | Thermostat replacement (HW-20) |
+`485-*` are isolated Waveshare units. `serial-*` are ports on a shared, **non-isolated** HF5142B
+next to the workstation; check what's plugged in before using a free port. Full detail: §3.
 
 ---
 
-## Docker Stack
+## Docker stack
 
-All containers run on network `rvtc_net` from `~/RV-total-control/docker-compose.yml`.
-**Always run `docker compose` from this directory.**
+Run from the repo root: `docker compose` must be run in `~/RV-total-control/`.
 
-| Container | Purpose |
-|---|---|
-| mosquitto | MQTT broker |
-| influxdb | Time-series database |
-| grafana | Dashboards |
-| telegraf | MQTT → InfluxDB bridge (solar measurement) |
-| rtl433 | RTL-SDR primary dongle → MQTT |
-| rtl433b | RTL-SDR secondary dongle → MQTT |
-| weewx | Weather engine — WeeWX + Belchertown skin |
-| nginx | Reverse proxy — all .lan domains + rvtc.lan |
-| homeassistant | Home Assistant (host network mode) |
-| pihole | DNS + ad blocking |
+| Container | Purpose | Port |
+|---|---|---|
+| mosquitto | MQTT broker | 1883, 9001 (websockets) |
+| influxdb | Time-series DB, bucket `rvtc` | 8086 |
+| telegraf | MQTT → InfluxDB (the only DB writer) | — |
+| grafana | Dashboards | 3000 |
+| weewx | Weather adaptor + Belchertown site | — |
+| homeassistant | Automation / display | 8123 |
+| nginx | Hostname reverse proxy for all `.lan` UIs | 80 |
+| pihole | DNS | 53, 8880 |
+| portainer | Docker admin | 9000 |
 
-### Host processes
+## Host services (systemd)
 
-All bridge services run under systemd. Every unit in `/etc/systemd/system/` for
-RVTC is a **symlink** into `config/scripts/` -- edit the repo copy, then
-`sudo systemctl daemon-reload`. Never install a standalone copy.
+Every RVTC unit in `/etc/systemd/system/` is a **symlink** into `config/scripts/`. Edit the
+repo copy, then `sudo systemctl daemon-reload`. Never install a standalone copy.
 
 | Unit | Purpose |
 |---|---|
-| `epever_mqtt` | EPEVER MPPT60 solar -> `rvtc/sensors/solar/#` |
-| `samlux_mqtt` | SAMLUX EVO-2212 inverter -> `rvtc/sensors/inverter/#` (script gitignored) |
-| `kws_mqtt` | KWS grid / generator meters |
+| `epever_mqtt` | Solar → `rvtc/sensors/solar/#` |
+| `samlux_mqtt` | Inverter → `rvtc/sensors/inverter/#` (script gitignored: private ports) |
+| `kws_mqtt` | Grid / generator meters |
 | `battery_current_mqtt` | Battery shunt current |
-| `WN90_mqtt` | WN90 weather station |
-| `eid041_mqtt` | EID041 temp/humidity |
-| `imu_mqtt`, `imu_web`, `imu_gps_heading_autoset` | WitMotion IMU, leveling web page, GPS heading autoset |
-| `gps_nmea_bridge`, `gps_nmea_geoclue` | GPS -> NMEA (APRS radio) and geoclue |
+| `WN90_mqtt` | WN90LP weather, raw (WeeWX publishes the corrected feed) |
+| `eid041_mqtt` | Enclosure temp/humidity |
+| `imu_mqtt`, `imu_web`, `imu_gps_heading_autoset` | IMU, leveling page, GPS heading autoset |
+| `gps_nmea_bridge`, `gps_nmea_geoclue` | GPS → NMEA (APRS radio), GPS → geoclue |
 | `meshcore_names`, `watchdog_mqtt` | MeshCore name resolver, service watchdog |
-| `fetch_eccc_forecast.timer`, `update_weewx_station_location.timer`, `auto_recalibrate_imu_heading.timer` | Scheduled jobs |
+| `fetch_eccc_forecast.timer` | ECCC forecast for the WeeWX site |
+| `update_weewx_station_location.timer` | Moves WeeWX station location when the RV moves |
+| `auto_recalibrate_imu_heading.timer` | Nightly IMU heading recalibration |
 
 ---
 
-## Repository Structure
+## Network
+
+| Address | Device |
+|---|---|
+| 192.168.88.1 | MikroTik router (Club WiFi / Starlink WAN) |
+| 192.168.88.3 | J45 control host — all services |
+| 192.168.88.5–12 | Waveshare RS-485 gateways `485-1`…`485-8` |
+| 192.168.88.13–16 | HF5142B serial gateway `serial-1`…`serial-4` |
+| 192.168.0.0/24 | Home network, reached over the trailer↔home IPsec VPN (§6) |
+
+---
+
+## Repository structure
 
 ```
 RV-total-control/
-├── ansible.cfg, site.yml, phase2.yml   # Ansible entry points
-├── docker-compose.yml            # Canonical -- always run from repo root
+├── docker-compose.yml            # Canonical — always run from repo root
+├── .env                          # Secrets for compose (InfluxDB token) — gitignored, chmod 600
 ├── docker_volume_backup.sh       # Nightly backup (cron, 02:00)
+├── ansible.cfg, site.yml, phase2.yml   # Ansible entry points
 ├── config/
 │   ├── scripts/                  # LIVE: bridge scripts + their systemd units (symlinked)
-│   ├── telegraf/                 # LIVE: telegraf_*.conf, bind-mounted by compose
+│   ├── telegraf/                 # LIVE: telegraf_*.conf, each bind-mounted by compose
 │   ├── tools/                    # One-off diagnostics, probes, setup helpers (not services)
 │   ├── homeassistant/            # HA YAML + relay scripts (reference copies; live in docker volume)
 │   ├── nginx/, grafana/          # Reference copies of dashboards / site
@@ -168,69 +156,40 @@ RV-total-control/
 └── roles/                        # Ansible roles (mosquitto, influxdb, grafana, ...)
 ```
 
-Not in git (kept on the host in `~/rvtc-files/`): driver installers, large data
-exports, logs, and private notes. Runtime state files (`imu_heading_state.json`,
-`weewx_location_state.json`) are gitignored because they contain the RV position.
-
----|---|
-| 192.168.88.1 | MikroTik gateway |
-| 192.168.88.2 | Windows workstation |
-| 192.168.88.3 | Beelink J45 — all services |
-| 192.168.88.5–12 | Waveshare RS-485 gateway ports 1–8 |
-
-DNS: Pi-hole at 192.168.88.3. All local domains use `.lan` TLD.
+**Not in git** (kept on the host in `~/rvtc-files/`): driver installers, large data exports,
+logs, and private notes/keys. Runtime state files (`imu_heading_state.json`,
+`weewx_location_state.json`) are gitignored because they contain the RV's position.
 
 ---
 
-## Network
+## Secrets — this repo is public
 
-| IP | Device |
-|---|---|
-| 192.168.88.1 | MikroTik gateway |
-| 192.168.88.2 | Windows workstation |
-| 192.168.88.3 | Beelink J45 — all services |
-| 192.168.88.5–12 | Waveshare RS-485 gateway ports 1–8 |
-
-DNS: Pi-hole at 192.168.88.3. All local domains use `.lan` TLD.
-
----
-
-## Modbus Notes
-
-All Modbus work in this project uses **literal/direct register addressing** (0-based PDU).
-
-- `mbpoll`: always pass `-0` flag — without it, mbpoll applies a Modicon-style -1 offset
-  that makes every register look shifted by one ("Modbus Shuffle")
-- Home Assistant `pymodbus`: addresses literally by default — no offset needed
-- EPEVER: input registers FC04 (not holding FC03) for all realtime data; slave address 2
-- SAMLUX EVO-2212: holding registers FC03, slave 1, 9600 8N1
-- KWS-303L: holding registers FC03, slave 1 (grid) / slave 2 (generator), Even parity
+- **InfluxDB token:** in `.env` only (write-only on bucket `rvtc`); telegraf configs reference
+  `${INFLUX_TOKEN}`. Rotation steps: System Reference §9.
+- **Ansible:** secrets in `group_vars/all/vault.yml` (Ansible Vault); vault password in
+  `~/.vault_pass` (chmod 600, never committed).
+- **SAMLUX:** `samlux_mqtt.py` is gitignored, and the register map is held locally under NDA.
+  Never commit or paste either.
+- **VPN pre-shared key:** only in `~/rvtc-files/private/` and the password manager.
+- Before committing anything from a chat handover, scan it for keys and passwords.
 
 ---
 
-## Load & Energy Management
+## Key operational notes
 
-Four-tier architecture documented in project reference Section 2.10:
+- **Compose directory:** always `~/RV-total-control/`. The wrong directory puts containers on the
+  wrong network and breaks inter-container DNS.
+- **New telegraf config:** create the file **and** add its mount line in `docker-compose.yml`,
+  then `docker compose up -d telegraf`. A plain restart won't pick up a new mount.
+- **Modbus:** literal 0-based register addressing everywhere. `mbpoll` needs `-0`, and these
+  gateways speak raw RTU over TCP, not Modbus/TCP. EPEVER uses input registers (FC04), slave 2.
+  SAMLUX and KWS use holding registers (FC03).
+- **Relays:** board coils are inverted (1 = shed/off). That's a wiring quirk, not a bug (§3).
+- **Grafana volume:** must be owned `472:472`. If dashboards vanish after a restart:
+  `sudo chown -R 472:472 /data/docker/volumes/grafana`.
+- **LMDE Docker repo:** `$VERSION_CODENAME` returns `gigi`, so `docker.list` must hardcode `trixie`.
+- **host_vars filename** must match the inventory hostname (`localhost.yml`).
+- **Git:** run git over SSH on the host. Windows git on the `X:` share shows bogus mode/CRLF
+  changes, and its line-ending conversion can damage live scripts.
 
-- **Tier 1** — ESP32-autonomous, source-based: EVO inverting → shed water heater + fridge + A/C
-- **Tier 2** — ESP32-autonomous, temperature-based: charge inhibit + battery heater
-- **Tier 3** — HA-orchestrated, overload: grid/gen current thresholds → sequential load shed
-- **Tier 4** — HA-orchestrated, SOC-based: A/C shed on battery depletion while inverting
-
-Relay board coil assignments: 1=water heater AC, 2=fridge AC, 3=furnace demand,
-4=A/C demand, 5=EVO BMS charge inhibit, 6=battery heater, 7–8=spare.
-
----
-
-## Key Operational Notes
-
-- **Docker compose directory:** always `~/RV-total-control/` — wrong directory puts containers
-  on the wrong network and breaks inter-container DNS
-- **LMDE Docker repo:** `$VERSION_CODENAME` returns `gigi` on LMDE — docker.list must
-  hardcode `trixie`
-- **Grafana volume:** must be owned `472:472` — if dashboard disappears after restart:
-  `sudo chown -R 472:472 /data/docker/volumes/grafana`
-- **WeeWX rain:** `contains_total = true` is critical — Acurite 5n1 sends cumulative counts
-- **SAMLUX register map:** held locally under NDA — never paste into chat or commit to repo
-- **Ansible vault password:** `~/.vault_pass` — chmod 600, never committed
-- **host_vars filename:** must match inventory hostname (`localhost.yml`, not `rvtc.yml`)
+Known quirks and their fixes: System Reference §9. Open items and hardware still to install: §11.
