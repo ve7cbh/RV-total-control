@@ -92,6 +92,8 @@ services:
     image: telegraf:latest
     container_name: telegraf
     restart: unless-stopped
+    environment:
+      - INFLUX_TOKEN=${INFLUX_TOKEN}   # from ./.env (gitignored)
     volumes:
       - ./config/telegraf/telegraf_solar.conf:/etc/telegraf/telegraf.d/solar.conf:ro
       - ./config/telegraf/telegraf_grid.conf:/etc/telegraf/telegraf.d/grid.conf:ro

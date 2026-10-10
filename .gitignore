@@ -31,3 +31,6 @@ platform-tools*
 /*.csv
 logs/
 *.log
+
+# Secrets for docker compose (InfluxDB token etc.)
+.env
