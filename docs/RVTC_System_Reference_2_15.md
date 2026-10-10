@@ -2,7 +2,8 @@
 **Version:** 2.15 — 2026-10-10 — Section 9: json_v2 required-field gotcha (wind fields
 dropping whole weather packets) and its fix; Telegraf's InfluxDB token now supplied from a
 gitignored `.env`; dead WeeWX `[InfluxDB2]` stanza removed; OI-48 (IPsec hash) closed;
-trailer↔home IPsec PSK rotated.
+trailer↔home IPsec PSK rotated; Sections 2/4/5 corrected against the live host (disks, OS,
+portainer, Mosquitto websocket port, telegraf_meshcore.conf, imu.lan/portainer.lan).
 **Owner:** Steve Bradshaw (ve7cbh) — Nanaimo, BC
 **GitHub:** https://github.com/ve7cbh/RV-total-control
 **Document purpose:** how the system is built, right now. Not a session log — historical
@@ -64,9 +65,9 @@ took real effort to find. See Section 9 for what that looked like and how it was
 | Host | Beelink J45 mini-PC |
 | CPU | Intel Pentium J4205 (4-core) |
 | RAM | 8 GB |
-| Root drive | `/dev/sda` — 256 GB — mounted `/` |
-| Data drive | `/dev/sdb` — 640 GB — mounted `/data` |
-| OS | Linux Mint LMDE (Debian trixie base) |
+| Root drive | `/dev/sdb` — 238 GB — root on `sdb3`, mounted `/` |
+| Data drive | `/dev/sda` — 477 GB — mounted `/data` |
+| OS | Linux Mint LMDE 7 "gigi" (Debian trixie base) |
 | Hostname | `ve7cbh-control` |
 | IP | `192.168.88.3` (ethernet, WiFi disabled) |
 
@@ -148,7 +149,7 @@ Waveshare array too (RS-232/RS-422 in addition to RS-485).
 
 | Container | Image | Port(s) | Config source |
 |---|---|---|---|
-| `mosquitto` | eclipse-mosquitto | `1883` | broker — no service config needed |
+| `mosquitto` | eclipse-mosquitto | `1883` (MQTT), `9001` (websockets — `rvtc.lan` Telemetry tab) | broker — no service config needed |
 | `influxdb` | influxdb:2 | `8086` | database — bucket `rvtc`, org `rvtc` |
 | `telegraf` | telegraf:latest | *(none exposed — outbound only)* | `config/telegraf/telegraf_*.conf`, individually bind-mounted per file into `/etc/telegraf/telegraf.d/` — see Section 7 |
 | `grafana` | grafana/grafana | `3000` | — |
@@ -156,13 +157,14 @@ Waveshare array too (RS-232/RS-422 in addition to RS-485).
 | `homeassistant` | ghcr.io/home-assistant/home-assistant:stable | `8123` | `/data/docker/volumes/homeassistant/configuration.yaml` |
 | `nginx` | nginx:alpine | `80` | `/data/docker/volumes/nginx/nginx.conf` — full replacement of the stock file, not `conf.d/` |
 | `pihole` | pihole/pihole | `8880` (admin UI), `53` (DNS) | Local DNS records under Pi-hole's own admin UI |
+| `portainer` | portainer/portainer-ce | `9000` | Docker admin UI — also `portainer.lan` |
 
 **Not currently running:** `rtl433` / `rtl433b` (removed — weather source is now the WN90LP, not
 the Acurite 5n1 / rtl_433 SDR path).
 
 **Telegraf's config directory pattern:** each source gets its own file in `config/telegraf/`
 (`telegraf_solar.conf`, `telegraf_grid.conf`, `telegraf_generator.conf`, `telegraf_weather.conf`,
-`telegraf_snmp.conf`, `telegraf_battery.conf`), individually bind-mounted in `docker-compose.yml` — there is no
+`telegraf_snmp.conf`, `telegraf_battery.conf`, `telegraf_meshcore.conf`), individually bind-mounted in `docker-compose.yml` — there is no
 directory-level mount, so a new config file requires both creating the file **and** adding a
 mount line in the compose file, then `docker compose up -d telegraf` (a plain `docker restart`
 will not pick up a new mount).
@@ -185,7 +187,9 @@ docker exec nginx cat /etc/nginx/nginx.conf
 | `influxdb.lan` | `proxy_pass` → `influxdb:8086` |
 | `homeassistant.lan` | `proxy_pass` → `192.168.88.3:8123` |
 | `esphome.lan` | `proxy_pass` → `esphome:6052` |
+| `imu.lan` | `proxy_pass` → `192.168.88.3:8090` (`imu_web.py` leveling page, host systemd service) |
 | `pihole.lan` | `proxy_pass` → `pihole:80` |
+| `portainer.lan` | `proxy_pass` → `portainer:9000` |
 
 Every hostname above (plus `.local` duplicates for some) resolves to bare `192.168.88.3` via
 Pi-hole's **Local DNS → DNS Records**. DNS records cannot carry a port — the hostname-based
