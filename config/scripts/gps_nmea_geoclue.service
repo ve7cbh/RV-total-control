@@ -1,0 +1,23 @@
+[Unit]
+Description=RVTC: GPS (Mosquitto) -> NMEA -> GeoClue Unix socket
+After=network.target
+
+[Service]
+Type=simple
+User=ve7cbh
+WorkingDirectory=/home/ve7cbh/RV-total-control
+ExecStart=/usr/bin/python3 -u /home/ve7cbh/RV-total-control/config/scripts/gps_nmea_geoclue.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# systemd creates /run/gps-share/ owned by ve7cbh before start and
+# removes it on stop -- lets a non-root service place a socket under
+# /run without needing write access to /run/ itself. Matches the
+# nmea-socket= path set in /etc/geoclue/geoclue.conf.
+RuntimeDirectory=gps-share
+RuntimeDirectoryMode=0755
+
+[Install]
+WantedBy=multi-user.target

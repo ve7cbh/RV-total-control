@@ -1,0 +1,11 @@
+[Unit]
+Description=RVTC — daily IMU heading drift auto-recalibration (parked only)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ve7cbh
+Group=ve7cbh
+WorkingDirectory=/home/ve7cbh/RV-total-control/config/scripts
+ExecStart=/usr/bin/python3 /home/ve7cbh/RV-total-control/config/scripts/auto_recalibrate_imu_heading.py

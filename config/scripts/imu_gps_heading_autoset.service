@@ -1,0 +1,15 @@
+[Unit]
+Description=RVTC — GPS-derived IMU heading autoset (commits new baseline on arrival)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -u /home/ve7cbh/RV-total-control/config/scripts/imu_gps_heading_autoset.py
+Restart=on-failure
+RestartSec=10
+User=ve7cbh
+
+[Install]
+WantedBy=multi-user.target

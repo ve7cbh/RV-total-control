@@ -179,7 +179,7 @@ HEADING_STATE_FILE = "/home/ve7cbh/RV-total-control/config/scripts/imu_heading_s
 FIX_MIN_SATELLITES = 4
 FIX_MAX_HDOP = 5.0
 
-POLL_INTERVAL_SECONDS = 0.5   # 2 Hz -- plenty for a leveling display. 9600 baud
+POLL_INTERVAL_SECONDS = 0.5  # 2 Hz -- plenty for a leveling display. 9600 baud
                                # leaves headroom to go faster later if it ever
                                # feels sluggish while actively jacking the trailer.
 SOCKET_TIMEOUT = 2.0

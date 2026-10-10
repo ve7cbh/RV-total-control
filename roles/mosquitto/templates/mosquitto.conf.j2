@@ -4,6 +4,11 @@
 listener {{ mosquitto_port }}
 allow_anonymous true
 
+# WebSocket listener -- for browser-based dashboards (RVTC Telemetry tab,
+# Master Caution) to connect directly from the LAN. Added 2026-08.
+listener {{ mosquitto_ws_port }}
+protocol websockets
+
 persistence {{ mosquitto_persistence | lower }}
 persistence_location /mosquitto/data/
 

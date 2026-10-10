@@ -1,0 +1,15 @@
+[Unit]
+Description=RVTC mobile IMU status page (heading/pitch/roll/time) - OI-42
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ve7cbh
+WorkingDirectory=/home/ve7cbh/RV-total-control/config/scripts
+ExecStart=/usr/bin/python3 /home/ve7cbh/RV-total-control/config/scripts/imu_web.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

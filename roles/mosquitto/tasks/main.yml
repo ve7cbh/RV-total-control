@@ -32,6 +32,7 @@
       - name: "{{ docker_network }}"
     ports:
       - "{{ mosquitto_port }}:{{ mosquitto_port }}"
+      - "{{ mosquitto_ws_port }}:{{ mosquitto_ws_port }}"
     volumes:
       - "{{ mosquitto_volume_base }}/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro"
       - "{{ mosquitto_volume_base }}/data:/mosquitto/data"

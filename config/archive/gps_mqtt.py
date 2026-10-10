@@ -9,11 +9,11 @@ Architecture note (deliberate departure from the other bridge scripts):
 samlux_mqtt.py / epever_mqtt.py / kws_mqtt.py each poll their device's Modbus
 gateway directly, because nothing else on the bus is already doing that job.
 GPS is different: gpsd is already running on this host, already the sole
-TCP client of the serial gateway at 192.168.88.10:4001, and already doing the
+TCP client of the serial gateway at 192.168.88.8:4001, and already doing the
 NMEA/UBX parsing, fix-quality arbitration, and device-activation retry logic
 (see 2026-07-07 session — gpsd came up before the gateway was ready and just
 needed a restart once the gateway was reachable). Opening a second raw
-connection to 192.168.88.10:4001 from this script would create a second
+connection to 192.168.88.8:4001 from this script would create a second
 competing client on a gateway that other RVTC bridges already treat as
 single-consumer-only, and would throw away gpsd's fix arbitration for no
 reason. So this script is a client of gpsd's own protocol (port 2947,

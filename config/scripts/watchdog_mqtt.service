@@ -1,0 +1,19 @@
+[Unit]
+Description=RVTC — MQTT adaptor health watchdog
+# Watches every adaptor's topic tree for silence (see watchdog_mqtt.py's
+# own docstring for why this is separate from each adaptor's LWT). Needs
+# the network up and Mosquitto reachable -- Mosquitto itself runs in
+# Docker, so this also waits on docker.service rather than assuming the
+# broker is already listening the instant network-online.target is hit.
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/ve7cbh/RV-total-control/config/scripts/watchdog_mqtt.py
+Restart=on-failure
+RestartSec=10
+User=ve7cbh
+
+[Install]
+WantedBy=multi-user.target

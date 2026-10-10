@@ -58,7 +58,7 @@ MQTT_HOST      = "192.168.88.3"
 MQTT_PORT      = 1883
 MQTT_RETAIN    = True
 
-POLL_INTERVAL  = 2        # seconds
+POLL_INTERVAL  = .5        # seconds
 
 GENERATOR_ENABLED = True
 

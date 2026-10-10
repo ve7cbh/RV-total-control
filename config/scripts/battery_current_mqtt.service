@@ -1,0 +1,15 @@
+[Unit]
+Description=RVTC battery current shunt (JSY-MK-229, 485-7) Modbus->MQTT bridge
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ve7cbh
+WorkingDirectory=/home/ve7cbh/RV-total-control/config/scripts
+ExecStart=/usr/bin/python3 /home/ve7cbh/RV-total-control/config/scripts/battery_current_mqtt.py
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

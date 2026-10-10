@@ -1,0 +1,12 @@
+[Unit]
+Description=RVTC — daily trigger for IMU heading auto-recalibration
+
+[Timer]
+# Once a day is plenty for slow, temperature/time-driven drift -- this
+# isn't correcting anything that changes minute to minute.
+OnCalendar=daily
+OnBootSec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

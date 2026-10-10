@@ -5,7 +5,8 @@ services:
     container_name: mosquitto
     restart: unless-stopped
     ports:
-      - "1883:1883"
+      - "1883:1883" 
+      - "9001:9001"
     volumes:
       - /data/docker/volumes/mosquitto/config:/mosquitto/config
       - /data/docker/volumes/mosquitto/data:/mosquitto/data
@@ -97,6 +98,8 @@ services:
       - ./config/telegraf/telegraf_generator.conf:/etc/telegraf/telegraf.d/generator.conf:ro
       - ./config/telegraf/telegraf_weather.conf:/etc/telegraf/telegraf.d/weather.conf:ro
       - ./config/telegraf/telegraf_snmp.conf:/etc/telegraf/telegraf.d/snmp.conf:ro
+      - ./config/telegraf/telegraf_battery.conf:/etc/telegraf/telegraf.d/battery.conf:ro
+      - ./config/telegraf/telegraf_meshcore.conf:/etc/telegraf/telegraf.d/telegraf_meshcore.conf:ro
     depends_on:
       - mosquitto
       - influxdb
