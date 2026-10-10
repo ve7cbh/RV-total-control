@@ -3,7 +3,8 @@
 dropping whole weather packets) and its fix; Telegraf's InfluxDB token now supplied from a
 gitignored `.env`; dead WeeWX `[InfluxDB2]` stanza removed; OI-48 (IPsec hash) closed;
 trailer↔home IPsec PSK rotated; Sections 2/4/5 corrected against the live host (disks, OS,
-portainer, Mosquitto websocket port, telegraf_meshcore.conf, imu.lan/portainer.lan).
+portainer, Mosquitto websocket port, telegraf_meshcore.conf, imu.lan/portainer.lan);
+`esphome.lan` kept deliberately (OI-51).
 **Owner:** Steve Bradshaw (ve7cbh) — Nanaimo, BC
 **GitHub:** https://github.com/ve7cbh/RV-total-control
 **Document purpose:** how the system is built, right now. Not a session log — historical
@@ -186,7 +187,7 @@ docker exec nginx cat /etc/nginx/nginx.conf
 | `grafana.lan` | `proxy_pass` → `grafana:3000` |
 | `influxdb.lan` | `proxy_pass` → `influxdb:8086` |
 | `homeassistant.lan` | `proxy_pass` → `192.168.88.3:8123` |
-| `esphome.lan` | `proxy_pass` → `esphome:6052` |
+| `esphome.lan` | `proxy_pass` → `esphome:6052` — **reserved, kept on purpose**: no `esphome` container runs yet; held for the winter heater smart plugs and the HVAC boards (OI-51). Not leftover — don't remove. |
 | `imu.lan` | `proxy_pass` → `192.168.88.3:8090` (`imu_web.py` leveling page, host systemd service) |
 | `pihole.lan` | `proxy_pass` → `pihole:80` |
 | `portainer.lan` | `proxy_pass` → `portainer:9000` |
@@ -865,6 +866,23 @@ for full history/context on any item below.
   and 5 (`Starlink always enabled`) are functionally identical (same chain/action/out-interface),
   found while fixing OI-49. Likely leftover from whenever the Starlink rules were added alongside
   the original Rogers ones. Low priority — not blocking anything, just housekeeping.
+- OI-51 — **ESPHome: unoccupied-winter electric heater control (+ HVAC boards)** — decided
+  2026-10-10 to keep the `esphome.lan` nginx route (Section 5) for an ESPHome container.
+  Primary use: two electric heaters, each switched by its own **1800 W ESPHome smart plug**,
+  to keep the trailer from freezing while it's unoccupied in winter. The plugs are WiFi
+  devices by design — the no-WiFi rule in Section 12 applies to the HVAC boards only, not to
+  these. Power layout:
+  - **Plug 1 — on the trailer's 30 A service.** ~15 A at full output, half the service, so it
+    has to fit the load-shed scheme (Section 8 / OI-24) alongside other loads.
+  - **Plug 2 — on an extension cord external to the 30 A service.** Doesn't load the trailer
+    supply, and is **not seen by the KWS grid meter** — its consumption is only visible via the
+    plug's own power reporting, if used.
+
+  Secondary use: the HVAC boards (Section 12) — open question whether ESPHome manages them at
+  all (e.g. firmware/OTA only), given Section 12's wired-only design. Not started: no ESPHome
+  container yet, plugs not yet integrated. Unattended heating should keep the heaters' own
+  built-in thermostat/tip-over/thermal cutoffs as the local fail-safe, independent of RVTC.
+  Related: OI-18 (ESPHome Ansible role).
 
 
 **Automation / live-test items (no formal number in the archive):**
