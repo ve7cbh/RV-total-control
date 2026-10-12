@@ -34,3 +34,9 @@ logs/
 
 # Secrets for docker compose (InfluxDB token etc.)
 .env
+
+# KiCad lock / backup / local-state files
+*.lck
+*-backups/
+*.kicad_prl
+fp-info-cache
