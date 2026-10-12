@@ -4,7 +4,8 @@
 Block-diagram style, like docs/archive/rvtc_imu_hookup.kicad_sch: graphic
 rectangles, polylines and text only -- no symbols, no nets, no ERC meaning.
 Facts are taken from docs/RVTC_System_Reference_2_15.md (Sections 3-7).
-Edit the tables below and re-run; the output lands next to this script.
+Produced the base layout only -- the .kicad_sch is hand-edited after that,
+so re-running this OVERWRITES those edits. Write to a different file if needed.
 """
 import uuid
 from pathlib import Path
@@ -22,6 +23,7 @@ PENDING = ((150, 150, 150), (245, 245, 245))
 REMOTE = ((170, 90, 0), (253, 240, 222))
 
 items = []
+NL = chr(10)
 
 
 def u():
@@ -108,6 +110,7 @@ ADAPTORS = [  # (script, what it does) -- two text columns, KiCad font is propor
     ("gps_nmea_bridge.py", "imu/gps -> NMEA -> serial-1"),
     ("imu_web.py", ":8090 leveling page (imu.lan)"),
     ("relay.py", "<- HA shell_command -> 485-8"),
+    ("meshcore_name_resolver.py", "ADVERTs -> meshcore/names/+"),
 ]
 ADAPTOR_NOTES = [
     "Modbus RTU frame + CRC16 over raw TCP,",
@@ -139,6 +142,7 @@ for i, (dev, note, bus, addr, pend) in enumerate(WAVESHARE):
     block(GX1, y, GX2, y + 15, f"{bus}  Waveshare", f"192.168.88{addr}\nProtocol: None",
           GATEWAY)
     line([(GX2, cy), (RX1, cy)], arrow=False, color=NET[0])
+    text("ether6", (GX2 + RX1) / 2, cy - 1.3, 1.0, color=NET[0])
 
 # HF5142B: one 4-port box
 hy1, hy2 = 182, 245
@@ -155,6 +159,7 @@ for j, (dev, note, port, addr, link, pend) in enumerate(HF):
     text(f"{port}  {addr}", GX1 + 2, cy + 1, 1.15, justify="left")
 text("serial-3 .15 - free", GX1 + 2, hy2 - 2.5, 1.0, justify="left", color=PENDING[0])
 line([(GX2, 213.5), (RX1, 213.5)], arrow=False, color=NET[0])
+text("ether4", (GX2 + RX1) / 2, 212.2, 1.0, color=NET[0])
 
 # MikroTik / RV LAN
 rect(RX1, 25, RX2, 245, NET)
@@ -167,7 +172,7 @@ text("Beelink J45  -  ve7cbh-control  -  192.168.88.3", (H_X1 + H_X2) / 2, 29.5,
 text("LMDE 7 (Debian trixie)  -  root sdb3 /  -  data sda /data", (H_X1 + H_X2) / 2, 33, 1.1)
 
 # adaptors
-AX1, AX2, AY1, AY2 = 186, 244, 38, 122
+AX1, AX2, AY1, AY2 = 186, 244, 38, 126
 rect(AX1, AY1, AX2, AY2, FIELD)
 text("Bridge adaptors (systemd)", (AX1 + AX2) / 2, AY1 + 4, 1.5, bold=True, color=FIELD[0])
 text("config/scripts/  -  topics under rvtc/sensors/", (AX1 + AX2) / 2, AY1 + 7, 1.0)
@@ -175,9 +180,9 @@ for k, (script, what) in enumerate(ADAPTORS):
     text(script, AX1 + 2, AY1 + 13 + 5 * k, 1.05, justify="left")
     text(what, AX1 + 27, AY1 + 13 + 5 * k, 1.05, justify="left")
 for k, note in enumerate(ADAPTOR_NOTES):
-    text(note, AX1 + 2, AY1 + 69 + 3.5 * k, 1.0, justify="left", color=(90, 90, 90))
+    text(note, AX1 + 2, AY1 + 75 + 3.5 * k, 1.0, justify="left", color=(90, 90, 90))
 line([(RX2, 100), (AX1, 100)], color=NET[0])
-text("Eth", (RX2 + AX1) / 2, 98.7, 1.0)
+text("ether4", (RX2 + AX1) / 2, 98.7, 1.0, color=NET[0])
 
 # docker
 DKX1, DKX2, DKY1, DKY2 = 250, 326, 38, 241
@@ -218,6 +223,8 @@ text("imu/# is live-only (by design)", L1, 149.5, 1.05, justify="left")
 text("weather: telegraf takes the", L1, 155, 1.05, justify="left")
 text("corrected topic only", L1, 158.5, 1.05, justify="left")
 text("battery: json topic only", L1, 164, 1.05, justify="left")
+text("meshcore/DUQ/+/*: published by", L1, 169.5, 1.05, justify="left")
+text("the nodes themselves (no bridge)", L1, 173, 1.05, justify="left")
 
 # right column: clients, home via VPN, WAN
 EX1, EX2 = 342, 408
@@ -225,6 +232,11 @@ block(EX1, 25, EX2, 52, "LAN clients / browsers",
       "*.lan -> Pi-hole DNS -> nginx :80\nrvtc.lan: InfluxDB HTTP\n+ live MQTT over ws :9001",
       REMOTE)
 line([(EX1, 40), (334, 40), (334, 131.5), (R2, 131.5)], color=REMOTE[0])
+block(EX1, 57, EX2, 98, "Other RV LAN hosts",
+      NL.join([".2  VE7CBH-RV workstation (ether4)", ".4  DS223 NAS (ether5)",
+               ".20 printer   .21 Fanvil X4G phone", ".22 TL-SG108PE PoE switch (ether4)",
+               ".23 Motorola phone   .24 WP-820 (wlan1)", ".254 Sonoff S31 plug (dynamic, wlan1)"]),
+      HOST)
 block(EX1, 105, EX2, 140, "Home site (via VPN)",
       "TP-Link ER605  192.168.0.1\nLAN 192.168.0.0/24\nHome HA 192.168.0.125\nHome Pi 192.168.0.3",
       REMOTE)
@@ -235,23 +247,34 @@ block(EX1, 196, EX2, 236, "WAN (MikroTik)",
 line([(375, 196), (375, 140)], color=REMOTE[0])
 text("IPsec IKEv2 AES-256 / DH14", 377, 165, 1.1, justify="left")
 text("-> home.malacat.ca", 377, 168.5, 1.1, justify="left")
-line([(163, 245), (163, 251), (375, 251), (375, 236)], color=NET[0])
+line([(168, 245), (168, 251), (375, 251), (375, 236)], color=NET[0])
 text("uplink", 250, 249.7, 1.0)
 
+# MeshCore: TCP/IP straight onto the LAN, no serial gateway (IPs from MikroTik DHCP leases)
+block(DX1, 249, DX2, 265, "MeshCore Observer  .25",
+      "ESP32-S3, WiFi (wlan1)" + NL + "MQTT meshcore/DUQ/+/* -> :1883", FIELD)
+line([(DX2, 257), (159, 257), (159, 245)], color=NET[0])
+text("WiFi - TCP/IP", 120, 255.7, 1.0)
+block(DX1, 269, DX2, 285, "MeshCore companion  .26",
+      "RAK4631 + RAK13800 (WIZnet), ether4" + NL + "TCP <-> Meshy app", FIELD)
+line([(DX2, 277), (165, 277), (165, 245)], color=NET[0])
+text("Ethernet - TCP/IP", 120, 275.7, 1.0)
+
 # legend
-LGX, LGY = 12, 255
-rect(LGX, LGY, 150, 287, HOST, width=0.2)
+LGX, LGY = 182, 255
+rect(LGX, LGY, 300, 287, HOST, width=0.2)
 text("Legend", LGX + 2, LGY + 3.5, 1.4, bold=True, justify="left")
 for k, (st, lbl, dash) in enumerate([
         (FIELD, "field device / adaptor", "solid"), (GATEWAY, "serial-to-Ethernet gateway", "solid"),
         (NET, "network / router", "solid"), (DOCKER, "docker container", "solid"),
         (REMOTE, "external / remote site", "solid"), (PENDING, "planned / not yet wired", "dash")]):
-    x = LGX + 3 + (k % 2) * 68
+    x = LGX + 3 + (k % 2) * 58
     y = LGY + 7 + (k // 2) * 5
     rect(x, y, x + 6, y + 3, st, width=0.25, dash=dash)
     text(lbl, x + 8, y + 1.5, 1.1, justify="left")
-text("Arrow = data direction.  Gateway IPs are 192.168.88.x, port 4001.  "
-     "Source: RVTC_System_Reference_2_15.md", LGX + 3, LGY + 29, 1.0, justify="left")
+text("Arrow = data direction.  Gateway IPs are 192.168.88.x, port 4001.",
+     LGX + 3, LGY + 25.5, 1.0, justify="left")
+text("Source: RVTC_System_Reference_2_15.md", LGX + 3, LGY + 29, 1.0, justify="left")
 
 # ---------------------------------------------------------------- write
 sch = f'''(kicad_sch (version 20231120) (generator "rvtc_system_gen") (generator_version "8.0")
@@ -263,7 +286,7 @@ sch = f'''(kicad_sch (version 20231120) (generator "rvtc_system_gen") (generator
     (rev "{REV}")
     (company "RVTC - VE7CBH")
     (comment 1 "Block-diagram style - not a manufacturable schematic")
-    (comment 2 "Generated by docs/drawings/generate_rvtc_system_sch.py - edit the script, not this file")
+    (comment 2 "Base layout from docs/drawings/generate_rvtc_system_sch.py - hand-edited since; re-running it overwrites edits")
   )
   (lib_symbols)
 {chr(10).join(items)}
