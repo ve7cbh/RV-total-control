@@ -276,9 +276,29 @@ text("Arrow = data direction.  Gateway IPs are 192.168.88.x, port 4001.",
      LGX + 3, LGY + 25.5, 1.0, justify="left")
 text("Source: RVTC_System_Reference_2_15.md", LGX + 3, LGY + 29, 1.0, justify="left")
 
+# page 2: power sheet, as a hierarchical sheet symbol (double-click to open)
+ROOT = u()
+items.append(f'''  (sheet (at 343 172) (size 26 14) (fields_autoplaced yes)
+    (stroke (width 0.3) (type solid) (color 180 0 0 1))
+    (fill (color 253 230 230 1))
+    (uuid "{u()}")
+    (property "Sheetname" "Electrical" (at 343 171.3 0)
+      (effects (font (size 1.4 1.4) bold) (justify left bottom))
+    )
+    (property "Sheetfile" "rvtc_power.kicad_sch" (at 343 186.6 0)
+      (effects (font (size 1.1 1.1)) (justify left top))
+    )
+    (instances
+      (project "rvtc_system"
+        (path "/{ROOT}" (page "2"))
+      )
+    )
+  )''')
+text("power side: page 2", 356, 179, 1.1)
+
 # ---------------------------------------------------------------- write
 sch = f'''(kicad_sch (version 20231120) (generator "rvtc_system_gen") (generator_version "8.0")
-  (uuid "{u()}")
+  (uuid "{ROOT}")
   (paper "A3")
   (title_block
     (title "RVTC System Block Diagram")
@@ -286,7 +306,7 @@ sch = f'''(kicad_sch (version 20231120) (generator "rvtc_system_gen") (generator
     (rev "{REV}")
     (company "RVTC - VE7CBH")
     (comment 1 "Block-diagram style - not a manufacturable schematic")
-    (comment 2 "Base layout from docs/drawings/generate_rvtc_system_sch.py - hand-edited since; re-running it overwrites edits")
+    (comment 2 "Base layout: generate_rvtc_system_sch.py; hand-edited after - re-running overwrites")
   )
   (lib_symbols)
 {chr(10).join(items)}
