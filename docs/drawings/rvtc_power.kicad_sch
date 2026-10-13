@@ -3,7 +3,7 @@
 	(generator "eeschema")
 	(generator_version "8.0")
 	(uuid "09e3f090-8cb6-4afd-ab1a-1d48c698325b")
-	(paper "A3")
+	(paper "USLedger")
 	(title_block
 		(title "RVTC Electrical Block Diagram")
 		(date "2026-10-12")
@@ -15,7 +15,7 @@
 	(lib_symbols)
 	(polyline
 		(pts
-			(xy 75 121) (xy 175 121)
+			(xy 75 113.785) (xy 175 113.785)
 		)
 		(stroke
 			(width 0.5)
@@ -26,7 +26,7 @@
 	)
 	(polyline
 		(pts
-			(xy 44.45 44.45) (xy 44.45 52.07)
+			(xy 44.45 42.211) (xy 44.45 49.335)
 		)
 		(stroke
 			(width 0.5)
@@ -37,7 +37,7 @@
 	)
 	(polyline
 		(pts
-			(xy 195 60) (xy 205 60)
+			(xy 195 56.75) (xy 205 56.75)
 		)
 		(stroke
 			(width 0.5)
@@ -48,7 +48,7 @@
 	)
 	(polyline
 		(pts
-			(xy 75 60) (xy 95 60)
+			(xy 75 56.75) (xy 95 56.75)
 		)
 		(stroke
 			(width 0.5)
@@ -59,7 +59,7 @@
 	)
 	(polyline
 		(pts
-			(xy 270 166) (xy 290 166)
+			(xy 270 155.86) (xy 290 155.86)
 		)
 		(stroke
 			(width 0.5)
@@ -70,7 +70,7 @@
 	)
 	(polyline
 		(pts
-			(xy 203 244) (xy 213 244)
+			(xy 203 228.79) (xy 213 228.79)
 		)
 		(stroke
 			(width 0.5)
@@ -81,7 +81,7 @@
 	)
 	(polyline
 		(pts
-			(xy 203 262) (xy 213 262)
+			(xy 203 245.62) (xy 213 245.62)
 		)
 		(stroke
 			(width 0.3)
@@ -92,7 +92,7 @@
 	)
 	(polyline
 		(pts
-			(xy 165 242) (xy 165 256)
+			(xy 165 226.92) (xy 165 240.01)
 		)
 		(stroke
 			(width 0.5)
@@ -103,7 +103,7 @@
 	)
 	(polyline
 		(pts
-			(xy 150 40) (xy 175 40)
+			(xy 150 38.05) (xy 175 38.05)
 		)
 		(stroke
 			(width 0.5)
@@ -114,7 +114,7 @@
 	)
 	(polyline
 		(pts
-			(xy 195 157) (xy 205 157)
+			(xy 195 147.445) (xy 205 147.445)
 		)
 		(stroke
 			(width 0.7)
@@ -125,7 +125,7 @@
 	)
 	(polyline
 		(pts
-			(xy 203 248.5) (xy 213 248.5)
+			(xy 203 232.998) (xy 213 232.998)
 		)
 		(stroke
 			(width 0.5)
@@ -136,7 +136,7 @@
 	)
 	(polyline
 		(pts
-			(xy 352 106) (xy 360 106)
+			(xy 352 99.76) (xy 360 99.76)
 		)
 		(stroke
 			(width 0.5)
@@ -147,7 +147,7 @@
 	)
 	(polyline
 		(pts
-			(xy 352 131) (xy 360 131)
+			(xy 352 123.135) (xy 360 123.135)
 		)
 		(stroke
 			(width 0.5)
@@ -158,7 +158,7 @@
 	)
 	(polyline
 		(pts
-			(xy 52.07 44.45) (xy 52.07 52.07)
+			(xy 52.07 42.211) (xy 52.07 49.335)
 		)
 		(stroke
 			(width 0.5)
@@ -169,7 +169,7 @@
 	)
 	(polyline
 		(pts
-			(xy 378.5 46) (xy 378.5 56)
+			(xy 378.5 43.66) (xy 378.5 53.01)
 		)
 		(stroke
 			(width 0.5)
@@ -180,7 +180,7 @@
 	)
 	(polyline
 		(pts
-			(xy 203 257.5) (xy 213 257.5)
+			(xy 203 241.413) (xy 213 241.413)
 		)
 		(stroke
 			(width 0.5)
@@ -191,7 +191,7 @@
 	)
 	(polyline
 		(pts
-			(xy 203 253) (xy 213 253)
+			(xy 203 237.205) (xy 213 237.205)
 		)
 		(stroke
 			(width 0.5)
@@ -202,7 +202,7 @@
 	)
 	(polyline
 		(pts
-			(xy 122.5 70) (xy 122.5 64)
+			(xy 122.5 66.1) (xy 122.5 60.49)
 		)
 		(stroke
 			(width 0.3)
@@ -213,7 +213,7 @@
 	)
 	(polyline
 		(pts
-			(xy 352 183) (xy 360 183)
+			(xy 352 171.755) (xy 360 171.755)
 		)
 		(stroke
 			(width 0.5)
@@ -224,7 +224,7 @@
 	)
 	(polyline
 		(pts
-			(xy 48.26 44.45) (xy 48.26 52.07)
+			(xy 48.26 42.211) (xy 48.26 49.335)
 		)
 		(stroke
 			(width 0.5)
@@ -235,7 +235,7 @@
 	)
 	(polyline
 		(pts
-			(xy 85 242) (xy 100 242)
+			(xy 85 226.92) (xy 100 226.92)
 		)
 		(stroke
 			(width 0.5)
@@ -246,7 +246,7 @@
 	)
 	(polyline
 		(pts
-			(xy 85 214) (xy 100 214)
+			(xy 85 200.74) (xy 100 200.74)
 		)
 		(stroke
 			(width 0.5)
@@ -257,7 +257,7 @@
 	)
 	(polyline
 		(pts
-			(xy 311.5 46) (xy 311.5 56)
+			(xy 311.5 43.66) (xy 311.5 53.01)
 		)
 		(stroke
 			(width 0.5)
@@ -268,7 +268,7 @@
 	)
 	(polyline
 		(pts
-			(xy 352 156) (xy 360 156)
+			(xy 352 146.51) (xy 360 146.51)
 		)
 		(stroke
 			(width 0.5)
@@ -278,8 +278,8 @@
 		(uuid "ebb3f1be-4008-4b80-920d-a89c711672b9")
 	)
 	(rectangle
-		(start 140 256)
-		(end 190 272)
+		(start 140 240.01)
+		(end 190 254.97)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -292,8 +292,8 @@
 		(uuid 07143744-68c0-4af4-8211-c1fbf6641434)
 	)
 	(rectangle
-		(start 285 26)
-		(end 338 46)
+		(start 285 24.96)
+		(end 338 43.66)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -306,8 +306,8 @@
 		(uuid 0827c0cd-8677-4eba-8c7e-f88bd45d064a)
 	)
 	(rectangle
-		(start 360 146)
-		(end 408 166)
+		(start 360 137.16)
+		(end 408 155.86)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -320,8 +320,8 @@
 		(uuid 0ad7ce85-e678-470a-aed7-e2971e5e8ff9)
 	)
 	(rectangle
-		(start 205 26)
-		(end 270 112)
+		(start 205 24.96)
+		(end 270 105.37)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -334,8 +334,8 @@
 		(uuid 13ac39bb-cbfb-465c-ac87-267efde493bd)
 	)
 	(rectangle
-		(start 205 138)
-		(end 270 176)
+		(start 205 129.68)
+		(end 270 165.21)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -348,8 +348,8 @@
 		(uuid 1f99bf33-268b-4d8e-820f-69a1a8a97cf9)
 	)
 	(rectangle
-		(start 100 206)
-		(end 145 222)
+		(start 100 193.26)
+		(end 145 208.22)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -362,8 +362,8 @@
 		(uuid 25fc6dff-c59b-45d9-9798-7729d59c432e)
 	)
 	(rectangle
-		(start 15 26)
-		(end 74.93 44.45)
+		(start 15 24.96)
+		(end 74.93 42.211)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -376,8 +376,8 @@
 		(uuid 32b9514d-f15a-4ffd-bd06-534f7109f590)
 	)
 	(rectangle
-		(start 100 234)
-		(end 145 250)
+		(start 100 219.44)
+		(end 145 234.4)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -390,8 +390,8 @@
 		(uuid 33674cca-c6df-425d-a83b-34c920e97862)
 	)
 	(rectangle
-		(start 300 56)
-		(end 390 72)
+		(start 300 53.01)
+		(end 390 67.97)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -404,8 +404,8 @@
 		(uuid 44d70da5-f2f9-49ef-853d-bf491956ea2e)
 	)
 	(rectangle
-		(start 175 26)
-		(end 195 200)
+		(start 175 24.96)
+		(end 195 187.65)
 		(stroke
 			(width 0.45)
 			(type solid)
@@ -418,8 +418,8 @@
 		(uuid 469dd33a-f65b-4b73-8a7d-5fd16e2d6aef)
 	)
 	(rectangle
-		(start 352 26)
-		(end 405 46)
+		(start 352 24.96)
+		(end 405 43.66)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -432,8 +432,8 @@
 		(uuid 47644fef-6335-46d4-8715-7b11e0a50886)
 	)
 	(rectangle
-		(start 19 211)
-		(end 81 228)
+		(start 19 197.935)
+		(end 81 213.83)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -446,8 +446,8 @@
 		(uuid 5c52e95f-6a23-4c78-a058-cb25169fcd2f)
 	)
 	(rectangle
-		(start 95 26)
-		(end 150 64)
+		(start 95 24.96)
+		(end 150 60.49)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -460,8 +460,8 @@
 		(uuid 5d898291-6706-4558-9c88-e156b0ebdb4c)
 	)
 	(rectangle
-		(start 360 121)
-		(end 408 141)
+		(start 360 113.785)
+		(end 408 132.485)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -474,8 +474,8 @@
 		(uuid 70570c14-00af-4ee4-b4fe-65accba59feb)
 	)
 	(rectangle
-		(start 15 92)
-		(end 75 150)
+		(start 15 86.67)
+		(end 75 140.9)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -488,8 +488,8 @@
 		(uuid 731defd1-2206-4c97-9010-a349f4fa5c88)
 	)
 	(rectangle
-		(start 360 205)
-		(end 408 225)
+		(start 360 192.325)
+		(end 408 211.025)
 		(stroke
 			(width 0.3)
 			(type dash)
@@ -502,8 +502,8 @@
 		(uuid 7a7d75aa-0ffe-4cc4-bab9-381ccbdd11e8)
 	)
 	(rectangle
-		(start 15 52.07)
-		(end 74.93 68)
+		(start 15 49.335)
+		(end 74.93 64.23)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -516,8 +516,8 @@
 		(uuid 7da0ab66-671b-4346-8e69-7cc80ad67e48)
 	)
 	(rectangle
-		(start 360 96)
-		(end 408 116)
+		(start 360 90.41)
+		(end 408 109.11)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -530,8 +530,8 @@
 		(uuid 7fa6f2d1-a06b-4626-8212-0379b9ee6707)
 	)
 	(rectangle
-		(start 290 96)
-		(end 352 202)
+		(start 290 90.41)
+		(end 352 189.52)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -544,8 +544,8 @@
 		(uuid a91b0230-dae5-4798-80f5-99d5d4f49dd0)
 	)
 	(rectangle
-		(start 19 231)
-		(end 81 248)
+		(start 19 216.635)
+		(end 81 232.53)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -558,8 +558,8 @@
 		(uuid b69ad425-e015-46df-95aa-91337f69d906)
 	)
 	(rectangle
-		(start 15 200)
-		(end 85 252)
+		(start 15 187.65)
+		(end 85 236.27)
 		(stroke
 			(width 0.45)
 			(type solid)
@@ -573,7 +573,7 @@
 	)
 	(polyline
 		(pts
-			(xy 145 242) (xy 190 242) (xy 190 200)
+			(xy 145 226.92) (xy 190 226.92) (xy 190 187.65)
 		)
 		(stroke
 			(width 0.5)
@@ -586,8 +586,8 @@
 		(uuid ce1129b0-d3be-4212-b270-7f0e98d26ea2)
 	)
 	(rectangle
-		(start 360 171)
-		(end 408 195)
+		(start 360 160.535)
+		(end 408 182.975)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -601,7 +601,7 @@
 	)
 	(polyline
 		(pts
-			(xy 300 64) (xy 280 64) (xy 280 146) (xy 270 146)
+			(xy 300 60.49) (xy 280 60.49) (xy 280 137.16) (xy 270 137.16)
 		)
 		(stroke
 			(width 0.5)
@@ -615,7 +615,7 @@
 	)
 	(polyline
 		(pts
-			(xy 145 214) (xy 180 214) (xy 180 200)
+			(xy 145 200.74) (xy 180 200.74) (xy 180 187.65)
 		)
 		(stroke
 			(width 0.5)
@@ -628,8 +628,8 @@
 		(uuid e7a0eac3-f55a-4297-9416-be2bda93483f)
 	)
 	(rectangle
-		(start 95 70)
-		(end 150 82)
+		(start 95 66.1)
+		(end 150 77.32)
 		(stroke
 			(width 0.3)
 			(type solid)
@@ -642,8 +642,8 @@
 		(uuid f82f7a1f-3494-4820-89bc-715641f2feb4)
 	)
 	(rectangle
-		(start 200 236)
-		(end 300 287)
+		(start 200 221.31)
+		(end 300 268.995)
 		(stroke
 			(width 0.2)
 			(type solid)
@@ -657,7 +657,7 @@
 	)
 	(text "LiFePO4 #1  ? Ah"
 		(exclude_from_sim no)
-		(at 50 215 0)
+		(at 50 201.675 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -669,7 +669,7 @@
 	)
 	(text "Load-shed relays"
 		(exclude_from_sim no)
-		(at 384 100 0)
+		(at 384 94.15 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -681,7 +681,7 @@
 	)
 	(text "RS-485 data (see page 1)"
 		(exclude_from_sim no)
-		(at 216 262 0)
+		(at 216 245.62 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -692,7 +692,7 @@
 	)
 	(text "Waveshare 8-ch relay board"
 		(exclude_from_sim no)
-		(at 207.5 51.6 0)
+		(at 207.5 48.896 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -703,7 +703,7 @@
 	)
 	(text "absorb 14.20 / float 13.70 V"
 		(exclude_from_sim no)
-		(at 97.5 41.4 0)
+		(at 97.5 39.359 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -712,9 +712,9 @@
 		)
 		(uuid "047e64f8-00fb-4620-b518-af09afded7f0")
 	)
-	(text "auto transfer switch, or EVO AC-in priority ?"
+	(text "2 x 30 A DIN brkr/disconnect + meter, DIN box\nauto transfer switch, or EVO AC-in priority ?"
 		(exclude_from_sim no)
-		(at 345 62.4 0)
+		(at 345 60.594 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -724,7 +724,7 @@
 	)
 	(text "Fridge ?"
 		(exclude_from_sim no)
-		(at 17.5 110.8 0)
+		(at 17.5 104.248 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -735,7 +735,7 @@
 	)
 	(text "Shore / generator transfer ?"
 		(exclude_from_sim no)
-		(at 345 60 0)
+		(at 345 56.75 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -747,7 +747,7 @@
 	)
 	(text "Supply: direct / DC-DC / PoE ?"
 		(exclude_from_sim no)
-		(at 207.5 75.4 0)
+		(at 207.5 71.149 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -756,9 +756,9 @@
 		)
 		(uuid "122c14c0-4277-4487-91e4-db2fe8274f1b")
 	)
-	(text "DC load centre (OEM ?)"
+	(text "Trailer DC distribution (WFCO, OEM)"
 		(exclude_from_sim no)
-		(at 45 96 0)
+		(at 45 90.41 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -770,7 +770,7 @@
 	)
 	(text "Single point of ground ?"
 		(exclude_from_sim no)
-		(at 165 260 0)
+		(at 165 243.75 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -780,9 +780,9 @@
 		)
 		(uuid "157895d3-3b4d-4baf-a2d7-5e0c84fd34ae")
 	)
-	(text "2 x J45 monitors\n(1 via HDMI-over-Cat5e)\nJ45 speakers"
+	(text "Sony 32in HDMI TV/monitor\nSceptre 16in (12 V PSU on AC)\n1 via HDMI-over-Cat5e ?\nJ45 speakers"
 		(exclude_from_sim no)
-		(at 384 179.6 0)
+		(at 384 172.877 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -790,9 +790,9 @@
 		)
 		(uuid "181c181a-be67-4082-8fa8-6f34b1c440bb")
 	)
-	(text "Generator inlet ? A"
+	(text "Generator inlet 30 A"
 		(exclude_from_sim no)
-		(at 378.5 30 0)
+		(at 378.5 28.7 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -804,7 +804,7 @@
 	)
 	(text "300 A shunt (HW-24)"
 		(exclude_from_sim no)
-		(at 122.5 238 0)
+		(at 122.5 223.18 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -816,7 +816,7 @@
 	)
 	(text "Sub-panel / inverter-only ?"
 		(exclude_from_sim no)
-		(at 292.5 128.4 0)
+		(at 292.5 120.704 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -827,7 +827,7 @@
 	)
 	(text "Rooftop A/C ?"
 		(exclude_from_sim no)
-		(at 292.5 114.8 0)
+		(at 292.5 107.988 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -838,7 +838,7 @@
 	)
 	(text "Microwave ?"
 		(exclude_from_sim no)
-		(at 292.5 111.4 0)
+		(at 292.5 104.809 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -847,9 +847,9 @@
 		)
 		(uuid "2aae69f8-6290-4222-8347-4a11de790eef")
 	)
-	(text "PV combiner + disconnect ?"
+	(text "PV combiner + disconnect"
 		(exclude_from_sim no)
-		(at 45 56 0)
+		(at 45 53.01 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -861,7 +861,7 @@
 	)
 	(text "fuse ? A / ? AWG"
 		(exclude_from_sim no)
-		(at 200.5 155.7 0)
+		(at 200.5 146.23 0)
 		(effects
 			(font
 				(size 0.9 0.9)
@@ -872,7 +872,7 @@
 	)
 	(text "Converter ? (EVO charges)"
 		(exclude_from_sim no)
-		(at 292.5 125 0)
+		(at 292.5 117.525 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -883,7 +883,7 @@
 	)
 	(text "MikroTik CRS109 router"
 		(exclude_from_sim no)
-		(at 207.5 41.4 0)
+		(at 207.5 39.359 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -894,7 +894,7 @@
 	)
 	(text "HF5142B serial gateway ?"
 		(exclude_from_sim no)
-		(at 207.5 58.4 0)
+		(at 207.5 55.254 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -905,7 +905,7 @@
 	)
 	(text "inverter ? W, charger ? A"
 		(exclude_from_sim no)
-		(at 207.5 150 0)
+		(at 207.5 140.9 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -916,7 +916,7 @@
 	)
 	(text "120 VAC in"
 		(exclude_from_sim no)
-		(at 289 62.7 0)
+		(at 289 59.275 0)
 		(effects
 			(font
 				(size 1 1)
@@ -927,7 +927,7 @@
 	)
 	(text "Dometic 579 rooftop A/C"
 		(exclude_from_sim no)
-		(at 384 125 0)
+		(at 384 117.525 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -939,7 +939,7 @@
 	)
 	(text "Water pump ?"
 		(exclude_from_sim no)
-		(at 17.5 117.6 0)
+		(at 17.5 110.606 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -950,7 +950,7 @@
 	)
 	(text "data: 485-1 (epever_mqtt.py)"
 		(exclude_from_sim no)
-		(at 97.5 51.6 0)
+		(at 97.5 48.896 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -959,9 +959,9 @@
 		)
 		(uuid "476dda30-0eff-4fdf-bf17-7e527edd93ce")
 	)
-	(text "string fuses ? A (panel max 15 A) / breaker ? A"
+	(text "ECO-WORTHY 4-string, 12 A brkr/string (3 used)\nAmerical 50 A DC DIN brkr ? - rated 80 V!"
 		(exclude_from_sim no)
-		(at 45.72 65.532 0)
+		(at 45.72 61.922 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -971,7 +971,7 @@
 	)
 	(text "MeshCore nodes ?"
 		(exclude_from_sim no)
-		(at 207.5 68.6 0)
+		(at 207.5 64.791 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -982,7 +982,7 @@
 	)
 	(text "CO / LP detector ?"
 		(exclude_from_sim no)
-		(at 17.5 114.2 0)
+		(at 17.5 107.427 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -993,7 +993,7 @@
 	)
 	(text "Outlets ?"
 		(exclude_from_sim no)
-		(at 292.5 118.2 0)
+		(at 292.5 111.167 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1004,7 +1004,7 @@
 	)
 	(text "internal BMS\nheater HW-22 / temp HW-31 planned"
 		(exclude_from_sim no)
-		(at 50 238.5 0)
+		(at 50 223.648 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1014,7 +1014,7 @@
 	)
 	(text "Slide / jacks ?"
 		(exclude_from_sim no)
-		(at 17.5 121 0)
+		(at 17.5 113.785 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1025,7 +1025,7 @@
 	)
 	(text "negative"
 		(exclude_from_sim no)
-		(at 162 240.7 0)
+		(at 162 225.704 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1036,7 +1036,7 @@
 	)
 	(text "MT50 remote"
 		(exclude_from_sim no)
-		(at 122.5 74 0)
+		(at 122.5 69.84 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1048,7 +1048,7 @@
 	)
 	(text "12 V LiFePO4 house system, 30 A shore / generator, inverter/charger.  \"?\" = not yet documented, fill in by hand."
 		(exclude_from_sim no)
-		(at 12 19 0)
+		(at 12 18.415 0)
 		(effects
 			(font
 				(size 1.4 1.4)
@@ -1059,7 +1059,7 @@
 	)
 	(text "RVTC 120 VAC loads"
 		(exclude_from_sim no)
-		(at 384 175 0)
+		(at 384 164.275 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1071,7 +1071,7 @@
 	)
 	(text "chassis bond ? / gauge ?"
 		(exclude_from_sim no)
-		(at 165 262.4 0)
+		(at 165 245.994 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1081,7 +1081,7 @@
 	)
 	(text "Waveshare 8-ch (485-8), NC wiring\ncoil 0 water heater, coil 1 microwave"
 		(exclude_from_sim no)
-		(at 384 103.5 0)
+		(at 384 97.422 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1091,7 +1091,7 @@
 	)
 	(text "LP furnace (call from HVAC brd) ?"
 		(exclude_from_sim no)
-		(at 17.5 107.4 0)
+		(at 17.5 101.069 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1102,7 +1102,7 @@
 	)
 	(text "120 VAC out"
 		(exclude_from_sim no)
-		(at 280 164.7 0)
+		(at 280 154.644 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1113,7 +1113,7 @@
 	)
 	(text "KWS-303L grid meter (485-3)\nconnect/disconnect: planned"
 		(exclude_from_sim no)
-		(at 311.5 33.5 0)
+		(at 311.5 31.973 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1123,7 +1123,7 @@
 	)
 	(text "HVAC ESP32-S3 boards (12 V run exists)"
 		(exclude_from_sim no)
-		(at 207.5 65.2 0)
+		(at 207.5 61.612 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1134,7 +1134,7 @@
 	)
 	(text "Tank monitor ?"
 		(exclude_from_sim no)
-		(at 17.5 124.4 0)
+		(at 17.5 116.964 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1143,9 +1143,9 @@
 		)
 		(uuid "6fb70dc0-5242-485c-988b-41ab52e5be85")
 	)
-	(text "+ battery disconnect ?"
+	(text "Bsomain ANL-350A\n+ Ampper battery switch (S1)"
 		(exclude_from_sim no)
-		(at 122.5 212.4 0)
+		(at 122.5 201.301 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1155,7 +1155,7 @@
 	)
 	(text "EPEVER MPPT60"
 		(exclude_from_sim no)
-		(at 122.5 30 0)
+		(at 122.5 28.7 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1167,7 +1167,7 @@
 	)
 	(text "SAMLUX EVO-2212"
 		(exclude_from_sim no)
-		(at 237.5 142 0)
+		(at 237.5 133.42 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1177,9 +1177,9 @@
 		)
 		(uuid "780778cd-6b01-4ea1-a559-a3ef2c0faff3")
 	)
-	(text "Main fuse ? A"
+	(text "Main fuse 350 A ANL"
 		(exclude_from_sim no)
-		(at 122.5 210 0)
+		(at 122.5 197 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1191,7 +1191,7 @@
 	)
 	(text "Roof PV array"
 		(exclude_from_sim no)
-		(at 45 30 0)
+		(at 45 28.7 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1203,7 +1203,7 @@
 	)
 	(text "RVTC 12 V loads"
 		(exclude_from_sim no)
-		(at 237.5 30 0)
+		(at 237.5 28.7 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1215,7 +1215,7 @@
 	)
 	(text "120 VAC"
 		(exclude_from_sim no)
-		(at 216 257.5 0)
+		(at 216 241.413 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1226,7 +1226,7 @@
 	)
 	(text "capacity setting 600 Ah"
 		(exclude_from_sim no)
-		(at 97.5 48.2 0)
+		(at 97.5 45.717 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1237,7 +1237,7 @@
 	)
 	(text "Lines are block-level: one line = the circuit, not each conductor."
 		(exclude_from_sim no)
-		(at 203 269 0)
+		(at 203 252.165 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1248,7 +1248,7 @@
 	)
 	(text "fuse ? A"
 		(exclude_from_sim no)
-		(at 162.5 38.7 0)
+		(at 162.5 36.835 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1259,7 +1259,7 @@
 	)
 	(text "AC out: load centre ?"
 		(exclude_from_sim no)
-		(at 207.5 156.8 0)
+		(at 207.5 147.258 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1270,7 +1270,7 @@
 	)
 	(text "+12 V DC"
 		(exclude_from_sim no)
-		(at 216 248.5 0)
+		(at 216 232.998 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1281,7 +1281,7 @@
 	)
 	(text "JSY-MK-229, neg. leg\ndata: 485-7"
 		(exclude_from_sim no)
-		(at 122.5 241.5 0)
+		(at 122.5 226.453 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1291,7 +1291,7 @@
 	)
 	(text "fuse ? A"
 		(exclude_from_sim no)
-		(at 200 58.7 0)
+		(at 200 55.535 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1302,7 +1302,7 @@
 	)
 	(text "AC in: shore / gen"
 		(exclude_from_sim no)
-		(at 207.5 153.4 0)
+		(at 207.5 144.079 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1313,7 +1313,7 @@
 	)
 	(text "Battery heaters HW-22 (planned)"
 		(exclude_from_sim no)
-		(at 17.5 127.8 0)
+		(at 17.5 120.143 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1324,7 +1324,7 @@
 	)
 	(text "RV Total Control (RVTC) - Electrical Block Diagram"
 		(exclude_from_sim no)
-		(at 12 14 0)
+		(at 12 13.74 0)
 		(effects
 			(font
 				(size 2.5 2.5)
@@ -1334,9 +1334,9 @@
 		)
 		(uuid "a7436fa4-b7f0-402d-b816-c83cd0846f3b")
 	)
-	(text "own fused feed ? A  -  all RVTC kit is 12 V"
+	(text "BlueFire 12-way blade fuse box, feed ? A - all 12 V"
 		(exclude_from_sim no)
-		(at 237.5 32.4 0)
+		(at 237.5 30.944 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1346,7 +1346,7 @@
 	)
 	(text "Shore inlet 30 A"
 		(exclude_from_sim no)
-		(at 311.5 30 0)
+		(at 311.5 28.7 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1358,7 +1358,7 @@
 	)
 	(text "Layout after Cougar 27-8 drawing (2020-01-31)."
 		(exclude_from_sim no)
-		(at 203 276 0)
+		(at 203 258.71 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1367,9 +1367,9 @@
 		)
 		(uuid "b11d75cd-d8dc-4aa5-b7be-e97deb340fb2")
 	)
-	(text "12 V DC distribution  -  +/- bus bars ?"
+	(text "Forward electrical bay  -  12 V DC distribution  -  +/- bus bars ?"
 		(exclude_from_sim no)
-		(at 185 113 90)
+		(at 185 106.305 90)
 		(effects
 			(font
 				(size 1.6 1.6)
@@ -1381,7 +1381,7 @@
 	)
 	(text "Winter heater plug 2"
 		(exclude_from_sim no)
-		(at 384 209 0)
+		(at 384 196.065 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1393,7 +1393,7 @@
 	)
 	(text "House battery bank  12 V"
 		(exclude_from_sim no)
-		(at 50 204 0)
+		(at 50 191.39 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1404,7 +1404,7 @@
 	)
 	(text "Starlink ?"
 		(exclude_from_sim no)
-		(at 207.5 72 0)
+		(at 207.5 67.97 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1415,7 +1415,7 @@
 	)
 	(text "GFCI ?"
 		(exclude_from_sim no)
-		(at 292.5 121.6 0)
+		(at 292.5 114.346 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1426,7 +1426,7 @@
 	)
 	(text "KWS-303L gen meter (485-3)\ngenerator ? W"
 		(exclude_from_sim no)
-		(at 378.5 33.5 0)
+		(at 378.5 31.973 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1436,7 +1436,7 @@
 	)
 	(text "Winter heater plug 1"
 		(exclude_from_sim no)
-		(at 384 150 0)
+		(at 384 140.9 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1448,7 +1448,7 @@
 	)
 	(text "LiFePO4, 2 batteries in parallel ?"
 		(exclude_from_sim no)
-		(at 50 207.5 0)
+		(at 50 194.663 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1458,7 +1458,7 @@
 	)
 	(text "  HW-19 12->5 V DC-DC (planned)"
 		(exclude_from_sim no)
-		(at 207.5 55 0)
+		(at 207.5 52.075 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1469,7 +1469,7 @@
 	)
 	(text "Lights ?"
 		(exclude_from_sim no)
-		(at 17.5 104 0)
+		(at 17.5 97.89 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1480,7 +1480,7 @@
 	)
 	(text "Water heater (electric) ?"
 		(exclude_from_sim no)
-		(at 292.5 108 0)
+		(at 292.5 101.63 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1489,9 +1489,9 @@
 		)
 		(uuid "bf7a7a3f-c674-4f4b-b488-31fcced4aa28")
 	)
-	(text "inverter / charger, 12 V"
+	(text "inverter / charger, 12 V, EVO-RC+ remote"
 		(exclude_from_sim no)
-		(at 237.5 144.4 0)
+		(at 237.5 135.664 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1501,7 +1501,7 @@
 	)
 	(text "main ? A  -  fed from EVO AC out ?"
 		(exclude_from_sim no)
-		(at 321 102.4 0)
+		(at 321 96.394 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1511,7 +1511,7 @@
 	)
 	(text "BMS disconnect drops the whole 12 V side,"
 		(exclude_from_sim no)
-		(at 92 190 0)
+		(at 92 178.3 0)
 		(effects
 			(font
 				(size 1.05 1.05)
@@ -1523,7 +1523,7 @@
 	)
 	(text "negative / ground"
 		(exclude_from_sim no)
-		(at 216 253 0)
+		(at 216 237.205 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1534,7 +1534,7 @@
 	)
 	(text "internal BMS\nheater HW-22 / temp HW-31 planned"
 		(exclude_from_sim no)
-		(at 50 218.5 0)
+		(at 50 204.948 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1544,7 +1544,7 @@
 	)
 	(text "LiFePO4 #2  ? Ah"
 		(exclude_from_sim no)
-		(at 50 235 0)
+		(at 50 220.375 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1556,7 +1556,7 @@
 	)
 	(text "data: 485-2 (samlux_mqtt.py)"
 		(exclude_from_sim no)
-		(at 207.5 160.2 0)
+		(at 207.5 150.437 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1567,7 +1567,7 @@
 	)
 	(text "LiFePO4 'User' profile"
 		(exclude_from_sim no)
-		(at 97.5 38 0)
+		(at 97.5 36.18 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1578,7 +1578,7 @@
 	)
 	(text "ESP32-S3 relay board: compressor,\nfan hi / lo, furnace call"
 		(exclude_from_sim no)
-		(at 384 128.5 0)
+		(at 384 120.797 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1588,7 +1588,7 @@
 	)
 	(text "60 A MPPT, 12 V"
 		(exclude_from_sim no)
-		(at 122.5 32.4 0)
+		(at 122.5 30.944 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1598,7 +1598,7 @@
 	)
 	(text "fused branch circuits ?"
 		(exclude_from_sim no)
-		(at 45 98.4 0)
+		(at 45 92.654 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1608,7 +1608,7 @@
 	)
 	(text "PV"
 		(exclude_from_sim no)
-		(at 85 58.7 0)
+		(at 85 55.535 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1619,7 +1619,7 @@
 	)
 	(text "Beelink J45 control PC"
 		(exclude_from_sim no)
-		(at 207.5 38 0)
+		(at 207.5 36.18 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1630,7 +1630,7 @@
 	)
 	(text "+12 V"
 		(exclude_from_sim no)
-		(at 162 212.7 0)
+		(at 162 199.524 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1641,7 +1641,7 @@
 	)
 	(text "on 485-1 via RS485-1M2S tap"
 		(exclude_from_sim no)
-		(at 122.5 76.4 0)
+		(at 122.5 72.084 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1651,7 +1651,7 @@
 	)
 	(text "1800 W ESPHome plug, ~15 A\nmust fit the load-shed scheme"
 		(exclude_from_sim no)
-		(at 384 153.5 0)
+		(at 384 144.173 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1661,7 +1661,7 @@
 	)
 	(text "Legend"
 		(exclude_from_sim no)
-		(at 202 239.5 0)
+		(at 202 224.583 0)
 		(effects
 			(font
 				(size 1.4 1.4)
@@ -1673,7 +1673,7 @@
 	)
 	(text "(2026-07-29, still being tuned)"
 		(exclude_from_sim no)
-		(at 97.5 44.8 0)
+		(at 97.5 42.538 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1684,7 +1684,7 @@
 	)
 	(text "external extension cord -\nNOT on 30 A service, NOT on KWS"
 		(exclude_from_sim no)
-		(at 384 212.5 0)
+		(at 384 199.338 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1694,7 +1694,7 @@
 	)
 	(text "PV DC (array to controller)"
 		(exclude_from_sim no)
-		(at 216 244 0)
+		(at 216 228.79 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1705,7 +1705,7 @@
 	)
 	(text "Blue boxes = RVTC kit.  \"?\" = fill in by hand."
 		(exclude_from_sim no)
-		(at 203 272.5 0)
+		(at 203 255.438 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1716,7 +1716,7 @@
 	)
 	(text "RS-485 sensors (WN90, IMU, EID041...) ?"
 		(exclude_from_sim no)
-		(at 207.5 61.8 0)
+		(at 207.5 58.433 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1725,9 +1725,9 @@
 		)
 		(uuid "f3399894-9b85-4bb3-bd3c-5cba9186a52c")
 	)
-	(text "Waveshare RS-485 gateways x8"
+	(text "Waveshare 8-port RS-485 gateway"
 		(exclude_from_sim no)
-		(at 207.5 48.2 0)
+		(at 207.5 45.717 0)
 		(effects
 			(font
 				(size 1.1 1.1)
@@ -1736,9 +1736,9 @@
 		)
 		(uuid "f3a3acf1-a6d3-4d18-a2c7-d7b07626e6fa")
 	)
-	(text "AC load centre (OEM ?)"
+	(text "AC load centre (WFCO, OEM)"
 		(exclude_from_sim no)
-		(at 321 100 0)
+		(at 321 94.15 0)
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -1750,7 +1750,7 @@
 	)
 	(text "9 x Renogy RNG-100D-SS = 900 W, 3S3P\n(3 strings of 3 in series, paralleled)\nVoc 72.9 V / Isc 15.6 A (array)\nVmp 61.2 V / Imp 14.7 A"
 		(exclude_from_sim no)
-		(at 45 37.3 0)
+		(at 45 35.525 0)
 		(effects
 			(font
 				(size 1.15 1.15)
@@ -1758,9 +1758,9 @@
 		)
 		(uuid "f857775e-adb6-4f56-a5b2-45e75a64d9e5")
 	)
-	(text "12 V  fuse 70 A"
+	(text "main DC fuse 250 A"
 		(exclude_from_sim no)
-		(at 125 119.7 0)
+		(at 125 112.57 0)
 		(effects
 			(font
 				(size 1 1)
@@ -1771,7 +1771,7 @@
 	)
 	(text "including the J45 (known, accepted)."
 		(exclude_from_sim no)
-		(at 92 193.5 0)
+		(at 92 181.573 0)
 		(effects
 			(font
 				(size 1.05 1.05)
@@ -1783,7 +1783,7 @@
 	)
 	(text "TL-SG108PE PoE switch"
 		(exclude_from_sim no)
-		(at 207.5 44.8 0)
+		(at 207.5 42.538 0)
 		(effects
 			(font
 				(size 1.1 1.1)

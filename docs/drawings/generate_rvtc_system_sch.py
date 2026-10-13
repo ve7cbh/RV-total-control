@@ -7,6 +7,7 @@ Facts are taken from docs/RVTC_System_Reference_2_15.md (Sections 3-7).
 Produced the base layout only -- the .kicad_sch is hand-edited after that,
 so re-running this OVERWRITES those edits. Write to a different file if needed.
 """
+import re
 import uuid
 from pathlib import Path
 
@@ -132,6 +133,10 @@ row_y = [25 + 20 * i for i in range(8)] + [190, 210, 230]
 text("FIELD DEVICES", (DX1 + DX2) / 2, 23, 1.3, bold=True, color=FIELD[0])
 text("RS-485 / SERIAL GATEWAYS", (GX1 + GX2) / 2, 23, 1.3, bold=True, color=GATEWAY[0])
 
+# Waveshare: one 8-port unit, one IP per port
+rect(GX1, 25, GX2, 180, GATEWAY)
+text("Waveshare 8-port", (GX1 + GX2) / 2, 27.8, 1.5, bold=True, color=GATEWAY[0])
+text("RS-485 to Ethernet, Protocol: None", (GX1 + GX2) / 2, 30.6, 1.0)
 for i, (dev, note, bus, addr, pend) in enumerate(WAVESHARE):
     y = row_y[i]
     cy = y + 7.5
@@ -139,8 +144,7 @@ for i, (dev, note, bus, addr, pend) in enumerate(WAVESHARE):
           dash="dash" if pend else "solid")
     line([(DX2, cy), (GX1, cy)], arrow=False)
     text("RS-485", (DX2 + GX1) / 2, cy - 1.3, 1.0)
-    block(GX1, y, GX2, y + 15, f"{bus}  Waveshare", f"192.168.88{addr}\nProtocol: None",
-          GATEWAY)
+    text(f"{bus}  192.168.88{addr}", GX1 + 2, cy + 1.5, 1.15, justify="left")
     line([(GX2, cy), (RX1, cy)], arrow=False, color=NET[0])
     text("ether6", (GX2 + RX1) / 2, cy - 1.3, 1.0, color=NET[0])
 
@@ -299,7 +303,7 @@ text("power side: page 2", 356, 179, 1.1)
 # ---------------------------------------------------------------- write
 sch = f'''(kicad_sch (version 20231120) (generator "rvtc_system_gen") (generator_version "8.0")
   (uuid "{ROOT}")
-  (paper "A3")
+  (paper "USLedger")
   (title_block
     (title "RVTC System Block Diagram")
     (date "{DATE}")
@@ -315,5 +319,12 @@ sch = f'''(kicad_sch (version 20231120) (generator "rvtc_system_gen") (generator
   )
 )
 '''
+# Layout above is drawn on A3 coordinates; 11x17 (USLedger) is 17.6 mm shorter,
+# so compress y toward the top border. Font sizes are untouched.
+S = 0.935
+sch = re.sub(r"\((at|start|end|xy) ([-\d.]+) ([-\d.]+)",
+             lambda m: f"({m.group(1)} {m.group(2)} {10 + (float(m.group(3)) - 10) * S:.3f}", sch)
+sch = re.sub(r"(\(sheet \(at [-\d.]+ [-\d.]+\) \(size [-\d.]+) ([-\d.]+)\)",
+             lambda m: f"{m.group(1)} {float(m.group(2)) * S:.3f})", sch)
 OUT.write_text(sch, encoding="utf-8")
 print(f"wrote {OUT} ({len(items)} items)")
