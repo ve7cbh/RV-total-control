@@ -756,6 +756,17 @@
 		)
 		(uuid "122c14c0-4277-4487-91e4-db2fe8274f1b")
 	)
+	(text "5 V 50 W PSU -> 5 V blade fuse block"
+		(exclude_from_sim no)
+		(at 207.5 74.33 0)
+		(effects
+			(font
+				(size 1.1 1.1)
+			)
+			(justify left)
+		)
+		(uuid "7fee6b62-7253-4ec8-ac04-9c66410e52ea")
+	)
 	(text "Trailer DC distribution (WFCO, OEM)"
 		(exclude_from_sim no)
 		(at 45 90.41 0)
@@ -859,9 +870,9 @@
 		)
 		(uuid "2c0026d9-7502-49ea-b8a5-1a3cc4ad20a6")
 	)
-	(text "fuse ? A / ? AWG"
+	(text "Ampper S1\n350 A Cl. T"
 		(exclude_from_sim no)
-		(at 200.5 146.23 0)
+		(at 200.3 144.9 0)
 		(effects
 			(font
 				(size 0.9 0.9)
@@ -959,7 +970,7 @@
 		)
 		(uuid "476dda30-0eff-4fdf-bf17-7e527edd93ce")
 	)
-	(text "ECO-WORTHY 4-string, 12 A brkr/string (3 used)\nAmerical 50 A DC DIN brkr ? - rated 80 V!"
+	(text "ECO-WORTHY 4-string, 12 A brkr/string (3 used)\nPV breaker rated 250 VDC"
 		(exclude_from_sim no)
 		(at 45.72 61.922 0)
 		(effects
@@ -1143,7 +1154,7 @@
 		)
 		(uuid "6fb70dc0-5242-485c-988b-41ab52e5be85")
 	)
-	(text "Bsomain ANL-350A\n+ Ampper battery switch (S1)"
+	(text "at B+ terminal - type TBD, size TBD"
 		(exclude_from_sim no)
 		(at 122.5 201.301 0)
 		(effects
@@ -1177,7 +1188,7 @@
 		)
 		(uuid "780778cd-6b01-4ea1-a559-a3ef2c0faff3")
 	)
-	(text "Main fuse 350 A ANL"
+	(text "Main battery fuse  TBD"
 		(exclude_from_sim no)
 		(at 122.5 197 0)
 		(effects
@@ -1246,7 +1257,7 @@
 		)
 		(uuid "84ceaee7-3d32-4788-8a7e-d739749cc7ac")
 	)
-	(text "fuse ? A"
+	(text "50 A DC breaker"
 		(exclude_from_sim no)
 		(at 162.5 36.835 0)
 		(effects
@@ -1758,7 +1769,7 @@
 		)
 		(uuid "f857775e-adb6-4f56-a5b2-45e75a64d9e5")
 	)
-	(text "main DC fuse 250 A"
+	(text "Ampper S2 + 250 A ANL fuse"
 		(exclude_from_sim no)
 		(at 125 112.57 0)
 		(effects
