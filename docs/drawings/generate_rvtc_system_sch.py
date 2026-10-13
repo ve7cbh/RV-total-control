@@ -251,8 +251,8 @@ line([(168, 245), (168, 251), (375, 251), (375, 236)], color=NET[0])
 text("uplink", 250, 249.7, 1.0)
 
 # MeshCore: TCP/IP straight onto the LAN, no serial gateway (IPs from MikroTik DHCP leases)
-block(DX1, 249, DX2, 265, "MeshCore Observer  .25",
-      "ESP32-S3, WiFi (wlan1)" + NL + "MQTT meshcore/DUQ/+/* -> :1883", FIELD)
+block(DX1, 249, DX2, 265, "MeshCore Observer VE7CBH-RVTC  .25",
+      "LilyGo T-Beam, WiFi (wlan1)" + NL + "MQTT DUQ -> :1883 + public observer map", FIELD)
 line([(DX2, 257), (159, 257), (159, 245)], color=NET[0])
 text("WiFi - TCP/IP", 120, 255.7, 1.0)
 block(DX1, 269, DX2, 285, "MeshCore companion  .26",
