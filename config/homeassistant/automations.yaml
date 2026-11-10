@@ -242,3 +242,51 @@
               data:
                 name: "Winter Heater"
                 message: "Enclosure at {{ states('sensor.enclosure_temperature') }} °C — Winter Heater OFF"
+
+
+- alias: "HA Update Notification"
+  id: ha_update_notification
+  description: >-
+    Container install has no Supervisor, so HA never offers its own update.
+    Raises a persistent notification when sensor.ha_latest_version is newer
+    than the running version, and clears it once updated.
+  mode: single
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.ha_update_available
+      to: "on"
+    - platform: state
+      entity_id: binary_sensor.ha_update_available
+      from: "on"
+      to: "off"
+    - platform: state
+      entity_id: sensor.ha_latest_version
+  action:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.ha_update_available
+              state: "on"
+          sequence:
+            - service: persistent_notification.create
+              data:
+                notification_id: ha_update_available
+                title: "Home Assistant {{ states('sensor.ha_latest_version') }} available"
+                message: >-
+                  Running {{ states('sensor.ha_installed_version') }}.
+                  Check the [release notes](https://www.home-assistant.io/blog/categories/core/)
+                  for backward-incompatible changes first.
+
+
+                  Update on ve7cbh-control: back up
+                  `/data/docker/volumes/homeassistant`, then in
+                  `~/RV-total-control` run
+                  `docker compose pull homeassistant && docker compose up -d homeassistant`.
+        - conditions:
+            - condition: state
+              entity_id: binary_sensor.ha_update_available
+              state: "off"
+          sequence:
+            - service: persistent_notification.dismiss
+              data:
+                notification_id: ha_update_available

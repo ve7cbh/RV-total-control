@@ -1,0 +1,93 @@
+
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+# includes
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+input_boolean: !include helpers_input_boolean.yaml
+input_number: !include helpers_input_number.yaml
+mqtt: !include mqtt_sensors.yaml
+# modbus: !include modbus-relay.yaml
+
+# in configuration.yaml
+shell_command:
+  relay_1_on: "python3 /config/relay.py 0 1"
+  relay_1_off: "python3 /config/relay.py 0 0"
+  relay_2_on: "python3 /config/relay.py 1 1"
+  relay_2_off: "python3 /config/relay.py 1 0"
+  grid_relay_on:   "python3 /config/kws_relay.py 1 1"
+  grid_relay_off:  "python3 /config/kws_relay.py 1 0"
+  generator_relay_on:  "python3 /config/kws_relay.py 2 1"
+  generator_relay_off: "python3 /config/kws_relay.py 2 0"
+
+template:
+  - switch:
+      - turn_on:
+          - action: script.kws_grid_connect
+        turn_off:
+          - action: script.kws_grid_disconnect
+        default_entity_id: switch.grid_connection
+        icon: "{% if states('sensor.grid_relay_state') | int(0) == 1 %}\n  mdi:transmission-tower\n{% else %}\n  mdi:transmission-tower-off\n{% endif %}"
+        name: Grid Connection
+        state: '{{ states(''sensor.grid_relay_state'') | int(0) == 1 }}'
+      - turn_on:
+          - action: shell_command.generator_relay_on
+        turn_off:
+          - action: shell_command.generator_relay_off
+        default_entity_id: switch.generator_connection
+        icon: "{% if states('sensor.generator_relay_state') | int(0) == 1 %}\n  mdi:transmission-tower\n{% else %}\n  mdi:transmission-tower-off\n{% endif %}"
+        name: Generator Connection
+        state: '{{ states(''sensor.generator_relay_state'') | int(0) == 1 }}'
+        
+
+  - switch:
+      - name: "Manual Shed - Fridge"
+        unique_id: manual_shed_fridge
+        icon: mdi:fridge
+        state: "{{ is_state('switch.sonoff_s31_0cfa26_sonoff_s31_relay', 'off') }}"
+        turn_on:
+          - service: switch.turn_off
+            target:
+              entity_id: switch.sonoff_s31_0cfa26_sonoff_s31_relay
+        turn_off:
+          - service: switch.turn_on
+            target:
+              entity_id: switch.sonoff_s31_0cfa26_sonoff_s31_relay        
+
+
+  # ── HA update check (Container install has no Supervisor update entity) ──
+  - binary_sensor:
+      - name: "HA Update Available"
+        unique_id: ha_update_available
+        icon: mdi:package-up
+        state: >
+          {% set i = states('sensor.ha_installed_version') %}
+          {% set l = states('sensor.ha_latest_version') %}
+          {{ i not in ['unknown', 'unavailable', '']
+             and l not in ['unknown', 'unavailable', '']
+             and version(l) > version(i) }}
+
+# Installed version, read from inside the HA container
+command_line:
+  - sensor:
+      name: "HA Installed Version"
+      unique_id: ha_installed_version
+      icon: mdi:home-assistant
+      command: "python3 -c 'from homeassistant.const import __version__ as v; print(v)'"
+      scan_interval: 3600
+
+# Latest stable release, from the official version endpoint
+rest:
+  - resource: https://version.home-assistant.io/stable.json
+    scan_interval: 21600
+    sensor:
+      - name: "HA Latest Version"
+        unique_id: ha_latest_version
+        icon: mdi:package-up
+        value_template: "{{ value_json.homeassistant.default }}"
