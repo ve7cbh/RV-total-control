@@ -203,32 +203,45 @@
 - alias: "Winter Heater - Enclosure Thermostat"
   id: enclosure_heat_s31_thermostat
   description: >-
-    RV winter heater (S31 0cf6c8) — keeps the RV dry and unfrozen. ON when the
-    equipment enclosure (EID041, HW-32) drops to 12.0 °C or below, OFF at
-    14.0 °C or above (2 °C hysteresis). Only acts on real reading-to-reading
-    crossings, so a manual ON/OFF holds until the next crossing. On HA start
-    it will only turn the heater ON (freeze protection), never OFF.
+    RV winter heater (S31 0cf6c8) — keeps the RV dry and unfrozen.
+    At or below 12.0 °C (EID041 enclosure sensor, HW-32) the heater is forced
+    ON: on the cold crossing, on HA start, whenever it is switched off, and on a
+    5-minute check — this deliberately overrides a manual OFF. To keep it off
+    while cold, unplug it (the switch goes unavailable and is left alone).
+    OFF at 14.0 °C or above, but only on a genuine reading-to-reading rise, so
+    a manual ON above 12 °C holds until then.
   mode: single
   trigger:
     - platform: numeric_state
       entity_id: sensor.enclosure_temperature
       below: 12.05
       id: cold
+    - platform: state
+      entity_id: switch.sonoff_s31_0cf6c8_sonoff_s31_relay
+      to: "off"
+      id: heater_off
+    - platform: time_pattern
+      minutes: "/5"
+      id: periodic
+    - platform: homeassistant
+      event: start
+      id: start
     - platform: numeric_state
       entity_id: sensor.enclosure_temperature
       above: 13.95
       id: warm
-    - platform: homeassistant
-      event: start
-      id: start
   action:
     - choose:
         - conditions:
             - condition: trigger
-              id: [cold, start]
+              id: [cold, heater_off, periodic, start]
             - condition: numeric_state
               entity_id: sensor.enclosure_temperature
               below: 12.05
+            # Only "off" — an unplugged S31 is "unavailable" and is left alone.
+            - condition: state
+              entity_id: switch.sonoff_s31_0cf6c8_sonoff_s31_relay
+              state: "off"
           sequence:
             - service: switch.turn_on
               target:
