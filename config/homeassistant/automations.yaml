@@ -200,10 +200,10 @@
         message: >
           Both KWS relays reported connected simultaneously. Generator was force-disconnected.
           Investigate immediately — this should never happen if the switch-level interlock is working.
-- alias: "Enclosure Heat - S31 0cf6c8 Thermostat"
+- alias: "Winter Heater - Enclosure Thermostat"
   id: enclosure_heat_s31_thermostat
   description: >-
-    Turns S31 0cf6c8 ON when the equipment enclosure (EID041, HW-32) drops to
+    RV winter heater (S31 0cf6c8) — keeps the RV dry and unfrozen. ON when the equipment enclosure (EID041, HW-32) drops to
     12.0 °C or below, and OFF at 14.0 °C or above (2 °C hysteresis).
     Re-checks on HA start in case a crossing was missed while HA was down.
   mode: single
@@ -228,8 +228,8 @@
                 entity_id: switch.sonoff_s31_0cf6c8_sonoff_s31_relay
             - service: logbook.log
               data:
-                name: "Enclosure Heat"
-                message: "Enclosure at {{ states('sensor.enclosure_temperature') }} °C — S31 0cf6c8 ON"
+                name: "Winter Heater"
+                message: "Enclosure at {{ states('sensor.enclosure_temperature') }} °C — Winter Heater ON"
         - conditions:
             - condition: numeric_state
               entity_id: sensor.enclosure_temperature
@@ -240,5 +240,5 @@
                 entity_id: switch.sonoff_s31_0cf6c8_sonoff_s31_relay
             - service: logbook.log
               data:
-                name: "Enclosure Heat"
-                message: "Enclosure at {{ states('sensor.enclosure_temperature') }} °C — S31 0cf6c8 OFF"
+                name: "Winter Heater"
+                message: "Enclosure at {{ states('sensor.enclosure_temperature') }} °C — Winter Heater OFF"
