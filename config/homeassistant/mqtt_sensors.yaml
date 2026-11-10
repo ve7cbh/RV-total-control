@@ -401,3 +401,104 @@ sensor:
     state_topic: "rvtc/sensors/inverter/fan_speed"
     state_class: measurement
     expire_after: 60
+
+  # ── Ecowitt WN90LP — Outdoor Weather, via WN90_mqtt.py ────────────────────
+  # Direct Modbus poll bridge (RS-485 gateway), not rtl_433. Replaces the old
+  # Acurite 5n1/rtl_433 entries as of 2026-07-16.
+
+  - name: "Weather Outside Temp"
+    unique_id: mqtt_weather_outtemp
+    state_topic: "rvtc/sensors/weather/outTemp"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Weather Outside Humidity"
+    unique_id: mqtt_weather_outhumidity
+    state_topic: "rvtc/sensors/weather/outHumidity"
+    unit_of_measurement: "%"
+    device_class: humidity
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Weather Wind Speed"
+    unique_id: mqtt_weather_windspeed
+    state_topic: "rvtc/sensors/weather/windSpeed"
+    unit_of_measurement: "m/s"
+    device_class: wind_speed
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Weather Wind Gust"
+    unique_id: mqtt_weather_windgust
+    state_topic: "rvtc/sensors/weather/windGust"
+    unit_of_measurement: "m/s"
+    device_class: wind_speed
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Weather Wind Direction"
+    unique_id: mqtt_weather_winddir
+    state_topic: "rvtc/sensors/weather/windDir"
+    unit_of_measurement: "°"
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Weather Barometric Pressure"
+    unique_id: mqtt_weather_barometer
+    state_topic: "rvtc/sensors/weather/barometer"
+    unit_of_measurement: "hPa"
+    device_class: pressure
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Weather Rain Total"
+    unique_id: mqtt_weather_rain_total
+    state_topic: "rvtc/sensors/weather/rain_total_mm"
+    unit_of_measurement: "mm"
+    device_class: precipitation
+    state_class: total_increasing
+    expire_after: 60
+
+  - name: "Weather UV Index"
+    unique_id: mqtt_weather_uvi
+    state_topic: "rvtc/sensors/weather/uvi"
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Weather Light Level"
+    unique_id: mqtt_weather_light_lux
+    state_topic: "rvtc/sensors/weather/light_lux"
+    unit_of_measurement: "lx"
+    device_class: illuminance
+    state_class: measurement
+    expire_after: 60
+
+  - name: "Weather Solar Radiation"
+    unique_id: mqtt_weather_solar_radiation
+    state_topic: "rvtc/sensors/weather/solarRadiation"
+    unit_of_measurement: "W/m²"
+    state_class: measurement
+    expire_after: 60
+
+  # ── EID041-G01S — Equipment enclosure (HW-32, serial-4) ───────────────────
+  # Bridge: eid041_mqtt.py → rvtc/sensors/enclosure/#  (30 s poll)
+
+  - name: "Enclosure Temperature"
+    unique_id: mqtt_enclosure_temperature
+    state_topic: "rvtc/sensors/enclosure/temperature_c"
+    availability_topic: "rvtc/sensors/enclosure/availability"
+    unit_of_measurement: "°C"
+    device_class: temperature
+    state_class: measurement
+    expire_after: 120
+
+  - name: "Enclosure Humidity"
+    unique_id: mqtt_enclosure_humidity
+    state_topic: "rvtc/sensors/enclosure/humidity_pct"
+    availability_topic: "rvtc/sensors/enclosure/availability"
+    unit_of_measurement: "%"
+    device_class: humidity
+    state_class: measurement
+    expire_after: 120

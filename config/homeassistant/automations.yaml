@@ -1,141 +1,244 @@
+- id: '1782788919624'
+  alias: 'RV: Update Home Location from GPSD'
+  description: Dynamically moves the HA Map and Home Zone as the RV travels.
+  triggers:
+  - entity_id: sensor.gps_192_168_88_3_latitude
+    trigger: state
+  conditions:
+  - condition: template
+    value_template: "{{ states('sensor.gps_192_168_88_3_mode') in ['2D Fix', '3D Fix',
+      '2', '3', '2d', '3d', 'Fix'] or \n   'Fix' in states('sensor.gps_192_168_88_3_mode')
+      }}"
+  actions:
+  - data:
+      latitude: '{{ states(''sensor.gps_192_168_88_3_latitude'') | float }}'
+      longitude: '{{ states(''sensor.gps_192_168_88_3_longitude'') | float }}'
+      elevation: '{{ states(''sensor.gps_192_168_88_3_elevation'') | int }}'
+    action: homeassistant.set_location
+  mode: single
+
 # Tier 3 — Automations
-# Add to automations.yaml (or !include it).
-#
-# Shed automations: fire once when current crosses the entry threshold and
-# stays there 30s (debounce per spec). mode: single + script's own mode:
-# single means a re-trigger mid-sequence is just ignored, not stacked.
-#
-# Restore automations: checked every minute while a coil is energised, so
-# the script's own numeric_state conditions decide whether anything happens.
-# This avoids needing a "for:" duration on every restore threshold individually.
 
-automation:
+- alias: "Tier 3 - Grid Overload Trigger"
+  id: tier3_grid_overload_trigger
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.grid_current
+      above: 25
+      for: "00:00:30"
+  condition:
+    - condition: template
+      value_template: "{{ states('sensor.samlux_operating_mode_text') | lower != 'inverter' }}"
+  action:
+    - service: script.tier3_grid_overload_response
 
-  - alias: "Tier 3 - Grid Overload Trigger"
-    id: tier3_grid_overload_trigger
-    trigger:
-      - platform: numeric_state
-        entity_id: sensor.grid_current
-        above: 25
-        for: "00:00:30"
-    condition:
-      - condition: template
-        value_template: "{{ states('sensor.samlux_operating_mode_text') | lower != 'inverting' }}"
-    action:
-      - service: script.tier3_grid_overload_response
+- alias: "Tier 3 - Grid Restore Check"
+  id: tier3_grid_restore_check
+  trigger:
+    - platform: time_pattern
+      minutes: "/1"
+  condition:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_boolean.coil1_energised
+          state: "on"
+        - condition: state
+          entity_id: input_boolean.coil2_energised
+          state: "on"
+  action:
+    - service: script.tier3_grid_restore
 
-  - alias: "Tier 3 - Grid Restore Check"
-    id: tier3_grid_restore_check
-    trigger:
-      - platform: time_pattern
-        minutes: "/1"
-    condition:
-      - condition: or
-        conditions:
-          - condition: state
-            entity_id: input_boolean.coil1_energised
-            state: "on"
-          - condition: state
-            entity_id: input_boolean.coil2_energised
-            state: "on"
-    action:
-      - service: script.tier3_grid_restore
+- alias: "Tier 3 - Generator Overload Trigger"
+  id: tier3_generator_overload_trigger
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.generator_current
+      above: 22
+      for: "00:00:30"
+  condition:
+    - condition: template
+      value_template: "{{ states('sensor.samlux_operating_mode_text') | lower != 'inverter' }}"
+  action:
+    - service: script.tier3_generator_overload_response
 
-  - alias: "Tier 3 - Generator Overload Trigger"
-    id: tier3_generator_overload_trigger
-    trigger:
-      - platform: numeric_state
-        entity_id: sensor.generator_current
-        above: 22
-        for: "00:00:30"
-    condition:
-      - condition: template
-        value_template: "{{ states('sensor.samlux_operating_mode_text') | lower != 'inverting' }}"
-    action:
-      - service: script.tier3_generator_overload_response
+- alias: "Tier 3 - Generator Restore Check"
+  id: tier3_generator_restore_check
+  trigger:
+    - platform: time_pattern
+      minutes: "/1"
+  condition:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_boolean.coil1_energised
+          state: "on"
+        - condition: state
+          entity_id: input_boolean.coil2_energised
+          state: "on"
+  action:
+    - service: script.tier3_generator_restore
 
-  - alias: "Tier 3 - Generator Restore Check"
-    id: tier3_generator_restore_check
-    trigger:
-      - platform: time_pattern
-        minutes: "/1"
-    condition:
-      - condition: or
-        conditions:
-          - condition: state
-            entity_id: input_boolean.coil1_energised
-            state: "on"
-          - condition: state
-            entity_id: input_boolean.coil2_energised
-            state: "on"
-    action:
-      - service: script.tier3_generator_restore
+# Manual override switches (Manual Control dashboard tab).
+# Turning ON: shed the load immediately, regardless of current.
+# Turning OFF: hand back to Tier 3 — call both restore scripts, which only
+# actually restore if current is under threshold for that source.
 
-  # Manual override switches (Manual Control dashboard tab).
-  # Turning ON: shed the load immediately, regardless of current.
-  # Turning OFF: hand back to Tier 3 — call both restore scripts, which only
-  # actually restore if current is under threshold for that source.
+- alias: "Manual Shed - Water Heater"
+  id: manual_shed_water_heater_toggle
+  trigger:
+    - platform: state
+      entity_id: input_boolean.manual_shed_water_heater
+  action:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.manual_shed_water_heater
+              state: "on"
+          sequence:
+            - service: shell_command.relay_1_on
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.coil1_energised
+            - service: logbook.log
+              data:
+                name: "Manual Shed"
+                message: "Water heater manually shed (coil 1 ON)"
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.manual_shed_water_heater
+              state: "off"
+          sequence:
+            - service: logbook.log
+              data:
+                name: "Manual Shed"
+                message: "Water heater manual override released — handing back to Tier 3"
+            - service: script.tier3_grid_restore
+            - service: script.tier3_generator_restore
 
-  - alias: "Manual Shed - Water Heater"
-    id: manual_shed_water_heater_toggle
-    trigger:
-      - platform: state
-        entity_id: input_boolean.manual_shed_water_heater
-    action:
-      - choose:
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.manual_shed_water_heater
-                state: "on"
-            sequence:
-              - service: shell_command.relay_1_on
-              - service: input_boolean.turn_on
-                target:
-                  entity_id: input_boolean.coil1_energised
-              - service: logbook.log
-                data:
-                  name: "Manual Shed"
-                  message: "Water heater manually shed (coil 1 ON)"
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.manual_shed_water_heater
-                state: "off"
-            sequence:
-              - service: logbook.log
-                data:
-                  name: "Manual Shed"
-                  message: "Water heater manual override released — handing back to Tier 3"
-              - service: script.tier3_grid_restore
-              - service: script.tier3_generator_restore
+- alias: "Manual Shed - Microwave"
+  id: manual_shed_microwave_toggle
+  trigger:
+    - platform: state
+      entity_id: input_boolean.manual_shed_microwave
+  action:
+    - choose:
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.manual_shed_microwave
+              state: "on"
+          sequence:
+            - service: shell_command.relay_2_on
+            - service: input_boolean.turn_on
+              target:
+                entity_id: input_boolean.coil2_energised
+            - service: logbook.log
+              data:
+                name: "Manual Shed"
+                message: "Microwave manually shed (coil 2 ON)"
+        - conditions:
+            - condition: state
+              entity_id: input_boolean.manual_shed_microwave
+              state: "off"
+          sequence:
+            - service: logbook.log
+              data:
+                name: "Manual Shed"
+                message: "Microwave manual override released — handing back to Tier 3"
+            - service: script.tier3_grid_restore
+            - service: script.tier3_generator_restore
+- alias: "Interlock - Block Grid/Generator Overlap"
+  id: interlock_block_overlap
+  trigger:
+    - platform: state
+      entity_id: switch.grid_connection
+      to: "on"
+      id: "grid_on"
+    - platform: state
+      entity_id: switch.generator_connection
+      to: "on"
+      id: "gen_on"
+  condition:
+    - condition: template
+      value_template: >
+        {{ states('switch.grid_connection') == 'on' and states('switch.generator_connection') == 'on' }}
+  action:
+    - choose:
+        - conditions:
+            - condition: trigger
+              id: "grid_on"
+          sequence:
+            - service: switch.turn_off
+              target:
+                entity_id: switch.generator_connection
+        - conditions:
+            - condition: trigger
+              id: "gen_on"
+          sequence:
+            - service: switch.turn_off
+              target:
+                entity_id: switch.grid_connection
+    - service: persistent_notification.create
+      data:
+        title: "Grid/Generator Interlock Blocked Overlap"
+        message: >
+          Both sources were on simultaneously. The source just switched on has been
+          forced back off. Use the 'Switch to Grid' / 'Switch to Generator' buttons
+          instead of toggling the raw switches directly.
 
-  - alias: "Manual Shed - Microwave"
-    id: manual_shed_microwave_toggle
-    trigger:
-      - platform: state
-        entity_id: input_boolean.manual_shed_microwave
-    action:
-      - choose:
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.manual_shed_microwave
-                state: "on"
-            sequence:
-              - service: shell_command.relay_2_on
-              - service: input_boolean.turn_on
-                target:
-                  entity_id: input_boolean.coil2_energised
-              - service: logbook.log
-                data:
-                  name: "Manual Shed"
-                  message: "Microwave manually shed (coil 2 ON)"
-          - conditions:
-              - condition: state
-                entity_id: input_boolean.manual_shed_microwave
-                state: "off"
-            sequence:
-              - service: logbook.log
-                data:
-                  name: "Manual Shed"
-                  message: "Microwave manual override released — handing back to Tier 3"
-              - service: script.tier3_grid_restore
-              - service: script.tier3_generator_restore
+- alias: "Interlock - Backstop Force Disconnect"
+  id: interlock_backstop_force_disconnect
+  trigger:
+    - platform: template
+      value_template: >
+        {{ states('sensor.grid_relay_state') == '1' and states('sensor.generator_relay_state') == '1' }}
+  action:
+    - service: shell_command.generator_relay_off
+    - service: persistent_notification.create
+      data:
+        title: "⚠ Grid/Generator Backstop Triggered"
+        message: >
+          Both KWS relays reported connected simultaneously. Generator was force-disconnected.
+          Investigate immediately — this should never happen if the switch-level interlock is working.
+- alias: "Enclosure Heat - S31 0cf6c8 Thermostat"
+  id: enclosure_heat_s31_thermostat
+  description: >-
+    Turns S31 0cf6c8 ON when the equipment enclosure (EID041, HW-32) drops to
+    12.0 °C or below, and OFF at 14.0 °C or above (2 °C hysteresis).
+    Re-checks on HA start in case a crossing was missed while HA was down.
+  mode: single
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.enclosure_temperature
+      below: 12.05
+    - platform: numeric_state
+      entity_id: sensor.enclosure_temperature
+      above: 13.95
+    - platform: homeassistant
+      event: start
+  action:
+    - choose:
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.enclosure_temperature
+              below: 12.05
+          sequence:
+            - service: switch.turn_on
+              target:
+                entity_id: switch.sonoff_s31_0cf6c8_sonoff_s31_relay
+            - service: logbook.log
+              data:
+                name: "Enclosure Heat"
+                message: "Enclosure at {{ states('sensor.enclosure_temperature') }} °C — S31 0cf6c8 ON"
+        - conditions:
+            - condition: numeric_state
+              entity_id: sensor.enclosure_temperature
+              above: 13.95
+          sequence:
+            - service: switch.turn_off
+              target:
+                entity_id: switch.sonoff_s31_0cf6c8_sonoff_s31_relay
+            - service: logbook.log
+              data:
+                name: "Enclosure Heat"
+                message: "Enclosure at {{ states('sensor.enclosure_temperature') }} °C — S31 0cf6c8 OFF"
